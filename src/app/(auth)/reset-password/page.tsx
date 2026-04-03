@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
         <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
           <Loader2 className="w-5 h-5 animate-spin text-brand" />
         </div>
-        <span className="text-sm text-white/60 lg:text-text-tertiary">Loading...</span>
+        <span className="text-sm text-[#a1a1a1] lg:text-text-tertiary">Loading...</span>
       </div>
     }>
       <ResetPasswordContent />
@@ -184,27 +184,8 @@ function ResetPasswordContent() {
   /* ─── Render ─── */
   return (
     <div className="min-h-screen bg-[var(--color-auth-bg)] flex relative overflow-hidden">
-      {/* Mobile background */}
-      <div className="absolute inset-0 lg:hidden">
-        <Image
-          src="/hero-space.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-[30%_80%]"
-          quality={90}
-        />
-        <Image
-          src="/hero-aurora.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-center mix-blend-screen opacity-20"
-          quality={90}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/90 via-[var(--color-auth-bg)]/50 to-[var(--color-auth-bg)]/80" />
-      </div>
+      {/* Mobile solid dark background */}
+      <div className="absolute inset-0 bg-black lg:hidden" />
 
       {/* Desktop left panel */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
@@ -268,13 +249,13 @@ function ResetPasswordContent() {
             transition={{ duration: 0.4, ease }}
             className="lg:hidden flex flex-col items-center mb-8"
           >
-            <div className="w-14 h-14 rounded-2xl bg-brand/90 backdrop-blur-sm flex items-center justify-center shadow-glow mb-3">
+            <div className="w-14 h-14 rounded-2xl bg-brand flex items-center justify-center shadow-glow mb-3">
               <TrendingUp className="w-7 h-7 text-white" />
             </div>
             <span className="text-xl font-bold text-white">
               CopyTrade Pro
             </span>
-            <span className="text-xs text-white/50 mt-1">
+            <span className="text-xs text-[#888] mt-1">
               Professional Copy Trading Platform
             </span>
           </motion.div>
@@ -295,10 +276,10 @@ function ResetPasswordContent() {
                         <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                           currentStepNumber >= s
                             ? "bg-brand shadow-[0_0_8px_rgba(41,98,255,0.3)]"
-                            : "bg-white/15 lg:bg-surface-3"
+                            : "bg-[#1a1a1a] lg:bg-surface-3"
                         }`} />
                         {s < 3 && <div className={`w-10 h-0.5 rounded-full transition-colors duration-300 ${
-                          currentStepNumber > s ? "bg-brand" : "bg-white/10 lg:bg-border"
+                          currentStepNumber > s ? "bg-brand" : "bg-[#222] lg:bg-border"
                         }`} />}
                       </div>
                     ))}
@@ -320,7 +301,7 @@ function ResetPasswordContent() {
                       Forgot password?
                     </h2>
                   </div>
-                  <p className="text-sm text-white/60 lg:text-text-tertiary mb-6">
+                  <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary mb-6">
                     Enter your email and we will send you a reset link
                   </p>
 
@@ -331,10 +312,10 @@ function ResetPasswordContent() {
                       touched={emailTouched}
                       valid={!emailError && !!email}
                       errorId="reset-email-error"
-                      labelClassName="text-white/70 lg:text-text-secondary"
+                      labelClassName="text-[#a1a1a1] lg:text-text-secondary"
                     >
                       <div className="relative">
-                        <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                        <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
                         <input
                           type="email"
                           value={email}
@@ -372,7 +353,7 @@ function ResetPasswordContent() {
                     </motion.button>
                   </form>
 
-                  <p className="text-sm text-white/50 lg:text-text-tertiary text-center mt-6">
+                  <p className="text-sm text-[#888] lg:text-text-tertiary text-center mt-6">
                     <Link
                       href="/login"
                       className="text-brand hover:text-brand-light transition-colors font-medium inline-flex items-center gap-1 min-h-[44px] py-2 -my-2"
@@ -399,9 +380,9 @@ function ResetPasswordContent() {
                   <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-2">
                     Check your email
                   </h2>
-                  <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
+                  <p className="text-sm text-[#888] lg:text-text-tertiary mb-6">
                     If an account exists for{" "}
-                    <span className="text-white/70 lg:text-text-secondary font-medium">
+                    <span className="text-[#a1a1a1] lg:text-text-secondary font-medium">
                       {email}
                     </span>
                     , we sent a password reset link. Check your inbox and spam
@@ -409,7 +390,7 @@ function ResetPasswordContent() {
                   </p>
 
                   {resendCountdown > 0 ? (
-                    <span className="text-sm text-white/50 lg:text-text-tertiary/50 cursor-not-allowed tabular-nums">
+                    <span className="text-sm text-[#888] lg:text-text-tertiary/50 cursor-not-allowed tabular-nums">
                       Resend in {resendCountdown}s
                     </span>
                   ) : (
@@ -437,13 +418,13 @@ function ResetPasswordContent() {
                           setIsLoading(false);
                         }
                       }}
-                      className="text-sm text-white/60 lg:text-text-tertiary hover:text-white lg:hover:text-text-primary cursor-pointer transition-colors"
+                      className="text-sm text-[#a1a1a1] lg:text-text-tertiary hover:text-white lg:hover:text-text-primary cursor-pointer transition-colors"
                     >
                       Resend email
                     </button>
                   )}
 
-                  <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-4">
+                  <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary text-center mt-4">
                     <Link
                       href="/login"
                       className="text-brand hover:text-brand-light transition-colors font-medium inline-flex items-center gap-1"
@@ -468,7 +449,7 @@ function ResetPasswordContent() {
                   <h2 className="text-lg font-semibold text-white lg:text-text-primary mb-1">
                     Verifying link...
                   </h2>
-                  <p className="text-sm text-white/50 lg:text-text-tertiary">
+                  <p className="text-sm text-[#888] lg:text-text-tertiary">
                     Please wait while we validate your reset link.
                   </p>
                 </motion.div>
@@ -489,7 +470,7 @@ function ResetPasswordContent() {
                   <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-2">
                     Link Expired
                   </h2>
-                  <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
+                  <p className="text-sm text-[#888] lg:text-text-tertiary mb-6">
                     This password reset link is invalid or has expired.
                   </p>
 
@@ -511,7 +492,7 @@ function ResetPasswordContent() {
                     <ArrowRight className="w-4 h-4" />
                   </motion.button>
 
-                  <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-4">
+                  <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary text-center mt-4">
                     <Link
                       href="/login"
                       className="text-brand hover:text-brand-light transition-colors font-medium inline-flex items-center gap-1"
@@ -537,7 +518,7 @@ function ResetPasswordContent() {
                       Set new password
                     </h2>
                   </div>
-                  <p className="text-sm text-white/60 lg:text-text-tertiary mb-6">
+                  <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary mb-6">
                     Choose a strong password for your account
                   </p>
 
@@ -548,10 +529,10 @@ function ResetPasswordContent() {
                       touched={passwordTouched}
                       valid={!passwordError && !!password}
                       errorId="reset-password-error"
-                      labelClassName="text-white/70 lg:text-text-secondary"
+                      labelClassName="text-[#a1a1a1] lg:text-text-secondary"
                     >
                       <div className="relative">
-                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
                         <input
                           type={showPassword ? "text" : "password"}
                           value={password}
@@ -575,7 +556,7 @@ function ResetPasswordContent() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
                           aria-label={showPassword ? "Hide password" : "Show password"}
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -590,7 +571,7 @@ function ResetPasswordContent() {
                         Confirm Password
                       </label>
                       <div className="relative">
-                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
                         <input
                           type={showConfirmPassword ? "text" : "password"}
                           value={confirmPassword}
@@ -619,7 +600,7 @@ function ResetPasswordContent() {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
                           aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                         >
                           {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -655,7 +636,7 @@ function ResetPasswordContent() {
                     </motion.button>
                   </form>
 
-                  <p className="text-sm text-white/50 lg:text-text-tertiary text-center mt-6">
+                  <p className="text-sm text-[#888] lg:text-text-tertiary text-center mt-6">
                     <Link
                       href="/login"
                       className="text-brand hover:text-brand-light transition-colors font-medium inline-flex items-center gap-1 min-h-[44px] py-2 -my-2"
@@ -682,7 +663,7 @@ function ResetPasswordContent() {
                   <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-2">
                     Password updated
                   </h2>
-                  <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
+                  <p className="text-sm text-[#888] lg:text-text-tertiary mb-6">
                     Your password has been reset successfully. You can now sign
                     in with your new password.
                   </p>

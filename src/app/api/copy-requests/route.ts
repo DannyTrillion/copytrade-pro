@@ -59,7 +59,6 @@ export async function GET() {
 /**
  * POST — Follower sends a copy request.
  * Requires: traderName + traderId must match a real trader.
- * Requires: wallet must be connected.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -67,16 +66,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = copyRequestSchema.parse(body);
 
-    // 1. Verify wallet is connected
-    const wallet = await prisma.wallet.findUnique({
-      where: { userId: user.id },
-    });
-
-    if (!wallet || !wallet.isConnected) {
-      return errorResponse("You must connect your wallet before requesting copy access", 400);
-    }
-
-    // 2. Verify trader exists and name + ID match
+    // 1. Verify trader exists and name + ID match
     const trader = await prisma.trader.findUnique({
       where: { id: data.traderId },
     });

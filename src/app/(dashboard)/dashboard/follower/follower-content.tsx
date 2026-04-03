@@ -340,10 +340,6 @@ export function FollowerDashboard() {
       setCopyError("Both trader name and trader ID are required");
       return;
     }
-    if (!walletConnected) {
-      setCopyError("You must connect your wallet before sending a copy request");
-      return;
-    }
     setCopyRequesting(true);
 
     // Check if user already has an active (APPROVED or PENDING) copy relationship
@@ -535,25 +531,6 @@ export function FollowerDashboard() {
         </div>
         <WalletConnectButton onConnectionChange={handleWalletChange} />
       </motion.div>
-
-      {/* ═══ Wallet required banner ═══ */}
-      {!walletConnected && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={pageTransition}
-          className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl border border-warning/20 bg-warning/5"
-        >
-          <div className="p-2 rounded-lg bg-warning/10">
-            <Lock className="w-4 h-4 text-warning" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-text-primary">Wallet Required</p>
-            <p className="text-xs text-text-tertiary mt-0.5">Connect your wallet to deposit funds and start copy trading.</p>
-          </div>
-          <WalletConnectButton onConnectionChange={handleWalletChange} />
-        </motion.div>
-      )}
 
       {/* ═══ Hero Balance Card ═══ */}
       <motion.div
@@ -1228,7 +1205,7 @@ export function FollowerDashboard() {
                             setCopyTraderName(trader.name);
                             setCopyTraderId(trader.id);
                             setCopyMessage("");
-                            setCopyError(!walletConnected ? "Connect your wallet first to send a copy request" : "");
+                            setCopyError("");
                             setShowCopyRequestModal(true);
                           }}
                           className="flex items-center gap-1 text-2xs px-2.5 py-1 rounded-full bg-brand text-white hover:bg-brand-dark transition-colors font-medium shadow-sm"
@@ -1281,7 +1258,7 @@ export function FollowerDashboard() {
               setCopyTraderName("");
               setCopyTraderId("");
               setCopyMessage("");
-              setCopyError(!walletConnected ? "Connect your wallet first to send a copy request" : "");
+              setCopyError("");
               setShowCopyRequestModal(true);
             }}
             className="btn-primary text-sm gap-1.5"
@@ -1678,20 +1655,13 @@ export function FollowerDashboard() {
             />
           </div>
 
-          {!walletConnected && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
-              <Lock className="w-4 h-4 text-warning shrink-0" />
-              <p className="text-xs text-warning">Wallet must be connected to send a request</p>
-            </div>
-          )}
-
           <div className="flex gap-2 pt-2">
             <button onClick={() => { setShowCopyRequestModal(false); setCopyError(""); }} className="btn-secondary flex-1">
               Cancel
             </button>
             <button
               onClick={handleSendCopyRequest}
-              disabled={copyRequesting || !walletConnected}
+              disabled={copyRequesting}
               className="btn-primary flex-1 gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {copyRequesting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
@@ -1828,7 +1798,7 @@ export function FollowerDashboard() {
           setCopyTraderName(traderName);
           setCopyTraderId(traderId);
           setCopyMessage("");
-          setCopyError(!walletConnected ? "Connect your wallet first to send a copy request" : "");
+          setCopyError("");
           setShowCopyRequestModal(true);
         }}
       />

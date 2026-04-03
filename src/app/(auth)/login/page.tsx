@@ -90,28 +90,8 @@ function LoginPageInner() {
   return (
     <div className="min-h-screen bg-[var(--color-auth-bg)] flex relative overflow-hidden">
 
-      {/* ===== Mobile background — astronaut space image ===== */}
-      <div className="absolute inset-0 lg:hidden">
-        <Image
-          src="/hero-space.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-[30%_80%]"
-          quality={90}
-        />
-        <Image
-          src="/hero-aurora.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-center mix-blend-screen opacity-20"
-          quality={90}
-        />
-        {/* Gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/90 via-[var(--color-auth-bg)]/50 to-[var(--color-auth-bg)]/80" />
-      </div>
+      {/* Mobile solid dark background */}
+      <div className="absolute inset-0 bg-black lg:hidden" />
 
       {/* ===== Desktop left panel — branding ===== */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
@@ -187,18 +167,18 @@ function LoginPageInner() {
             transition={{ duration: 0.4, ease }}
             className="lg:hidden flex flex-col items-center mb-8"
           >
-            <div className="w-14 h-14 rounded-2xl bg-brand/90 backdrop-blur-sm flex items-center justify-center shadow-glow mb-3">
+            <div className="w-14 h-14 rounded-2xl bg-brand flex items-center justify-center shadow-glow mb-3">
               <TrendingUp className="w-7 h-7 text-white" />
             </div>
             <span className="text-xl font-bold text-white">CopyTrade Pro</span>
-            <span className="text-xs text-white/60 mt-1">Professional Copy Trading Platform</span>
+            <span className="text-xs text-[#888] mt-1">Professional Copy Trading Platform</span>
           </motion.div>
 
           {/* Card wrapper */}
           <div className="auth-card">
 
             <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">Welcome back</h2>
-            <p className="text-sm text-white/60 lg:text-text-tertiary mb-8">Sign in to your account</p>
+            <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary mb-8">Sign in to your account</p>
 
             {/* Email verified success banner */}
             {showVerifiedBanner && (
@@ -234,15 +214,15 @@ function LoginPageInner() {
             </motion.button>
 
             <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
-              <span className="text-xs text-white/60 lg:text-text-tertiary uppercase tracking-wider">or</span>
-              <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
+              <div className="flex-1 h-px bg-[#222] lg:bg-border" />
+              <span className="text-xs text-[#a1a1a1] lg:text-text-tertiary uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-[#222] lg:bg-border" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <FormField label="Email" error={emailError} touched={emailTouched} valid={!emailError && !!email} errorId="login-email-error" labelClassName="text-white/70 lg:text-text-secondary">
+              <FormField label="Email" error={emailError} touched={emailTouched} valid={!emailError && !!email} errorId="login-email-error" labelClassName="text-[#a1a1a1] lg:text-text-secondary">
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
                   <input
                     type="email"
                     value={email}
@@ -266,7 +246,7 @@ function LoginPageInner() {
               <div>
                 <label className="auth-label">Password</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
                   <input
                     type="password"
                     value={password}
@@ -284,7 +264,7 @@ function LoginPageInner() {
                 <div className="flex justify-end -mt-1">
                   <Link
                     href="/reset-password"
-                    className="text-sm text-white/70 lg:text-text-tertiary hover:text-brand transition-colors inline-flex items-center min-h-[44px] py-2 -my-2"
+                    className="text-sm text-[#a1a1a1] lg:text-text-tertiary hover:text-brand transition-colors inline-flex items-center min-h-[44px] py-2 -my-2"
                   >
                     Forgot password?
                   </Link>
@@ -301,13 +281,13 @@ function LoginPageInner() {
                   <div className="bg-brand/5 border border-brand/10 rounded-lg p-3 mb-3">
                     <div className="flex gap-2 items-center">
                       <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
-                      <p className="text-xs text-white/70 lg:text-text-secondary">
+                      <p className="text-xs text-[#a1a1a1] lg:text-text-secondary">
                         Enter the 6-digit code from your authenticator app
                       </p>
                     </div>
                   </div>
                   <div className="relative">
-                    <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                    <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
                     <input
                       type="text"
                       inputMode="numeric"
@@ -329,7 +309,7 @@ function LoginPageInner() {
                       setRequires2FA(false);
                       setTwoFactorCode("");
                     }}
-                    className="flex items-center gap-1 text-xs text-white/70 lg:text-text-tertiary hover:text-brand transition-colors mt-2 min-h-[44px] py-2 -my-2"
+                    className="flex items-center gap-1 text-xs text-[#a1a1a1] lg:text-text-tertiary hover:text-brand transition-colors mt-2 min-h-[44px] py-2 -my-2"
                   >
                     <ArrowLeft className="w-3 h-3" />
                     Back to login
@@ -359,7 +339,7 @@ function LoginPageInner() {
               </motion.button>
             </form>
 
-            <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-8">
+            <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary text-center mt-8">
               Don&apos;t have an account?{" "}
               <Link href="/signup" className="text-brand hover:text-brand-light transition-colors font-medium">
                 Create one
@@ -367,12 +347,12 @@ function LoginPageInner() {
             </p>
 
             {/* Trust signals */}
-            <div className="flex items-center justify-center gap-6 mt-8 pt-5 border-t border-white/[0.06] lg:mt-10 lg:pt-6 lg:border-border/30">
+            <div className="flex items-center justify-center gap-6 mt-8 pt-5 border-t border-[#1a1a1a] lg:mt-10 lg:pt-6 lg:border-border/30">
               {[
                 { icon: ShieldCheck, text: "256-bit encryption" },
                 { icon: Lock, text: "SOC 2 compliant" },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-1.5 text-white/40 lg:text-text-quaternary">
+                <div key={i} className="flex items-center gap-1.5 text-[#666] lg:text-text-quaternary">
                   <item.icon className="w-3.5 h-3.5" />
                   <span className="text-xs">{item.text}</span>
                 </div>

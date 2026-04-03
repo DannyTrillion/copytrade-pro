@@ -44,15 +44,6 @@ export async function POST(req: NextRequest) {
       return errorResponse("Cannot follow yourself");
     }
 
-    // Check wallet is connected
-    const wallet = await prisma.wallet.findUnique({
-      where: { userId: user.id },
-    });
-
-    if (!wallet || !wallet.isConnected) {
-      return errorResponse("You must connect your wallet first", 400);
-    }
-
     // Check for approved copy request
     const copyRequest = await prisma.copyRequest.findUnique({
       where: {

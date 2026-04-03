@@ -183,8 +183,8 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
       {/* Logo */}
       <div className="h-14 flex items-center justify-between px-4 border-b border-border">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center flex-shrink-0 shadow-glow">
-            <TrendingUp className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center flex-shrink-0 shadow-glow transition-all duration-300 hover:scale-110 hover:shadow-[0_0_16px_rgba(41,98,255,0.4)] hover:rotate-[-4deg]">
+            <TrendingUp className="w-4 h-4 text-white transition-transform duration-300" />
           </div>
           {(sidebarOpen || isMobile) && (
             <motion.span
@@ -247,7 +247,7 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
                       )}
                       title={!sidebarOpen && !isMobile ? item.label : undefined}
                     >
-                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <Icon className="w-4 h-4 flex-shrink-0 sidebar-icon" />
                       <AnimatePresence>
                         {(sidebarOpen || isMobile) && (
                           <motion.span
@@ -293,12 +293,12 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
         {!isMobile && (
           <button
             onClick={toggleSidebar}
-            className="sidebar-link w-full justify-center"
+            className="sidebar-link w-full justify-center group/collapse"
             title={sidebarOpen ? "Collapse" : "Expand"}
           >
             <ChevronLeft
               className={cn(
-                "w-4 h-4 transition-transform duration-200",
+                "w-4 h-4 transition-all duration-300 group-hover/collapse:scale-110",
                 !sidebarOpen && "rotate-180"
               )}
             />

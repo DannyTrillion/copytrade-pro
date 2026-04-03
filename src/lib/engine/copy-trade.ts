@@ -89,7 +89,7 @@ async function processFollowerTrade(
   const wallet = follower.user.wallet;
 
   if (!wallet || !wallet.address || !wallet.isConnected) {
-    console.warn(`Follower ${follower.userId} has no connected wallet`);
+    console.warn(`Follower ${follower.userId}: skipping trade — wallet not connected`);
     return;
   }
 

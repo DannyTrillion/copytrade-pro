@@ -378,21 +378,21 @@
 
   /* ─── Auth Pages ─── */
   .auth-card {
-    @apply bg-white/[0.07] backdrop-blur-xl border border-white/[0.12] rounded-2xl p-6 shadow-[0_8px_40px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.05)]
+    @apply bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-6
            lg:bg-surface-1 lg:border-border/50 lg:backdrop-blur-none
            lg:shadow-[0_4px_24px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03),0_0_0_1px_rgba(0,0,0,0.02)]
            lg:p-10;
   }
 
   .auth-input {
-    @apply input-field pl-10 bg-white/[0.07] border-white/[0.12] text-white placeholder:text-white/40
+    @apply input-field pl-10 bg-[#0a0a0a] border-[#222] text-white placeholder:text-white/40
            focus:border-brand/60 focus:ring-brand/20
            lg:bg-surface-0 lg:border-border lg:text-text-primary lg:placeholder:text-text-tertiary
            lg:hover:border-border-light lg:focus:border-brand/50;
   }
 
   .auth-label {
-    @apply text-sm font-medium text-white/70 lg:text-text-secondary mb-2 block;
+    @apply text-sm font-medium text-[#a1a1a1] lg:text-text-secondary mb-2 block;
   }
 
   .auth-btn {
@@ -407,8 +407,8 @@
 
   .auth-btn-google {
     @apply w-full flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-medium
-           border border-white/[0.12] bg-white/[0.06] text-white
-           hover:bg-white/[0.1] hover:border-white/[0.16]
+           border border-[#222] bg-[#0a0a0a] text-white
+           hover:bg-[#111] hover:border-[#333]
            lg:border-border lg:bg-surface-0 lg:text-text-primary
            lg:hover:bg-surface-2 lg:hover:border-border-light lg:shadow-sm
            active:scale-[0.98] transition-all duration-200;
