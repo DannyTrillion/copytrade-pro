@@ -134,8 +134,7 @@ export function FollowerDashboard() {
   const { address: wagmiAddress, isConnected: wagmiConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
 
-  // Wallet state
-  const [walletConnected, setWalletConnected] = useState(false);
+
 
   // Balance state
   const [balance, setBalance] = useState<Balance | null>(null);
@@ -250,8 +249,8 @@ export function FollowerDashboard() {
   }, [fetchData]);
 
   // ─── Wallet connection callback ───
-  const handleWalletChange = useCallback((connected: boolean) => {
-    setWalletConnected(connected);
+  const handleWalletChange = useCallback((_connected: boolean) => {
+    // Wallet connection state tracked by WalletConnectButton internally
   }, []);
 
   // ─── Balance operations ───
