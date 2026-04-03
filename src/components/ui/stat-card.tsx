@@ -56,16 +56,19 @@ export function StatCard({
         />
       )}
 
-      <div className="relative stat-card hover:scale-[1.02] hover:shadow-lg transition-all duration-200">
+      <div className="relative stat-card">
         <div className="flex items-start justify-between mb-3">
           <div
             className={cn(
-              "p-2 rounded-lg bg-surface-3 transition-all duration-300",
-              "group-hover:shadow-glow group-hover:scale-110",
+              "relative p-2 rounded-lg bg-surface-3 transition-all duration-300 ease-out",
+              "group-hover:scale-110 group-hover:rotate-[-6deg]",
               iconColor
             )}
           >
-            <Icon className="w-4 h-4" />
+            {/* Icon glow ring on hover */}
+            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md bg-current" style={{ opacity: 0 }} />
+            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-[6px]" style={{ background: "currentColor" }} />
+            <Icon className="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:scale-105" />
           </div>
           {change && (
             <motion.span

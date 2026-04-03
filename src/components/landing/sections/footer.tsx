@@ -42,7 +42,7 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#E0E3EB] bg-white">
+    <footer className="border-t border-border bg-white">
       <div className="max-w-[1200px] mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-16">
           {/* Brand */}
@@ -50,7 +50,7 @@ export function Footer() {
             <Link href="/" className="inline-block mb-5">
               <Image src="/logo-dark.svg" alt="CopyTrade Pro" width={140} height={24} className="h-5 w-auto" />
             </Link>
-            <p className="text-[13px] text-[#787B86] leading-relaxed max-w-xs">
+            <p className="text-xs text-text-secondary leading-relaxed max-w-xs">
               Professional copy trading platform connecting TradingView signals with Polymarket execution.
             </p>
           </div>
@@ -58,11 +58,11 @@ export function Footer() {
           {/* Link columns */}
           {footerLinks.map((section, i) => (
             <div key={i}>
-              <h4 className="text-[12px] font-semibold text-[#131722] uppercase tracking-[0.08em] mb-5">{section.title}</h4>
+              <h4 className="text-xs font-semibold text-text-primary uppercase tracking-widest mb-5">{section.title}</h4>
               <ul className="space-y-3">
                 {section.links.map((link, j) => (
                   <li key={j}>
-                    <Link href={link.href} className="text-[13px] text-[#787B86] hover:text-[#2962FF] transition-colors duration-200">
+                    <Link href={link.href} className="text-xs text-text-secondary hover:text-brand transition-colors duration-200">
                       {link.label}
                     </Link>
                   </li>
@@ -73,13 +73,13 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-[#E0E3EB] flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[12px] text-[#B2B5BE]">
+        <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-text-tertiary">
             &copy; {new Date().getFullYear()} CopyTrade Pro. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             {["Discord", "Twitter", "GitHub"].map((social) => (
-              <a key={social} href="#" className="text-[12px] text-[#787B86] hover:text-[#2962FF] transition-colors duration-200">
+              <a key={social} href="#" className="text-xs text-text-secondary hover:text-brand transition-colors duration-200">
                 {social}
               </a>
             ))}

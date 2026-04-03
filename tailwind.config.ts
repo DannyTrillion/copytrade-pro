@@ -63,6 +63,11 @@ const config: Config = {
           DEFAULT: "#2962FF",
           light: "#5B8DEF",
         },
+        accent: {
+          DEFAULT: "#AB47BC",
+          light: "#CE93D8",
+          dark: "#8E24AA",
+        },
       },
       fontFamily: {
         sans: [
@@ -93,6 +98,8 @@ const config: Config = {
         card: "var(--shadow-card)",
         elevated: "var(--shadow-elevated)",
         "elevated-lg": "0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3)",
+        "card-hover": "0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)",
+        "card-lg": "0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)",
         "inner-glow": "inset 0 1px 0 0 rgba(255, 255, 255, 0.03)",
       },
       animation: {

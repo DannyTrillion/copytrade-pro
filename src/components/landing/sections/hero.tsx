@@ -1,12 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useInView, animate } from "framer-motion";
 import Image from "next/image";
+import { useRef, useEffect, useState } from "react";
 import {
   ChevronDown, TrendingUp, Activity, ArrowUpRight,
   Users, Wallet,
 } from "lucide-react";
+
+function AnimatedValue({ target, prefix = "", suffix = "", decimals = 0, duration = 2, delay = 0.5 }: {
+  target: number; prefix?: string; suffix?: string; decimals?: number; duration?: number; delay?: number;
+}) {
+  const [value, setValue] = useState(0);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!inView) return;
+    const timeout = setTimeout(() => {
+      const controls = animate(0, target, {
+        duration,
+        ease: [0.22, 1, 0.36, 1],
+        onUpdate: (v) => setValue(decimals > 0 ? parseFloat(v.toFixed(decimals)) : Math.round(v)),
+      });
+      return () => controls.stop();
+    }, delay * 1000);
+    return () => clearTimeout(timeout);
+  }, [inView, target, duration, delay, decimals]);
+
+  return (
+    <span ref={ref}>
+      {prefix}{value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}
+    </span>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  TradingView-style hero: CENTERED content, full 100vh               */
@@ -74,7 +102,7 @@ const chartB = [
 
 export function HeroSection() {
   return (
-    <section className="relative h-screen min-h-[700px] flex flex-col overflow-hidden bg-[#131722]">
+    <section className="relative h-screen min-h-[700px] flex flex-col overflow-hidden bg-surface-0">
 
       {/* ===== BACKGROUND — TradingView actual assets ===== */}
       <div className="absolute inset-0 z-0">
@@ -108,16 +136,16 @@ export function HeroSection() {
           className="absolute top-[12%] left-[-2%] w-[420px]"
         >
           <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
-            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-[0_16px_60px_rgba(0,0,0,0.3)]" style={{ background: "rgba(19,23,34,0.6)" }}>
+            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-elevated-lg" style={{ background: "rgba(19,23,34,0.6)" }}>
               <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.05]">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-white/50">TRUMP 2028</span>
-                  <span className="text-[10px] font-mono text-success">$0.42</span>
-                  <span className="flex items-center text-[9px] font-mono text-success"><ArrowUpRight className="w-2.5 h-2.5" />+12.3%</span>
+                  <span className="text-2xs font-bold text-white/50">TRUMP 2028</span>
+                  <span className="text-2xs font-mono text-success">$0.42</span>
+                  <span className="flex items-center text-2xs font-mono text-success"><ArrowUpRight className="w-2.5 h-2.5" />+12.3%</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {["1H", "4H", "1D"].map((tf, i) => (
-                    <span key={tf} className={`px-1.5 py-0.5 text-[8px] rounded ${i === 2 ? "bg-brand/60 text-white/70" : "text-white/20"}`}>{tf}</span>
+                    <span key={tf} className={`px-1.5 py-0.5 text-2xs rounded ${i === 2 ? "bg-brand/60 text-white/70" : "text-white/35"}`}>{tf}</span>
                   ))}
                 </div>
               </div>
@@ -125,8 +153,8 @@ export function HeroSection() {
                 <CandleChart candles={chartA} height={150} />
               </div>
               <div className="px-3 py-1 border-t border-white/[0.04] flex items-center gap-3">
-                <span className="text-[8px] text-white/15">Vol 24.5M</span>
-                <span className="text-[8px] text-white/15">RSI <span className="text-success/60">62.4</span></span>
+                <span className="text-2xs text-white/30">Vol 24.5M</span>
+                <span className="text-2xs text-white/30">RSI <span className="text-success/60">62.4</span></span>
               </div>
             </div>
           </motion.div>
@@ -140,9 +168,9 @@ export function HeroSection() {
           className="absolute top-[52%] left-[1%] w-[220px]"
         >
           <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
-            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-[0_12px_48px_rgba(0,0,0,0.25)]" style={{ background: "rgba(19,23,34,0.55)" }}>
+            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-elevated-lg" style={{ background: "rgba(19,23,34,0.55)" }}>
               <div className="px-3 py-1.5 border-b border-white/[0.05]">
-                <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider">Markets</span>
+                <span className="text-2xs font-semibold text-white/30 uppercase tracking-wider">Markets</span>
               </div>
               {[
                 { s: "BTC > 100K", p: "$0.78", c: "+5.1%", up: true, d: [60, 62, 65, 70, 72, 75, 78, 80] },
@@ -153,12 +181,12 @@ export function HeroSection() {
               ].map((m, i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-[5px] border-b border-white/[0.02]">
                   <div>
-                    <p className="text-[9px] font-semibold text-white/50">{m.s}</p>
-                    <p className="text-[8px] text-white/20 font-mono">{m.p}</p>
+                    <p className="text-2xs font-semibold text-white/50">{m.s}</p>
+                    <p className="text-2xs text-white/35 font-mono">{m.p}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <Spark data={m.d} color={m.up ? COLORS.success : COLORS.danger} w={28} h={12} />
-                    <span className={`text-[8px] font-mono ${m.up ? "text-success/70" : "text-danger/70"}`}>{m.c}</span>
+                    <span className={`text-2xs font-mono ${m.up ? "text-success/70" : "text-danger/70"}`}>{m.c}</span>
                   </div>
                 </div>
               ))}
@@ -175,9 +203,9 @@ export function HeroSection() {
           className="absolute top-[10%] right-[-1%] w-[280px]"
         >
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}>
-            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-[0_16px_60px_rgba(0,0,0,0.3)]" style={{ background: "rgba(19,23,34,0.6)" }}>
+            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-elevated-lg" style={{ background: "rgba(19,23,34,0.6)" }}>
               <div className="px-3 py-1.5 border-b border-white/[0.05]">
-                <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider">Top Traders</span>
+                <span className="text-2xs font-semibold text-white/30 uppercase tracking-wider">Top Traders</span>
               </div>
               <div className="p-2 space-y-1.5">
                 {[
@@ -186,18 +214,18 @@ export function HeroSection() {
                   { name: "MarketPro", pnl: "+$29.8K", wr: "65%", a: "M", d: [10, 14, 12, 18, 16, 22, 20, 24, 26, 30] },
                 ].map((t, i) => (
                   <div key={i} className="flex items-center gap-2 p-1.5 rounded-lg bg-white/[0.03]">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white/80 flex-shrink-0 bg-gradient-to-br from-brand to-success">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-2xs font-bold text-white/80 flex-shrink-0 bg-gradient-to-br from-brand to-success">
                       {t.a}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-semibold text-white/50">{t.name}</p>
+                      <p className="text-2xs font-semibold text-white/50">{t.name}</p>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-mono text-success/70">{t.pnl}</span>
-                        <span className="text-[8px] text-white/18">{t.wr}</span>
+                        <span className="text-2xs font-mono text-success/70">{t.pnl}</span>
+                        <span className="text-2xs text-white/18">{t.wr}</span>
                       </div>
                     </div>
                     <Spark data={t.d} color={COLORS.success} w={36} h={14} />
-                    <span className="px-1.5 py-0.5 text-[8px] font-semibold bg-brand/50 text-white/60 rounded-md">Copy</span>
+                    <span className="px-1.5 py-0.5 text-2xs font-semibold bg-brand/50 text-white/60 rounded-md">Copy</span>
                   </div>
                 ))}
               </div>
@@ -213,11 +241,11 @@ export function HeroSection() {
           className="absolute top-[48%] right-[2%] w-[300px]"
         >
           <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}>
-            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-[0_12px_48px_rgba(0,0,0,0.25)]" style={{ background: "rgba(19,23,34,0.55)" }}>
+            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-elevated-lg" style={{ background: "rgba(19,23,34,0.55)" }}>
               <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.05]">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-white/45">BTC &gt; 100K</span>
-                  <span className="text-[10px] font-mono text-success/70">$0.78</span>
+                  <span className="text-2xs font-bold text-white/45">BTC &gt; 100K</span>
+                  <span className="text-2xs font-mono text-success/70">$0.78</span>
                 </div>
               </div>
               <div className="p-2">
@@ -235,23 +263,23 @@ export function HeroSection() {
           className="absolute bottom-[16%] right-[6%] w-[200px]"
         >
           <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 3 }}>
-            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-[0_12px_48px_rgba(0,0,0,0.25)]" style={{ background: "rgba(19,23,34,0.55)" }}>
+            <div className="rounded-xl border border-white/[0.06] overflow-hidden backdrop-blur-sm shadow-elevated-lg" style={{ background: "rgba(19,23,34,0.55)" }}>
               <div className="px-3 py-1.5 border-b border-white/[0.05]">
-                <span className="text-[9px] font-semibold text-white/25 uppercase tracking-wider">Quick Trade</span>
+                <span className="text-2xs font-semibold text-white/25 uppercase tracking-wider">Quick Trade</span>
               </div>
               <div className="p-2.5">
                 <div className="flex gap-1 mb-2">
-                  <span className="flex-1 py-1 text-[9px] font-semibold bg-success/50 text-white/60 rounded-md text-center">Buy Yes</span>
-                  <span className="flex-1 py-1 text-[9px] font-semibold bg-white/[0.04] text-white/25 rounded-md text-center">Buy No</span>
+                  <span className="flex-1 py-1 text-2xs font-semibold bg-success/50 text-white/60 rounded-md text-center">Buy Yes</span>
+                  <span className="flex-1 py-1 text-2xs font-semibold bg-white/[0.04] text-white/25 rounded-md text-center">Buy No</span>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] text-white/20">Amount</span>
-                    <span className="text-[10px] font-mono text-white/40">$500</span>
+                    <span className="text-2xs text-white/35">Amount</span>
+                    <span className="text-2xs font-mono text-white/40">$500</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] text-white/20">Return</span>
-                    <span className="text-[10px] font-mono text-success/60">+$690</span>
+                    <span className="text-2xs text-white/35">Return</span>
+                    <span className="text-2xs font-mono text-success/60">+$690</span>
                   </div>
                 </div>
               </div>
@@ -269,10 +297,12 @@ export function HeroSection() {
         >
           <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/[0.05] backdrop-blur-sm" style={{ background: "rgba(19,23,34,0.5)" }}>
-              <Users className="w-3.5 h-3.5 text-[#AB47BC]/60" />
+              <Users className="w-3.5 h-3.5 text-accent/60" />
               <div>
-                <p className="text-[11px] font-bold text-white/45">2,847</p>
-                <p className="text-[8px] text-white/18">Online now</p>
+                <p className="text-2xs font-bold text-white/45">
+                  <AnimatedValue target={2847} duration={2.5} delay={1.5} />
+                </p>
+                <p className="text-2xs text-white/18">Online now</p>
               </div>
             </div>
           </motion.div>
@@ -289,8 +319,12 @@ export function HeroSection() {
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/[0.05] backdrop-blur-sm" style={{ background: "rgba(19,23,34,0.5)" }}>
               <Wallet className="w-3.5 h-3.5 text-brand/60" />
               <div>
-                <p className="text-[11px] font-bold text-white/45">$48,234</p>
-                <p className="text-[8px] text-success/50">+10.3% today</p>
+                <p className="text-2xs font-bold text-white/45">
+                  <AnimatedValue target={48234} prefix="$" duration={2.5} delay={1.8} />
+                </p>
+                <p className="text-2xs text-success/50">
+                  +<AnimatedValue target={10.3} decimals={1} duration={1.5} delay={2.2} />% today
+                </p>
               </div>
             </div>
           </motion.div>
@@ -305,11 +339,11 @@ export function HeroSection() {
         >
           <motion.div animate={{ y: [0, 4, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/[0.05] backdrop-blur-sm" style={{ background: "rgba(19,23,34,0.5)" }}>
-              <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse live-pulse text-success" />
               <Activity className="w-3 h-3 text-success/60" />
               <div>
-                <p className="text-[9px] font-semibold text-white/40">BUY TRUMP 2028</p>
-                <p className="text-[7px] text-white/15">AlphaTrader • 2s ago</p>
+                <p className="text-2xs font-semibold text-white/40">BUY TRUMP 2028</p>
+                <p className="text-2xs text-white/30">AlphaTrader • 2s ago</p>
               </div>
             </div>
           </motion.div>
@@ -354,13 +388,13 @@ export function HeroSection() {
           >
             <Link
               href="/signup"
-              className="px-8 py-3.5 bg-white text-[#131722] font-semibold text-[15px] rounded-[20px] hover:bg-white/90 transition-all duration-200 hover:translate-y-[-1px] shadow-[0_2px_16px_rgba(255,255,255,0.1)]"
+              className="px-8 py-3.5 bg-white text-text-primary font-semibold text-sm rounded-full hover:bg-white/90 transition-all duration-200 hover:translate-y-[-1px] shadow-lg shadow-white/10 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
             >
               Get started for free
             </Link>
             <Link
               href="#how-it-works"
-              className="px-6 py-3.5 text-white/60 font-medium text-[15px] rounded-[20px] border border-white/[0.12] hover:bg-white/[0.06] hover:text-white/80 transition-all duration-200"
+              className="px-6 py-3.5 text-white/60 font-medium text-sm rounded-full border border-white/[0.12] hover:bg-white/[0.06] hover:text-white/80 transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
             >
               How it works
             </Link>
@@ -371,7 +405,7 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-[13px] text-white/30"
+            className="text-xs text-white/30"
           >
             $0 forever, no credit card needed
           </motion.p>
@@ -391,8 +425,8 @@ export function HeroSection() {
         >
           {/* Avatar with glowing ring */}
           <div className="relative flex-shrink-0">
-            <div className="absolute -inset-[3px] rounded-full opacity-50 bg-gradient-to-br from-brand via-success to-[#AB47BC]" />
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#131722]">
+            <div className="absolute -inset-[3px] rounded-full opacity-50 bg-gradient-to-br from-brand via-success to-accent" />
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-surface-0">
               <Image
                 src="/ceo-avatar.webp"
                 alt="CEO"
@@ -402,20 +436,24 @@ export function HeroSection() {
               />
             </div>
             {/* Online indicator */}
-            <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-[#131722]" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-surface-0" />
           </div>
           {/* Info */}
           <div>
-            <p className="text-[14px] font-semibold text-white leading-tight">John Doe</p>
-            <p className="text-[11px] text-white/40 leading-tight mt-0.5">CEO & Co-founder</p>
+            <p className="text-sm font-semibold text-white leading-tight">John Doe</p>
+            <p className="text-2xs text-white/40 leading-tight mt-0.5">CEO & Co-founder</p>
             <div className="flex items-center gap-1.5 mt-1">
               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/10 border border-success/15">
                 <TrendingUp className="w-2.5 h-2.5 text-success" />
-                <span className="text-[9px] font-semibold text-success">+847% ROI</span>
+                <span className="text-2xs font-semibold text-success">
+                  +<AnimatedValue target={847} duration={2} delay={1.8} />% ROI
+                </span>
               </div>
               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-brand/10 border border-brand/15">
                 <Users className="w-2.5 h-2.5 text-brand" />
-                <span className="text-[9px] font-semibold text-brand">12K followers</span>
+                <span className="text-2xs font-semibold text-brand">
+                  <AnimatedValue target={12} duration={1.5} delay={2} />K followers
+                </span>
               </div>
             </div>
           </div>
@@ -430,7 +468,7 @@ export function HeroSection() {
         className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[6]"
       >
         <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-          <ChevronDown className="w-5 h-5 text-white/20" />
+          <ChevronDown className="w-5 h-5 text-white/35" />
         </motion.div>
       </motion.div>
     </section>

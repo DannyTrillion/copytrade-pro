@@ -56,17 +56,22 @@ export function ConfirmDialog({
           />
           <div className="fixed inset-0 z-[61] flex items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 8 }}
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 8 }}
-              transition={{ duration: 0.15 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
               className="glass-panel-elevated w-full max-w-sm p-6 space-y-4"
             >
               <div className="flex items-start justify-between">
-                <div className={`p-2.5 rounded-xl ${styles.icon}`}>
+                <motion.div
+                  className={`p-2.5 rounded-xl ${styles.icon}`}
+                  initial={{ scale: 0.5, rotate: -15 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.1 }}
+                >
                   <AlertTriangle className="w-5 h-5" />
-                </div>
-                <button onClick={onCancel} className="p-1 rounded-md hover:bg-surface-3 text-text-tertiary transition-colors">
+                </motion.div>
+                <button onClick={onCancel} className="icon-btn">
                   <X className="w-4 h-4" />
                 </button>
               </div>

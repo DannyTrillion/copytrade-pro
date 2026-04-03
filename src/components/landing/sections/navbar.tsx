@@ -45,7 +45,7 @@ export function Navbar() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
           ? isLight
-            ? "bg-white/90 backdrop-blur-2xl border-b border-[#E0E3EB] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+            ? "bg-white/90 backdrop-blur-2xl border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
             : "bg-[#0B0E17]/80 backdrop-blur-2xl border-b border-white/[0.06]"
           : "bg-transparent"
       }`}
@@ -66,9 +66,9 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className={`px-4 py-2 text-[14px] font-medium rounded-lg transition-colors duration-200 ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] ${
                 isLight
-                  ? "text-[#131722]/60 hover:text-[#131722] hover:bg-[#F0F3FA]"
+                  ? "text-text-primary/60 hover:text-text-primary hover:bg-surface-2"
                   : "text-white/50 hover:text-white/90 hover:bg-white/[0.06]"
               }`}
             >
@@ -80,9 +80,9 @@ export function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href="/login"
-            className={`px-4 py-2 text-[14px] font-medium rounded-lg transition-colors duration-200 ${
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] ${
               isLight
-                ? "text-[#131722]/70 hover:text-[#131722] hover:bg-[#F0F3FA]"
+                ? "text-text-primary/70 hover:text-text-primary hover:bg-surface-2"
                 : "text-white/70 hover:text-white hover:bg-white/[0.06]"
             }`}
           >
@@ -90,7 +90,7 @@ export function Navbar() {
           </Link>
           <Link
             href="/signup"
-            className="px-5 py-2.5 text-[14px] font-semibold bg-brand hover:bg-brand-dark text-white rounded-[20px] transition-all duration-200 hover:shadow-glow"
+            className="px-5 py-2.5 text-sm font-semibold bg-brand hover:bg-brand-dark text-white rounded-full transition-all duration-200 hover:shadow-glow active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
           >
             Get started
           </Link>
@@ -99,8 +99,8 @@ export function Navbar() {
         {/* Mobile toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className={`lg:hidden p-2 rounded-lg transition-colors ${
-            isLight ? "text-[#131722]/60 hover:bg-[#F0F3FA]" : "text-white/60 hover:bg-white/[0.06]"
+          className={`lg:hidden p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 ${
+            isLight ? "text-text-primary/60 hover:bg-surface-2" : "text-white/60 hover:bg-white/[0.06]"
           }`}
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -117,7 +117,7 @@ export function Navbar() {
             transition={{ duration: 0.3 }}
             className={`lg:hidden overflow-hidden border-t ${
               isLight
-                ? "bg-white/95 backdrop-blur-2xl border-[#E0E3EB]"
+                ? "bg-white/95 backdrop-blur-2xl border-border"
                 : "bg-[#0B0E17]/95 backdrop-blur-2xl border-white/[0.06]"
             }`}
           >
@@ -127,20 +127,20 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`block px-4 py-3 text-[15px] font-medium rounded-lg transition-colors ${
+                  className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors active:scale-[0.98] ${
                     isLight
-                      ? "text-[#131722]/60 hover:text-[#131722] hover:bg-[#F0F3FA]"
+                      ? "text-text-primary/60 hover:text-text-primary hover:bg-surface-2"
                       : "text-white/50 hover:text-white hover:bg-white/[0.06]"
                   }`}
                 >
                   {link.label}
                 </a>
               ))}
-              <div className={`pt-4 mt-3 border-t flex flex-col gap-2 ${isLight ? "border-[#E0E3EB]" : "border-white/[0.06]"}`}>
-                <Link href="/login" className={`px-4 py-3 text-[15px] font-medium rounded-lg ${isLight ? "text-[#131722]/70" : "text-white/70"}`}>
+              <div className={`pt-4 mt-3 border-t flex flex-col gap-2 ${isLight ? "border-border" : "border-white/[0.06]"}`}>
+                <Link href="/login" className={`px-4 py-3 text-sm font-medium rounded-lg ${isLight ? "text-text-primary/70" : "text-white/70"}`}>
                   Sign in
                 </Link>
-                <Link href="/signup" className="px-5 py-3 text-[15px] font-semibold bg-brand text-white rounded-[20px] text-center">
+                <Link href="/signup" className="px-5 py-3 text-sm font-semibold bg-brand text-white rounded-full text-center active:scale-[0.97]">
                   Get started
                 </Link>
               </div>

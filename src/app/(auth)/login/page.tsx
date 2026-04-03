@@ -110,7 +110,7 @@ function LoginPageInner() {
           quality={90}
         />
         {/* Gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/80 via-[var(--color-auth-bg)]/40 to-[var(--color-auth-bg)]/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/90 via-[var(--color-auth-bg)]/50 to-[var(--color-auth-bg)]/80" />
       </div>
 
       {/* ===== Desktop left panel — branding ===== */}
@@ -157,7 +157,7 @@ function LoginPageInner() {
                   transition={{ delay: 0.3 + i * 0.1 }}
                 >
                   <p className="text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="text-xs text-white/50 mt-0.5">{stat.label}</p>
+                  <p className="text-xs text-white/40 uppercase tracking-wider mt-0.5">{stat.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -168,11 +168,17 @@ function LoginPageInner() {
       {/* ===== Right panel / Mobile — form ===== */}
       <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-center px-5 py-8 lg:px-12 lg:bg-surface-0">
 
+        {/* Decorative gradient background for desktop */}
+        <div className="absolute inset-0 hidden lg:block">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_rgba(41,98,255,0.04),transparent_70%)]" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_center,_rgba(38,166,154,0.03),transparent_70%)]" />
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="w-full max-w-sm"
+          className="w-full max-w-[400px]"
         >
           {/* Mobile branding header */}
           <motion.div
@@ -185,187 +191,198 @@ function LoginPageInner() {
               <TrendingUp className="w-7 h-7 text-white" />
             </div>
             <span className="text-xl font-bold text-white">CopyTrade Pro</span>
-            <span className="text-xs text-white/50 mt-1">Professional Copy Trading Platform</span>
+            <span className="text-xs text-white/60 mt-1">Professional Copy Trading Platform</span>
           </motion.div>
 
-          {/* Glass card wrapper for mobile */}
-          <div className="lg:contents">
-            <div className="lg:bg-transparent lg:p-0 lg:border-0 lg:backdrop-blur-0 lg:shadow-none bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
+          {/* Card wrapper */}
+          <div className="auth-card">
 
-              <h2 className="text-xl font-semibold text-white lg:text-text-primary mb-1">Welcome back</h2>
-              <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">Sign in to your account</p>
+            <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">Welcome back</h2>
+            <p className="text-sm text-white/60 lg:text-text-tertiary mb-8">Sign in to your account</p>
 
-              {/* Email verified success banner */}
-              {showVerifiedBanner && (
+            {/* Email verified success banner */}
+            {showVerifiedBanner && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
+              >
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <p className="text-sm text-emerald-300">Email verified! You can now log in.</p>
+              </motion.div>
+            )}
+
+            {/* Google OAuth */}
+            <motion.button
+              type="button"
+              disabled={isGoogleLoading}
+              onClick={() => {
+                setIsGoogleLoading(true);
+                signIn("google", { callbackUrl: "/dashboard" });
+              }}
+              whileTap={{ scale: 0.97 }}
+              className="auth-btn-google"
+            >
+              {isGoogleLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <GoogleIcon className="w-5 h-5" />
+                  Continue with Google
+                </>
+              )}
+            </motion.button>
+
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
+              <span className="text-xs text-white/60 lg:text-text-tertiary uppercase tracking-wider">or</span>
+              <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <FormField label="Email" error={emailError} touched={emailTouched} valid={!emailError && !!email} errorId="login-email-error" labelClassName="text-white/70 lg:text-text-secondary">
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => {
+                      setEmailTouched(true);
+                      const error = validateField(emailSchema, email);
+                      setEmailError(error || "");
+                    }}
+                    placeholder="trader@example.com"
+                    className="auth-input pl-10"
+                    autoComplete="email"
+                    required
+                    aria-required="true"
+                    aria-invalid={!!emailError}
+                    aria-describedby={emailError ? "login-email-error" : undefined}
+                  />
+                </div>
+              </FormField>
+
+              <div>
+                <label className="auth-label">Password</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="auth-input pl-10"
+                    autoComplete="current-password"
+                    required
+                    aria-required="true"
+                  />
+                </div>
+              </div>
+
+              {!requires2FA && (
+                <div className="flex justify-end -mt-1">
+                  <Link
+                    href="/reset-password"
+                    className="text-sm text-white/70 lg:text-text-tertiary hover:text-brand transition-colors inline-flex items-center min-h-[44px] py-2 -my-2"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
+
+              {/* 2FA Code Input */}
+              {requires2FA && (
                 <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <p className="text-sm text-emerald-300">Email verified! You can now log in.</p>
+                  <div className="bg-brand/5 border border-brand/10 rounded-lg p-3 mb-3">
+                    <div className="flex gap-2 items-center">
+                      <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
+                      <p className="text-xs text-white/70 lg:text-text-secondary">
+                        Enter the 6-digit code from your authenticator app
+                      </p>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      value={twoFactorCode}
+                      onChange={(e) => {
+                        const cleaned = e.target.value.replace(/\D/g, "").slice(0, 6);
+                        setTwoFactorCode(cleaned);
+                      }}
+                      placeholder="000000"
+                      maxLength={6}
+                      className="auth-input text-center font-mono text-lg tracking-[0.3em] placeholder:tracking-[0.3em]"
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequires2FA(false);
+                      setTwoFactorCode("");
+                    }}
+                    className="flex items-center gap-1 text-xs text-white/70 lg:text-text-tertiary hover:text-brand transition-colors mt-2 min-h-[44px] py-2 -my-2"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                    Back to login
+                  </button>
                 </motion.div>
               )}
 
-              {/* Google OAuth */}
               <motion.button
-                type="button"
-                disabled={isGoogleLoading}
-                onClick={() => {
-                  setIsGoogleLoading(true);
-                  signIn("google", { callbackUrl: "/dashboard" });
-                }}
+                type="submit"
+                disabled={isLoading || (requires2FA && twoFactorCode.length !== 6)}
                 whileTap={{ scale: 0.97 }}
-                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-[15px] font-medium border border-white/[0.08] lg:border-border bg-white/[0.04] lg:bg-surface-1 hover:bg-white/[0.08] lg:hover:bg-surface-2 text-white lg:text-text-primary transition-colors"
+                className="auth-btn"
               >
-                {isGoogleLoading ? (
+                {isLoading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : requires2FA ? (
+                  <>
+                    Verify & Sign In
+                    <ArrowRight className="w-4 h-4" />
+                  </>
                 ) : (
                   <>
-                    <GoogleIcon className="w-5 h-5" />
-                    Continue with Google
+                    Sign In
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </motion.button>
+            </form>
 
-              <div className="flex items-center gap-3 my-1">
-                <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
-                <span className="text-xs text-white/50 lg:text-text-tertiary uppercase tracking-wider">or</span>
-                <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
-              </div>
+            <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-8">
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="text-brand hover:text-brand-light transition-colors font-medium">
+                Create one
+              </Link>
+            </p>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <FormField label="Email" error={emailError} touched={emailTouched} valid={!emailError && !!email} errorId="login-email-error">
-                  <div className="relative">
-                    <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      onBlur={() => {
-                        setEmailTouched(true);
-                        const error = validateField(emailSchema, email);
-                        setEmailError(error || "");
-                      }}
-                      placeholder="trader@example.com"
-                      className="input-field pl-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
-                      autoComplete="email"
-                      required
-                      aria-required="true"
-                      aria-invalid={!!emailError}
-                      aria-describedby={emailError ? "login-email-error" : undefined}
-                    />
-                  </div>
-                </FormField>
-
-                <div>
-                  <label className="text-sm text-white/60 lg:text-text-secondary mb-1.5 block">Password</label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      className="input-field pl-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
-                      autoComplete="current-password"
-                      required
-                      aria-required="true"
-                    />
-                  </div>
+            {/* Trust signals */}
+            <div className="flex items-center justify-center gap-6 mt-8 pt-5 border-t border-white/[0.06] lg:mt-10 lg:pt-6 lg:border-border/30">
+              {[
+                { icon: ShieldCheck, text: "256-bit encryption" },
+                { icon: Lock, text: "SOC 2 compliant" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-1.5 text-white/40 lg:text-text-quaternary">
+                  <item.icon className="w-3.5 h-3.5" />
+                  <span className="text-xs">{item.text}</span>
                 </div>
-
-                {!requires2FA && (
-                  <div className="flex justify-end -mt-1">
-                    <Link
-                      href="/reset-password"
-                      className="text-xs text-white/60 lg:text-text-tertiary hover:text-brand transition-colors inline-flex items-center min-h-[44px] py-2 -my-2"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                )}
-
-                {/* 2FA Code Input */}
-                {requires2FA && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <div className="bg-brand/5 border border-brand/10 rounded-lg p-3 mb-3">
-                      <div className="flex gap-2 items-center">
-                        <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
-                        <p className="text-xs text-white/60 lg:text-text-secondary">
-                          Enter the 6-digit code from your authenticator app
-                        </p>
-                      </div>
-                    </div>
-                    <div className="relative">
-                      <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        value={twoFactorCode}
-                        onChange={(e) => {
-                          const cleaned = e.target.value.replace(/\D/g, "").slice(0, 6);
-                          setTwoFactorCode(cleaned);
-                        }}
-                        placeholder="000000"
-                        maxLength={6}
-                        className="input-field pl-10 text-center font-mono text-lg tracking-[0.3em] placeholder:tracking-[0.3em] lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
-                        autoFocus
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRequires2FA(false);
-                        setTwoFactorCode("");
-                      }}
-                      className="flex items-center gap-1 text-xs text-white/60 lg:text-text-tertiary hover:text-brand transition-colors mt-2 min-h-[44px] py-2 -my-2"
-                    >
-                      <ArrowLeft className="w-3 h-3" />
-                      Back to login
-                    </button>
-                  </motion.div>
-                )}
-
-                <motion.button
-                  type="submit"
-                  disabled={isLoading || (requires2FA && twoFactorCode.length !== 6)}
-                  whileTap={{ scale: 0.97 }}
-                  className="btn-primary w-full gap-2 py-3 rounded-xl text-[15px]"
-                >
-                  {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : requires2FA ? (
-                    <>
-                      Verify & Sign In
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  ) : (
-                    <>
-                      Sign In
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </motion.button>
-              </form>
-
-              <p className="text-sm text-white/50 lg:text-text-tertiary text-center mt-6">
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" className="text-brand hover:text-brand-light transition-colors font-medium">
-                  Create one
-                </Link>
-              </p>
+              ))}
             </div>
           </div>
         </motion.div>
 
         {/* Mobile bottom safe area spacer */}
-        <div className="lg:hidden h-4" />
+        <div className="lg:hidden h-8" />
       </div>
     </div>
   );

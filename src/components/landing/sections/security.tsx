@@ -9,12 +9,12 @@ export function SecuritySection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   const features = [
-    { icon: Lock, title: "AES-256 Encryption", desc: "All wallet data encrypted at rest with military-grade AES-256 encryption. Keys never stored in plain text.", color: "#EF5350", bgColor: "bg-[#FFEBEE]" },
-    { icon: ShieldCheck, title: "Webhook Validation", desc: "Every TradingView webhook is validated against your secret key before processing any signal.", color: "#2962FF", bgColor: "bg-[#EBF0FF]" },
-    { icon: KeyRound, title: "Role-Based Access", desc: "Three-tier permission system — Admin, Master Trader, Follower — with strict route protection.", color: "#26A69A", bgColor: "bg-[#E8F5F2]" },
-    { icon: Fingerprint, title: "JWT Sessions", desc: "Secure JSON Web Token authentication with 24-hour expiry and server-side session validation.", color: "#FF9800", bgColor: "bg-[#FFF4E5]" },
-    { icon: Server, title: "Rate Limiting", desc: "API endpoints protected with intelligent rate limiting to prevent abuse and DDoS attacks.", color: "#AB47BC", bgColor: "bg-[#F3E5F5]" },
-    { icon: Eye, title: "Input Validation", desc: "Zod schema validation on every API endpoint. All inputs sanitized before database operations.", color: "#1452F0", bgColor: "bg-[#E8EEFF]" },
+    { icon: Lock, title: "AES-256 Encryption", desc: "All wallet data encrypted at rest with military-grade AES-256 encryption. Keys never stored in plain text.", color: "#EF5350", bgColor: "bg-danger/10" },
+    { icon: ShieldCheck, title: "Webhook Validation", desc: "Every TradingView webhook is validated against your secret key before processing any signal.", color: "#2962FF", bgColor: "bg-brand-50" },
+    { icon: KeyRound, title: "Role-Based Access", desc: "Three-tier permission system — Admin, Master Trader, Follower — with strict route protection.", color: "#26A69A", bgColor: "bg-success/10" },
+    { icon: Fingerprint, title: "JWT Sessions", desc: "Secure JSON Web Token authentication with 24-hour expiry and server-side session validation.", color: "#FF9800", bgColor: "bg-warning/10" },
+    { icon: Server, title: "Rate Limiting", desc: "API endpoints protected with intelligent rate limiting to prevent abuse and DDoS attacks.", color: "#AB47BC", bgColor: "bg-accent/10" },
+    { icon: Eye, title: "Input Validation", desc: "Zod schema validation on every API endpoint. All inputs sanitized before database operations.", color: "#1452F0", bgColor: "bg-brand/10" },
   ];
 
   return (
@@ -51,7 +51,7 @@ export function SecuritySection() {
               />
             ))}
             {/* Shield icon */}
-            <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-[#EF5350] to-[#FF9800] flex items-center justify-center shadow-[0_8px_30px_rgba(239,83,80,0.3)]">
+            <div className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-danger to-warning flex items-center justify-center shadow-glow-danger">
               <ShieldCheck className="w-8 h-8 text-white" />
             </div>
           </div>
@@ -63,14 +63,14 @@ export function SecuritySection() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-16 lg:mb-20"
         >
-          <span className="inline-block text-[13px] font-semibold text-[#EF5350] uppercase tracking-[0.08em] mb-4">Security</span>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-[#131722] leading-tight mb-5">
+          <span className="inline-block text-xs font-semibold text-danger uppercase tracking-widest mb-4">Security</span>
+          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight mb-5">
             Bank-Grade{" "}
-            <span className="bg-gradient-to-r from-[#EF5350] to-[#FF9800] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-danger to-warning bg-clip-text text-transparent">
               Security
             </span>
           </h2>
-          <p className="text-[17px] text-[#787B86] max-w-[560px] mx-auto leading-relaxed">
+          <p className="text-base text-text-secondary max-w-[560px] mx-auto leading-relaxed">
             Your assets and data are protected at every layer of the stack.
           </p>
         </motion.div>
@@ -83,12 +83,12 @@ export function SecuritySection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: i * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="bg-white border border-[#E0E3EB] rounded-xl p-7 hover:border-[#C8CBD5] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] h-full">
-                <div className={`w-11 h-11 rounded-lg flex items-center justify-center mb-5 ${feature.bgColor}`}>
+              <div className="bg-white border border-border rounded-xl p-7 hover:border-border-light transition-all duration-300 hover:shadow-card-hover h-full">
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5 ${feature.bgColor}`}>
                   <feature.icon className="w-5 h-5" style={{ color: feature.color }} />
                 </div>
-                <h3 className="text-[15px] font-semibold text-[#131722] mb-2">{feature.title}</h3>
-                <p className="text-[13px] text-[#787B86] leading-relaxed">{feature.desc}</p>
+                <h3 className="text-sm font-semibold text-text-primary mb-2">{feature.title}</h3>
+                <p className="text-xs text-text-secondary leading-relaxed">{feature.desc}</p>
               </div>
             </motion.div>
           ))}

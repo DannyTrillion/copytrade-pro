@@ -10,7 +10,7 @@ interface LiveIndicatorProps {
 
 export function LiveIndicator({ label = "Live", className, size = "sm" }: LiveIndicatorProps) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5", className)}>
+    <span className={cn("inline-flex items-center gap-1.5 transition-all duration-200 hover:brightness-110", className)}>
       <span className="relative flex">
         <span
           className={cn(
@@ -20,7 +20,7 @@ export function LiveIndicator({ label = "Live", className, size = "sm" }: LiveIn
         />
         <span
           className={cn(
-            "relative inline-flex rounded-full bg-success",
+            "relative inline-flex rounded-full bg-success live-pulse text-success",
             size === "sm" ? "h-1.5 w-1.5" : "h-2 w-2"
           )}
         />

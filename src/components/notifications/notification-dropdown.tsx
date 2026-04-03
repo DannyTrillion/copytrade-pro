@@ -147,7 +147,7 @@ export function NotificationDropdown() {
           setOpen(!open);
           if (!open) fetchNotifications();
         }}
-        className="p-2 rounded-md hover:bg-surface-3 transition-colors text-text-secondary hover:text-text-primary relative"
+        className="icon-btn relative"
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (

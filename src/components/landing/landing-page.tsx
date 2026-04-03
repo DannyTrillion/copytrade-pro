@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { HeroSection } from "./sections/hero";
 import { Navbar } from "./sections/navbar";
 
@@ -19,8 +20,19 @@ const CtaSection = dynamic(() => import("./sections/cta").then((m) => m.CtaSecti
 const Footer = dynamic(() => import("./sections/footer").then((m) => m.Footer));
 
 export function LandingPage() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
   return (
-    <div className="min-h-screen overflow-hidden bg-white text-[#131722]">
+    <div className="min-h-screen overflow-hidden bg-white text-text-primary">
+      {/* Scroll progress indicator */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-0.5 z-[200] origin-left"
+        style={{
+          scaleX,
+          background: "linear-gradient(90deg, #2962FF, #26A69A, #AB47BC)",
+        }}
+      />
       <Navbar />
       {/* Hero — dark, full viewport */}
       <HeroSection />

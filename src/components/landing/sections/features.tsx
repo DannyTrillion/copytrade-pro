@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion, useInView, useMotionValue, useTransform } from "framer-motion";
+import { useRef, type MouseEvent } from "react";
 import {
   Copy,
   Shield,
@@ -13,15 +13,48 @@ import {
   Cpu,
 } from "lucide-react";
 
+function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0.5);
+  const y = useMotionValue(0.5);
+  const rotateX = useTransform(y, [0, 1], [3, -3]);
+  const rotateY = useTransform(x, [0, 1], [-3, 3]);
+
+  function handleMouse(e: MouseEvent<HTMLDivElement>) {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    x.set((e.clientX - rect.left) / rect.width);
+    y.set((e.clientY - rect.top) / rect.height);
+  }
+
+  function handleLeave() {
+    x.set(0.5);
+    y.set(0.5);
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      onMouseMove={handleMouse}
+      onMouseLeave={handleLeave}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 800 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 const features = [
-  { icon: Copy, title: "Auto Copy Trading", desc: "Automatically replicate trades from top traders the moment a signal arrives. Zero manual intervention.", color: "#2962FF", bgColor: "bg-[#EBF0FF]" },
-  { icon: Shield, title: "Risk Control", desc: "Set risk per trade, max position sizes, and daily loss limits. The system enforces your rules every time.", color: "#26A69A", bgColor: "bg-[#E8F5F2]" },
-  { icon: Users, title: "Multiple Traders", desc: "Follow multiple master traders simultaneously with independent risk settings for each one.", color: "#AB47BC", bgColor: "bg-[#F3E5F5]" },
-  { icon: Zap, title: "Real-Time Execution", desc: "Sub-second trade execution via async processing with parallel order placement on Polymarket.", color: "#FF9800", bgColor: "bg-[#FFF4E5]" },
-  { icon: BarChart3, title: "Performance Stats", desc: "Comprehensive analytics with PnL tracking, win rates, trade history, and portfolio performance charts.", color: "#1452F0", bgColor: "bg-[#E8EEFF]" },
-  { icon: DollarSign, title: "Commission System", desc: "Transparent 2% platform commission on copied trades. Master traders earn from their follower base.", color: "#26A69A", bgColor: "bg-[#E8F5F2]" },
-  { icon: Lock, title: "Secure Wallets", desc: "AES-256 encrypted wallet storage. Private keys are never stored in plain text. Bank-grade security.", color: "#EF5350", bgColor: "bg-[#FFEBEE]" },
-  { icon: Cpu, title: "Async Processing", desc: "Queue-based worker system handles concurrent trade execution with retry logic and error handling.", color: "#2962FF", bgColor: "bg-[#EBF0FF]" },
+  { icon: Copy, title: "Auto Copy Trading", desc: "Automatically replicate trades from top traders the moment a signal arrives. Zero manual intervention.", color: "var(--color-brand)", bgColor: "bg-brand/10" },
+  { icon: Shield, title: "Risk Control", desc: "Set risk per trade, max position sizes, and daily loss limits. The system enforces your rules every time.", color: "var(--color-success)", bgColor: "bg-success/10" },
+  { icon: Users, title: "Multiple Traders", desc: "Follow multiple master traders simultaneously with independent risk settings for each one.", color: "#AB47BC", bgColor: "bg-accent/10" },
+  { icon: Zap, title: "Real-Time Execution", desc: "Sub-second trade execution via async processing with parallel order placement on Polymarket.", color: "var(--color-warning)", bgColor: "bg-warning/10" },
+  { icon: BarChart3, title: "Performance Stats", desc: "Comprehensive analytics with PnL tracking, win rates, trade history, and portfolio performance charts.", color: "#1452F0", bgColor: "bg-brand/10" },
+  { icon: DollarSign, title: "Commission System", desc: "Transparent 2% platform commission on copied trades. Master traders earn from their follower base.", color: "var(--color-success)", bgColor: "bg-success/10" },
+  { icon: Lock, title: "Secure Wallets", desc: "AES-256 encrypted wallet storage. Private keys are never stored in plain text. Bank-grade security.", color: "var(--color-danger)", bgColor: "bg-danger/10" },
+  { icon: Cpu, title: "Async Processing", desc: "Queue-based worker system handles concurrent trade execution with retry logic and error handling.", color: "var(--color-brand)", bgColor: "bg-brand/10" },
 ];
 
 export function FeaturesSection() {
@@ -37,14 +70,14 @@ export function FeaturesSection() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-16 lg:mb-20"
         >
-          <span className="inline-block text-[13px] font-semibold text-[#2962FF] uppercase tracking-[0.08em] mb-4">Platform Features</span>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-[#131722] leading-tight mb-5">
+          <span className="inline-block text-xs font-semibold text-brand uppercase tracking-widest mb-4">Platform Features</span>
+          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight mb-5">
             Built for{" "}
-            <span className="bg-gradient-to-r from-[#2962FF] to-[#26A69A] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-brand to-success bg-clip-text text-transparent">
               Serious Traders
             </span>
           </h2>
-          <p className="text-[17px] text-[#787B86] max-w-[560px] mx-auto leading-relaxed">
+          <p className="text-base text-text-secondary max-w-[560px] mx-auto leading-relaxed">
             Every feature designed for production-grade trading at scale.
           </p>
         </motion.div>
@@ -58,15 +91,17 @@ export function FeaturesSection() {
               transition={{ delay: i * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="group"
             >
-              <div className="bg-white border border-[#E0E3EB] rounded-xl p-6 h-full hover:border-[#C8CBD5] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)]">
-                <div
-                  className={`w-11 h-11 rounded-lg flex items-center justify-center mb-4 ${feature.bgColor}`}
-                >
-                  <feature.icon className="w-5 h-5" style={{ color: feature.color }} />
+              <TiltCard>
+                <div className="bg-white border border-border rounded-xl p-6 h-full hover:border-border-light transition-all duration-300 hover:shadow-card-hover">
+                  <div
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${feature.bgColor}`}
+                  >
+                    <feature.icon className="w-5 h-5" style={{ color: feature.color }} />
+                  </div>
+                  <h3 className="text-sm font-semibold text-text-primary mb-2">{feature.title}</h3>
+                  <p className="text-xs text-text-secondary leading-relaxed">{feature.desc}</p>
                 </div>
-                <h3 className="text-[15px] font-semibold text-[#131722] mb-2">{feature.title}</h3>
-                <p className="text-[13px] text-[#787B86] leading-relaxed">{feature.desc}</p>
-              </div>
+              </TiltCard>
             </motion.div>
           ))}
         </div>
@@ -76,41 +111,41 @@ export function FeaturesSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.5, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-16 bg-white border border-[#E0E3EB] rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.08)]"
+          className="mt-16 bg-white border border-border rounded-2xl overflow-hidden shadow-card-lg"
         >
           {/* Top bar */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-[#E0E3EB] bg-[#FAFBFC]">
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-surface-2">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-[#EF5350]" />
-                <div className="w-3 h-3 rounded-full bg-[#FF9800]" />
-                <div className="w-3 h-3 rounded-full bg-[#26A69A]" />
+                <div className="w-3 h-3 rounded-full bg-danger" />
+                <div className="w-3 h-3 rounded-full bg-warning" />
+                <div className="w-3 h-3 rounded-full bg-success" />
               </div>
-              <span className="text-[12px] font-semibold text-[#131722] ml-2">CopyTrade Pro — Live Dashboard</span>
+              <span className="text-xs font-semibold text-text-primary ml-2">CopyTrade Pro — Live Dashboard</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#26A69A] animate-pulse" />
-              <span className="text-[11px] text-[#787B86] font-medium">Connected</span>
+              <div className="w-2 h-2 rounded-full bg-success animate-pulse live-pulse text-success" />
+              <span className="text-2xs text-text-secondary font-medium">Connected</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#E0E3EB]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-border">
             {/* Candlestick Chart Area */}
             <div className="lg:col-span-7 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-[15px] font-bold text-[#131722]">BTC / USD</span>
-                  <span className="text-[20px] font-bold text-[#131722]">67,432.50</span>
-                  <span className="text-[13px] font-semibold text-[#26A69A]">+1,542.30 (+2.34%)</span>
+                  <span className="text-sm font-bold text-text-primary">BTC / USD</span>
+                  <span className="text-xl font-bold text-text-primary">67,432.50</span>
+                  <span className="text-xs font-semibold text-success">+1,542.30 (+2.34%)</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {["1H", "4H", "1D", "1W"].map((tf) => (
-                    <button key={tf} className={`px-2.5 py-1 text-[11px] font-semibold rounded-md ${tf === "4H" ? "bg-[#2962FF] text-white" : "text-[#787B86] hover:bg-[#F0F3FA]"}`}>{tf}</button>
+                    <button key={tf} className={`px-2.5 py-1 text-2xs font-semibold rounded-md transition-all duration-200 ${tf === "4H" ? "bg-brand text-white" : "text-text-secondary hover:bg-surface-2"}`}>{tf}</button>
                   ))}
                 </div>
               </div>
               {/* SVG Candlestick Chart */}
-              <svg width="100%" height="220" viewBox="0 0 560 220" preserveAspectRatio="none" className="rounded-lg bg-[#FAFBFC] border border-[#E0E3EB]/50">
+              <svg width="100%" height="220" viewBox="0 0 560 220" preserveAspectRatio="none" className="rounded-lg bg-surface-2 border border-border/50">
                 {/* Grid lines */}
                 {[44, 88, 132, 176].map((y) => (
                   <line key={y} x1="0" y1={y} x2="560" y2={y} stroke="#E0E3EB" strokeWidth="0.5" strokeDasharray="4 4" />
@@ -158,10 +193,10 @@ export function FeaturesSection() {
             </div>
 
             {/* Right sidebar */}
-            <div className="lg:col-span-5 divide-y divide-[#E0E3EB]">
+            <div className="lg:col-span-5 divide-y divide-border">
               {/* Order Book */}
               <div className="p-5">
-                <span className="text-[11px] font-semibold text-[#787B86] uppercase tracking-[0.1em]">Order Book</span>
+                <span className="text-2xs font-semibold text-text-secondary uppercase tracking-[0.1em]">Order Book</span>
                 <div className="mt-3 space-y-1">
                   {/* Asks */}
                   {[
@@ -169,15 +204,15 @@ export function FeaturesSection() {
                     { price: "67,465.50", size: "1.245", pct: 65 },
                     { price: "67,450.10", size: "0.520", pct: 40 },
                   ].map((ask, i) => (
-                    <div key={`a${i}`} className="relative flex items-center justify-between py-1 px-2 rounded text-[12px]">
-                      <div className="absolute inset-0 rounded bg-[#EF5350]/[0.06]" style={{ width: `${ask.pct}%` }} />
-                      <span className="relative text-[#EF5350] font-medium">{ask.price}</span>
-                      <span className="relative text-[#787B86]">{ask.size}</span>
+                    <div key={`a${i}`} className="relative flex items-center justify-between py-1 px-2 rounded text-xs">
+                      <div className="absolute inset-0 rounded bg-danger/[0.06]" style={{ width: `${ask.pct}%` }} />
+                      <span className="relative text-danger font-medium">{ask.price}</span>
+                      <span className="relative text-text-secondary">{ask.size}</span>
                     </div>
                   ))}
                   {/* Spread */}
                   <div className="flex items-center justify-center py-1.5">
-                    <span className="text-[11px] text-[#787B86]">Spread: $14.70 (0.02%)</span>
+                    <span className="text-2xs text-text-secondary">Spread: $14.70 (0.02%)</span>
                   </div>
                   {/* Bids */}
                   {[
@@ -185,10 +220,10 @@ export function FeaturesSection() {
                     { price: "67,420.30", size: "1.050", pct: 55 },
                     { price: "67,410.00", size: "0.780", pct: 45 },
                   ].map((bid, i) => (
-                    <div key={`b${i}`} className="relative flex items-center justify-between py-1 px-2 rounded text-[12px]">
-                      <div className="absolute inset-0 rounded bg-[#26A69A]/[0.06]" style={{ width: `${bid.pct}%` }} />
-                      <span className="relative text-[#26A69A] font-medium">{bid.price}</span>
-                      <span className="relative text-[#787B86]">{bid.size}</span>
+                    <div key={`b${i}`} className="relative flex items-center justify-between py-1 px-2 rounded text-xs">
+                      <div className="absolute inset-0 rounded bg-success/[0.06]" style={{ width: `${bid.pct}%` }} />
+                      <span className="relative text-success font-medium">{bid.price}</span>
+                      <span className="relative text-text-secondary">{bid.size}</span>
                     </div>
                   ))}
                 </div>
@@ -196,24 +231,24 @@ export function FeaturesSection() {
 
               {/* Active Positions */}
               <div className="p-5">
-                <span className="text-[11px] font-semibold text-[#787B86] uppercase tracking-[0.1em]">Active Positions</span>
+                <span className="text-2xs font-semibold text-text-secondary uppercase tracking-[0.1em]">Active Positions</span>
                 <div className="mt-3 space-y-2">
                   {[
                     { pair: "BTC/USD", side: "LONG", entry: "$66,890", pnl: "+$542.50", pnlPct: "+0.81%", up: true },
                     { pair: "ETH/USD", side: "LONG", entry: "$3,480", pnl: "+$124.50", pnlPct: "+3.58%", up: true },
                     { pair: "SOL/USD", side: "SHORT", entry: "$152.40", pnl: "-$18.75", pnlPct: "-1.23%", up: false },
                   ].map((pos, i) => (
-                    <div key={i} className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-[#F8F9FD] border border-[#E0E3EB]/50">
+                    <div key={i} className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-surface-0 border border-border/50">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[12px] font-semibold text-[#131722]">{pos.pair}</span>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${pos.up ? "text-[#26A69A] bg-[#E8F5F2]" : "text-[#EF5350] bg-[#FFEBEE]"}`}>{pos.side}</span>
+                          <span className="text-xs font-semibold text-text-primary">{pos.pair}</span>
+                          <span className={`text-2xs font-bold px-1.5 py-0.5 rounded ${pos.up ? "text-success bg-success/10" : "text-danger bg-danger/10"}`}>{pos.side}</span>
                         </div>
-                        <span className="text-[11px] text-[#787B86]">Entry: {pos.entry}</span>
+                        <span className="text-2xs text-text-secondary">Entry: {pos.entry}</span>
                       </div>
                       <div className="text-right">
-                        <div className={`text-[12px] font-semibold ${pos.up ? "text-[#26A69A]" : "text-[#EF5350]"}`}>{pos.pnl}</div>
-                        <div className={`text-[11px] ${pos.up ? "text-[#26A69A]" : "text-[#EF5350]"}`}>{pos.pnlPct}</div>
+                        <div className={`text-xs font-semibold ${pos.up ? "text-success" : "text-danger"}`}>{pos.pnl}</div>
+                        <div className={`text-2xs ${pos.up ? "text-success" : "text-danger"}`}>{pos.pnlPct}</div>
                       </div>
                     </div>
                   ))}

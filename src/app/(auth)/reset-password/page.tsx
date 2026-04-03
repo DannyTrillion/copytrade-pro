@@ -32,7 +32,14 @@ type Step = "request" | "reset" | "success";
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[var(--color-auth-bg)] flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand" /></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--color-auth-bg)] flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
+          <Loader2 className="w-5 h-5 animate-spin text-brand" />
+        </div>
+        <span className="text-sm text-white/60 lg:text-text-tertiary">Loading...</span>
+      </div>
+    }>
       <ResetPasswordContent />
     </Suspense>
   );
@@ -196,7 +203,7 @@ function ResetPasswordContent() {
           className="object-cover object-center mix-blend-screen opacity-20"
           quality={90}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/80 via-[var(--color-auth-bg)]/40 to-[var(--color-auth-bg)]/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/90 via-[var(--color-auth-bg)]/50 to-[var(--color-auth-bg)]/80" />
       </div>
 
       {/* Desktop left panel */}
@@ -243,11 +250,16 @@ function ResetPasswordContent() {
 
       {/* Right panel / Form */}
       <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-center px-5 py-8 lg:px-12 lg:bg-surface-0">
+        {/* Desktop gradient decoration */}
+        <div className="absolute inset-0 hidden lg:block">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_rgba(41,98,255,0.04),transparent_70%)]" />
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="w-full max-w-sm"
+          className="w-full max-w-[400px] relative z-10"
         >
           {/* Mobile branding */}
           <motion.div
@@ -268,8 +280,7 @@ function ResetPasswordContent() {
           </motion.div>
 
           {/* Glass card wrapper */}
-          <div className="lg:contents">
-            <div className="lg:bg-transparent lg:p-0 lg:border-0 lg:backdrop-blur-0 lg:shadow-none bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
+          <div className="auth-card">
 
               {/* Step indicator */}
               {(() => {
@@ -278,14 +289,16 @@ function ResetPasswordContent() {
                   step === "reset" ? 2 :
                   requestSent ? 2 : 1;
                 return (
-                  <div className="flex items-center justify-center gap-2 mb-6">
+                  <div className="flex items-center justify-center gap-1 mb-8">
                     {[1, 2, 3].map((s) => (
-                      <div key={s} className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-                          currentStepNumber >= s ? "bg-brand" : "bg-white/20"
+                      <div key={s} className="flex items-center gap-1">
+                        <div className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                          currentStepNumber >= s
+                            ? "bg-brand shadow-[0_0_8px_rgba(41,98,255,0.3)]"
+                            : "bg-white/15 lg:bg-surface-3"
                         }`} />
-                        {s < 3 && <div className={`w-8 h-px transition-colors duration-300 ${
-                          currentStepNumber > s ? "bg-brand" : "bg-white/10"
+                        {s < 3 && <div className={`w-10 h-0.5 rounded-full transition-colors duration-300 ${
+                          currentStepNumber > s ? "bg-brand" : "bg-white/10 lg:bg-border"
                         }`} />}
                       </div>
                     ))}
@@ -303,11 +316,11 @@ function ResetPasswordContent() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <KeyRound className="w-5 h-5 text-brand" />
-                    <h2 className="text-xl font-semibold text-white lg:text-text-primary">
+                    <h2 className="text-2xl font-bold text-white lg:text-text-primary">
                       Forgot password?
                     </h2>
                   </div>
-                  <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
+                  <p className="text-sm text-white/60 lg:text-text-tertiary mb-6">
                     Enter your email and we will send you a reset link
                   </p>
 
@@ -318,9 +331,10 @@ function ResetPasswordContent() {
                       touched={emailTouched}
                       valid={!emailError && !!email}
                       errorId="reset-email-error"
+                      labelClassName="text-white/70 lg:text-text-secondary"
                     >
                       <div className="relative">
-                        <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
+                        <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
                         <input
                           type="email"
                           value={email}
@@ -331,7 +345,7 @@ function ResetPasswordContent() {
                             setEmailError(err || "");
                           }}
                           placeholder="trader@example.com"
-                          className="input-field pl-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
+                          className="auth-input pl-10"
                           autoComplete="email"
                           required
                           aria-required="true"
@@ -345,7 +359,7 @@ function ResetPasswordContent() {
                       type="submit"
                       disabled={isLoading}
                       whileTap={{ scale: 0.97 }}
-                      className="btn-primary w-full gap-2 py-3 rounded-xl text-[15px]"
+                      className="auth-btn"
                     >
                       {isLoading ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -379,10 +393,10 @@ function ResetPasswordContent() {
                   transition={{ duration: 0.3 }}
                   className="text-center"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-brand/10 border border-brand/20 shadow-[0_0_24px_rgba(41,98,255,0.15)] flex items-center justify-center mx-auto mb-4">
                     <Mail className="w-7 h-7 text-brand" />
                   </div>
-                  <h2 className="text-xl font-semibold text-white lg:text-text-primary mb-2">
+                  <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-2">
                     Check your email
                   </h2>
                   <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
@@ -429,7 +443,7 @@ function ResetPasswordContent() {
                     </button>
                   )}
 
-                  <p className="text-sm text-white/40 lg:text-text-tertiary text-center mt-4">
+                  <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-4">
                     <Link
                       href="/login"
                       className="text-brand hover:text-brand-light transition-colors font-medium inline-flex items-center gap-1"
@@ -469,10 +483,10 @@ function ResetPasswordContent() {
                   transition={{ duration: 0.3 }}
                   className="text-center"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-danger/10 border border-danger/20 shadow-[0_0_24px_rgba(239,68,68,0.15)] flex items-center justify-center mx-auto mb-4">
                     <AlertTriangle className="w-7 h-7 text-danger" />
                   </div>
-                  <h2 className="text-xl font-semibold text-white lg:text-text-primary mb-2">
+                  <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-2">
                     Link Expired
                   </h2>
                   <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
@@ -491,13 +505,13 @@ function ResetPasswordContent() {
                       setPasswordError("");
                       setConfirmError("");
                     }}
-                    className="btn-primary w-full gap-2 py-3 rounded-xl text-[15px]"
+                    className="auth-btn"
                   >
                     Request New Link
                     <ArrowRight className="w-4 h-4" />
                   </motion.button>
 
-                  <p className="text-sm text-white/40 lg:text-text-tertiary text-center mt-4">
+                  <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-4">
                     <Link
                       href="/login"
                       className="text-brand hover:text-brand-light transition-colors font-medium inline-flex items-center gap-1"
@@ -519,11 +533,11 @@ function ResetPasswordContent() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Lock className="w-5 h-5 text-brand" />
-                    <h2 className="text-xl font-semibold text-white lg:text-text-primary">
+                    <h2 className="text-2xl font-bold text-white lg:text-text-primary">
                       Set new password
                     </h2>
                   </div>
-                  <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
+                  <p className="text-sm text-white/60 lg:text-text-tertiary mb-6">
                     Choose a strong password for your account
                   </p>
 
@@ -534,9 +548,10 @@ function ResetPasswordContent() {
                       touched={passwordTouched}
                       valid={!passwordError && !!password}
                       errorId="reset-password-error"
+                      labelClassName="text-white/70 lg:text-text-secondary"
                     >
                       <div className="relative">
-                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
+                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
                         <input
                           type={showPassword ? "text" : "password"}
                           value={password}
@@ -550,7 +565,7 @@ function ResetPasswordContent() {
                             setPasswordError(err || "");
                           }}
                           placeholder="Enter new password"
-                          className="input-field pl-10 pr-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
+                          className="auth-input pl-10 pr-10"
                           autoComplete="new-password"
                           required
                           aria-required="true"
@@ -560,7 +575,7 @@ function ResetPasswordContent() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/70 transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
                           aria-label={showPassword ? "Hide password" : "Show password"}
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -571,11 +586,11 @@ function ResetPasswordContent() {
                     <PasswordStrengthMeter password={password} />
 
                     <div>
-                      <label className="text-sm text-white/60 lg:text-text-secondary mb-1.5 block">
+                      <label className="auth-label">
                         Confirm Password
                       </label>
                       <div className="relative">
-                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
+                        <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
                         <input
                           type={showConfirmPassword ? "text" : "password"}
                           value={confirmPassword}
@@ -592,7 +607,7 @@ function ResetPasswordContent() {
                             }
                           }}
                           placeholder="Confirm new password"
-                          className={`input-field pl-10 pr-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border ${
+                          className={`auth-input pl-10 pr-10 ${
                             confirmError ? "!border-danger" : ""
                           }`}
                           autoComplete="new-password"
@@ -604,7 +619,7 @@ function ResetPasswordContent() {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/70 transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
                           aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                         >
                           {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -627,7 +642,7 @@ function ResetPasswordContent() {
                       type="submit"
                       disabled={isLoading}
                       whileTap={{ scale: 0.97 }}
-                      className="btn-primary w-full gap-2 py-3 rounded-xl text-[15px]"
+                      className="auth-btn"
                     >
                       {isLoading ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -661,10 +676,10 @@ function ResetPasswordContent() {
                   transition={{ duration: 0.4, ease }}
                   className="text-center"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-success/10 border border-success/20 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-success/10 border border-success/20 shadow-[0_0_24px_rgba(38,166,154,0.15)] flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 className="w-7 h-7 text-success" />
                   </div>
-                  <h2 className="text-xl font-semibold text-white lg:text-text-primary mb-2">
+                  <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-2">
                     Password updated
                   </h2>
                   <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
@@ -675,7 +690,7 @@ function ResetPasswordContent() {
                   <Link href="/login">
                     <motion.button
                       whileTap={{ scale: 0.97 }}
-                      className="btn-primary w-full gap-2 py-3 rounded-xl text-[15px]"
+                      className="auth-btn"
                     >
                       Sign In
                       <ArrowRight className="w-4 h-4" />
@@ -683,7 +698,6 @@ function ResetPasswordContent() {
                   </Link>
                 </motion.div>
               )}
-            </div>
           </div>
         </motion.div>
 

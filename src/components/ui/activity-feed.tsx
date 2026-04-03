@@ -107,9 +107,14 @@ export function ActivityFeed() {
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 className="flex items-center gap-3 py-2.5 border-b border-border/30 last:border-0"
               >
-                <div className={`p-1.5 rounded-lg ${cfg.bg} flex-shrink-0`}>
+                <motion.div
+                  className={`p-1.5 rounded-lg ${cfg.bg} flex-shrink-0`}
+                  initial={{ scale: 0.6, rotate: -12 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+                >
                   <Icon className={`w-3 h-3 ${cfg.color}`} />
-                </div>
+                </motion.div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-text-secondary truncate">
                     <span className="font-semibold text-text-primary">{item.user}</span>{" "}

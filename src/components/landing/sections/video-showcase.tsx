@@ -53,13 +53,13 @@ export function VideoShowcaseSection() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-16"
         >
-          <span className="inline-block text-[12px] font-semibold text-[#2962FF] uppercase tracking-[0.1em] mb-3">
+          <span className="inline-block text-xs font-semibold text-brand uppercase tracking-widest mb-3">
             See it in action
           </span>
           <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold text-white leading-tight mb-4">
             Your Dashboard, Real-Time
           </h2>
-          <p className="text-[16px] text-white/40 max-w-[500px] mx-auto leading-relaxed">
+          <p className="text-base text-white/50 max-w-[500px] mx-auto leading-relaxed">
             Watch how CopyTrade Pro executes trades in real-time, mirroring top performers automatically.
           </p>
         </motion.div>
@@ -90,17 +90,17 @@ export function VideoShowcaseSection() {
               className="flex items-center gap-2 px-5 py-3 border-b border-white/[0.04]"
               style={{ background: "#0D1017" }}
             >
-              <div className="flex gap-[7px]">
-                <div className="w-[11px] h-[11px] rounded-full bg-[#FF5F57]" />
-                <div className="w-[11px] h-[11px] rounded-full bg-[#FEBC2E]" />
-                <div className="w-[11px] h-[11px] rounded-full bg-[#28C840]" />
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-danger" />
+                <div className="w-3 h-3 rounded-full bg-warning" />
+                <div className="w-3 h-3 rounded-full bg-success" />
               </div>
               <div className="flex-1 flex justify-center">
-                <div className="flex items-center gap-2 px-4 py-[4px] bg-white/[0.04] rounded-lg max-w-[300px] w-full justify-center">
+                <div className="flex items-center gap-2 px-4 py-1 bg-white/[0.04] rounded-lg max-w-[300px] w-full justify-center">
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-20">
                     <circle cx="5" cy="5" r="4" stroke="white" strokeWidth="0.8" />
                   </svg>
-                  <span className="text-[11px] text-white/20 font-mono">copytrade.pro/dashboard</span>
+                  <span className="text-2xs text-white/35 font-mono">copytrade.pro/dashboard</span>
                 </div>
               </div>
               <div className="w-[56px]" />

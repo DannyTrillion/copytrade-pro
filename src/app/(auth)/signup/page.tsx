@@ -247,7 +247,7 @@ export default function SignupPage() {
       <div className="absolute inset-0 lg:hidden">
         <Image src="/hero-space.webp" alt="" fill priority sizes="100vw" className="object-cover object-[30%_80%]" quality={90} />
         <Image src="/hero-aurora.webp" alt="" fill sizes="100vw" className="object-cover object-center mix-blend-screen opacity-20" quality={90} />
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/80 via-[var(--color-auth-bg)]/40 to-[var(--color-auth-bg)]/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/90 via-[var(--color-auth-bg)]/50 to-[var(--color-auth-bg)]/80" />
       </div>
 
       {/* ===== Desktop left panel ===== */}
@@ -292,11 +292,17 @@ export default function SignupPage() {
 
       {/* ===== Right panel / Mobile ===== */}
       <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-start pt-10 pb-8 lg:justify-center lg:pt-0 px-5 lg:px-12 lg:bg-surface-0 overflow-y-auto">
+        {/* Desktop gradient decoration */}
+        <div className="absolute inset-0 hidden lg:block">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_rgba(38,166,154,0.04),transparent_70%)]" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_center,_rgba(41,98,255,0.03),transparent_70%)]" />
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="w-full max-w-sm"
+          className="w-full max-w-[400px]"
         >
           {/* Mobile branding */}
           <motion.div
@@ -312,34 +318,36 @@ export default function SignupPage() {
           </motion.div>
 
           {/* Glass card */}
-          <div className="lg:contents">
-            <div className="lg:bg-transparent lg:p-0 lg:border-0 lg:backdrop-blur-0 lg:shadow-none bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
+          <div className="auth-card">
 
               {/* Step indicator */}
-              <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="flex items-center gap-3 mb-8">
                 {steps.map((s, i) => (
-                  <div key={s.key} className="flex items-center gap-2">
-                    <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
-                        i < currentStepIndex
-                          ? "bg-brand text-white"
-                          : i === currentStepIndex
-                          ? "bg-brand/20 text-brand border border-brand/40"
-                          : "bg-white/[0.06] text-white/30 lg:bg-surface-2 lg:text-text-tertiary border border-white/[0.08] lg:border-border"
-                      }`}
-                    >
-                      {i < currentStepIndex ? (
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      ) : (
-                        i + 1
-                      )}
+                  <div key={s.key} className="flex items-center gap-3 flex-1">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
+                          i < currentStepIndex
+                            ? "bg-brand text-white shadow-[0_0_12px_rgba(41,98,255,0.25)]"
+                            : i === currentStepIndex
+                            ? "bg-brand/15 text-brand ring-2 ring-brand/30"
+                            : "bg-white/[0.06] text-white/30 lg:bg-surface-2 lg:text-text-tertiary"
+                        }`}
+                      >
+                        {i < currentStepIndex ? (
+                          <CheckCircle2 className="w-4 h-4" />
+                        ) : (
+                          i + 1
+                        )}
+                      </div>
+                      <span className={`text-2xs font-medium transition-colors duration-300 ${
+                        i <= currentStepIndex ? "text-white/70 lg:text-text-secondary" : "text-white/30 lg:text-text-tertiary"
+                      }`}>{s.label}</span>
                     </div>
                     {i < steps.length - 1 && (
-                      <div
-                        className={`w-8 h-0.5 rounded-full transition-colors duration-300 ${
-                          i < currentStepIndex ? "bg-brand" : "bg-white/[0.08] lg:bg-border"
-                        }`}
-                      />
+                      <div className={`flex-1 h-px transition-colors duration-500 mb-5 ${
+                        i < currentStepIndex ? "bg-brand" : "bg-white/[0.08] lg:bg-border"
+                      }`} />
                     )}
                   </div>
                 ))}
@@ -355,10 +363,10 @@ export default function SignupPage() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25, ease }}
                   >
-                    <h2 className="text-xl font-semibold text-white lg:text-text-primary mb-1">
+                    <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">
                       Create your account
                     </h2>
-                    <p className="text-sm text-white/50 lg:text-text-tertiary mb-5">
+                    <p className="text-sm text-white/60 lg:text-text-tertiary mb-6">
                       Enter your email to get started
                     </p>
 
@@ -371,7 +379,7 @@ export default function SignupPage() {
                         signIn("google", { callbackUrl: "/dashboard" });
                       }}
                       whileTap={{ scale: 0.97 }}
-                      className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-[15px] font-medium border border-white/[0.08] lg:border-border bg-white/[0.04] lg:bg-surface-1 hover:bg-white/[0.08] lg:hover:bg-surface-2 text-white lg:text-text-primary transition-colors"
+                      className="auth-btn-google"
                     >
                       {isGoogleLoading ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -383,9 +391,9 @@ export default function SignupPage() {
                       )}
                     </motion.button>
 
-                    <div className="flex items-center gap-3 my-4">
+                    <div className="flex items-center gap-3 my-5">
                       <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
-                      <span className="text-xs text-white/50 lg:text-text-tertiary uppercase tracking-wider">or</span>
+                      <span className="text-xs text-white/60 lg:text-text-tertiary uppercase tracking-wider">or</span>
                       <div className="flex-1 h-px bg-white/[0.08] lg:bg-border" />
                     </div>
 
@@ -396,9 +404,9 @@ export default function SignupPage() {
                       }}
                       className="space-y-5"
                     >
-                      <FormField label="Email address" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error">
+                      <FormField label="Email address" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-white/70 lg:text-text-secondary">
                         <div className="relative">
-                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
+                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
                           <input
                             type="email"
                             value={email}
@@ -407,7 +415,7 @@ export default function SignupPage() {
                               if (emailError) setEmailError("");
                             }}
                             placeholder="trader@example.com"
-                            className="input-field pl-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
+                            className="auth-input pl-10"
                             autoComplete="email"
                             autoFocus
                             required
@@ -420,7 +428,7 @@ export default function SignupPage() {
                         type="submit"
                         disabled={sendingOtp || !email.trim()}
                         whileTap={{ scale: 0.97 }}
-                        className="btn-primary w-full gap-2 py-3 rounded-xl text-[15px]"
+                        className="auth-btn"
                       >
                         {sendingOtp ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -433,11 +441,14 @@ export default function SignupPage() {
                       </motion.button>
                     </form>
 
-                    <p className="text-sm text-white/50 lg:text-text-tertiary text-center mt-5">
+                    <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-5">
                       Already have an account?{" "}
                       <Link href="/login" className="text-brand hover:text-brand-light transition-colors font-medium">
                         Sign in
                       </Link>
+                    </p>
+                    <p className="text-2xs text-white/40 lg:text-text-quaternary text-center mt-4">
+                      By signing up, you agree to our Terms & Privacy Policy
                     </p>
                   </motion.div>
                 )}
@@ -454,22 +465,22 @@ export default function SignupPage() {
                     <button
                       type="button"
                       onClick={() => setStep("email")}
-                      className="flex items-center gap-1.5 text-sm text-white/50 hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors mb-4"
+                      className="flex items-center gap-1.5 text-sm text-white/60 hover:text-white/80 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors mb-4"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
                       Back
                     </button>
 
-                    <h2 className="text-xl font-semibold text-white lg:text-text-primary mb-1">
+                    <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">
                       Check your email
                     </h2>
-                    <p className="text-sm text-white/50 lg:text-text-tertiary mb-6">
+                    <p className="text-sm text-white/60 lg:text-text-tertiary mb-6">
                       We sent a 6-digit code to{" "}
                       <span className="text-white/80 lg:text-text-secondary font-medium">{email}</span>
                     </p>
 
                     {/* OTP inputs */}
-                    <div className="flex items-center justify-center gap-2.5 mb-4">
+                    <div className="flex items-center justify-center gap-1.5 xs:gap-2 mb-4">
                       {otpDigits.map((digit, i) => (
                         <input
                           key={i}
@@ -488,15 +499,15 @@ export default function SignupPage() {
                             }
                           }}
                           disabled={verifyingOtp}
-                          className={`w-12 h-14 text-center text-xl font-bold rounded-xl border transition-all outline-none
+                          className={`w-11 h-12 xs:w-[52px] xs:h-[60px] text-center text-xl xs:text-2xl font-bold rounded-lg xs:rounded-xl border-2 transition-all duration-200 outline-none
                             ${
                               otpError
                                 ? "border-danger/40 bg-danger/5 text-danger"
                                 : digit
-                                ? "border-brand/40 bg-brand/5 text-white lg:text-text-primary"
-                                : "border-white/[0.1] bg-white/[0.04] text-white lg:text-text-primary lg:border-border lg:bg-surface-1"
+                                ? "border-brand/40 bg-brand/[0.08] text-white lg:text-text-primary"
+                                : "border-white/[0.12] bg-white/[0.05] text-white lg:text-text-primary lg:border-border lg:bg-surface-0"
                             }
-                            focus:border-brand focus:ring-2 focus:ring-brand/20
+                            focus:border-brand focus:ring-2 focus:ring-brand/20 focus:bg-brand/[0.04]
                             disabled:opacity-50
                           `}
                           aria-label={`Digit ${i + 1}`}
@@ -519,16 +530,16 @@ export default function SignupPage() {
                     {verifyingOtp && (
                       <div className="flex items-center justify-center gap-2 mb-4">
                         <Loader2 className="w-4 h-4 animate-spin text-brand" />
-                        <span className="text-sm text-white/60 lg:text-text-tertiary">Verifying...</span>
+                        <span className="text-sm text-white/70 lg:text-text-tertiary">Verifying...</span>
                       </div>
                     )}
 
                     {/* Resend */}
                     <div className="text-center">
-                      <p className="text-sm text-white/40 lg:text-text-tertiary">
+                      <p className="text-sm text-white/60 lg:text-text-tertiary">
                         Didn&apos;t receive the code?{" "}
                         {resendCooldown > 0 ? (
-                          <span className="text-white/50 lg:text-text-secondary tabular-nums">
+                          <span className="text-white/60 lg:text-text-secondary tabular-nums">
                             Resend in {resendCooldown}s
                           </span>
                         ) : (
@@ -562,24 +573,24 @@ export default function SignupPage() {
                       </div>
                     </div>
 
-                    <h2 className="text-xl font-semibold text-white lg:text-text-primary mb-1">
+                    <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">
                       Complete your profile
                     </h2>
-                    <p className="text-sm text-white/50 lg:text-text-tertiary mb-5">
+                    <p className="text-sm text-white/60 lg:text-text-tertiary mb-6">
                       Set up your name, password, and account type
                     </p>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-                      <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error">
+                      <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-white/70 lg:text-text-secondary">
                         <div className="relative">
-                          <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
+                          <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
                           <input
                             type="text"
                             value={form.name}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
                             onBlur={() => { setTouched((p) => ({ ...p, name: true })); validateOnBlur("name"); }}
                             placeholder="John Doe"
-                            className="input-field pl-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
+                            className="auth-input pl-10"
                             autoComplete="name"
                             autoFocus
                             required
@@ -589,16 +600,16 @@ export default function SignupPage() {
                         </div>
                       </FormField>
 
-                      <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error">
+                      <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-white/70 lg:text-text-secondary">
                         <div className="relative">
-                          <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/50 lg:text-text-tertiary" />
+                          <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40 lg:text-text-tertiary" />
                           <input
                             type={showPassword ? "text" : "password"}
                             value={form.password}
                             onChange={(e) => setForm({ ...form, password: e.target.value })}
                             onBlur={() => { setTouched((p) => ({ ...p, password: true })); validateOnBlur("password"); }}
                             placeholder="Min 8 characters"
-                            className="input-field pl-10 pr-10 lg:bg-surface-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 focus:border-brand/60 lg:text-text-primary lg:placeholder:text-text-tertiary lg:border-border"
+                            className="auth-input pl-10 pr-10"
                             autoComplete="new-password"
                             required
                             minLength={8}
@@ -607,7 +618,7 @@ export default function SignupPage() {
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white/70 transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
                             aria-label={showPassword ? "Hide password" : "Show password"}
                           >
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -617,7 +628,7 @@ export default function SignupPage() {
                       </FormField>
 
                       <div>
-                        <label className="text-sm text-white/60 lg:text-text-secondary mb-1.5 block">I want to</label>
+                        <label className="auth-label">I want to</label>
                         <div className="grid grid-cols-2 gap-2">
                           {[
                             { value: "FOLLOWER", label: "Copy Trades", desc: "Follow top traders" },
@@ -627,13 +638,13 @@ export default function SignupPage() {
                               key={option.value}
                               type="button"
                               onClick={() => setForm({ ...form, role: option.value })}
-                              className={`p-3 rounded-xl border text-left transition-all ${
+                              className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                                 form.role === option.value
-                                  ? "border-brand bg-brand/10 shadow-glow lg:bg-brand/5"
-                                  : "border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] lg:border-border lg:bg-surface-2 lg:hover:bg-surface-3"
+                                  ? "border-brand bg-brand/[0.06] shadow-[0_0_16px_rgba(41,98,255,0.1)] lg:bg-brand/5"
+                                  : "border-white/[0.12] bg-white/[0.05] hover:bg-white/[0.08] hover:border-white/[0.16] lg:border-border lg:bg-surface-0 lg:hover:bg-surface-2 lg:hover:border-border-light"
                               }`}
                             >
-                              <p className={`text-sm font-medium ${form.role === option.value ? "text-brand" : "text-white/70 lg:text-text-primary"}`}>
+                              <p className={`text-sm font-medium ${form.role === option.value ? "text-brand" : "text-white/80 lg:text-text-primary"}`}>
                                 {option.label}
                               </p>
                               <p className="text-2xs text-white/50 lg:text-text-tertiary mt-0.5">{option.desc}</p>
@@ -646,7 +657,7 @@ export default function SignupPage() {
                         type="submit"
                         disabled={isLoading}
                         whileTap={{ scale: 0.97 }}
-                        className="btn-primary w-full gap-2 py-3 rounded-xl text-[15px]"
+                        className="auth-btn"
                       >
                         {isLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -659,7 +670,7 @@ export default function SignupPage() {
                       </motion.button>
                     </form>
 
-                    <p className="text-sm text-white/50 lg:text-text-tertiary text-center mt-5">
+                    <p className="text-sm text-white/60 lg:text-text-tertiary text-center mt-5">
                       Already have an account?{" "}
                       <Link href="/login" className="text-brand hover:text-brand-light transition-colors font-medium">
                         Sign in
@@ -668,11 +679,10 @@ export default function SignupPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
           </div>
         </motion.div>
 
-        <div className="lg:hidden h-4" />
+        <div className="lg:hidden h-8" />
       </div>
     </div>
   );

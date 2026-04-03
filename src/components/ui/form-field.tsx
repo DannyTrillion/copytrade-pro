@@ -13,13 +13,14 @@ interface FormFieldProps {
   children: React.ReactNode;
   className?: string;
   errorId?: string;
+  labelClassName?: string;
 }
 
-export function FormField({ label, error, touched, valid, hint, children, className, errorId }: FormFieldProps) {
+export function FormField({ label, error, touched, valid, hint, children, className, errorId, labelClassName }: FormFieldProps) {
   return (
     <div className={cn("space-y-1.5", className)}>
       {label && (
-        <label className="text-sm text-text-secondary block">
+        <label className={cn("text-sm text-text-secondary block", labelClassName)}>
           {label}
           {touched && !error && valid && (
             <CheckCircle2 className="w-3.5 h-3.5 text-success inline ml-1.5 -mt-0.5" />

@@ -1,9 +1,36 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
+import { motion, useInView, animate } from "framer-motion";
 import { Globe, Users, Clock, TrendingUp } from "lucide-react";
 import dynamic from "next/dynamic";
+
+function AnimatedStat({ target, prefix = "", suffix = "", duration = 2, delay = 0 }: {
+  target: number; prefix?: string; suffix?: string; duration?: number; delay?: number;
+}) {
+  const [value, setValue] = useState(0);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!inView) return;
+    const timeout = setTimeout(() => {
+      const controls = animate(0, target, {
+        duration,
+        ease: [0.22, 1, 0.36, 1],
+        onUpdate: (v) => setValue(Math.round(v)),
+      });
+      return () => controls.stop();
+    }, delay * 1000);
+    return () => clearTimeout(timeout);
+  }, [inView, target, duration, delay]);
+
+  return (
+    <span ref={ref}>
+      {prefix}{value.toLocaleString()}{suffix}
+    </span>
+  );
+}
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -22,11 +49,20 @@ const Globe3D = dynamic(() => import("./globe-3d").then((m) => m.Globe3D), {
 /* ------------------------------------------------------------------ */
 /*  Stat cards                                                         */
 /* ------------------------------------------------------------------ */
-const STATS = [
-  { icon: Globe, value: "50+", label: "Countries", color: "#2962FF", pos: "top-[10%] left-0 lg:left-[-2%]" },
-  { icon: Users, value: "100K+", label: "Traders", color: "#26A69A", pos: "top-[14%] right-0 lg:right-[-2%]" },
-  { icon: Clock, value: "24/7", label: "Markets", color: "#AB47BC", pos: "bottom-[14%] left-0 lg:left-[2%]" },
-  { icon: TrendingUp, value: "$2M+", label: "Volume", color: "#2962FF", pos: "bottom-[10%] right-0 lg:right-[2%]" },
+const STATS: Array<{
+  icon: typeof Globe;
+  target: number;
+  prefix: string;
+  suffix: string;
+  staticValue?: string;
+  label: string;
+  color: string;
+  pos: string;
+}> = [
+  { icon: Globe, target: 50, prefix: "", suffix: "+", label: "Countries", color: "#2962FF", pos: "top-[10%] left-0 lg:left-[-2%]" },
+  { icon: Users, target: 100, prefix: "", suffix: "K+", label: "Traders", color: "#26A69A", pos: "top-[14%] right-0 lg:right-[-2%]" },
+  { icon: Clock, target: 0, prefix: "", suffix: "", staticValue: "24/7", label: "Markets", color: "#AB47BC", pos: "bottom-[14%] left-0 lg:left-[2%]" },
+  { icon: TrendingUp, target: 2, prefix: "$", suffix: "M+", label: "Volume", color: "#2962FF", pos: "bottom-[10%] right-0 lg:right-[2%]" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -54,7 +90,7 @@ export function GlobalReachSection() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, ease }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-[13px] font-semibold text-[#2962FF] uppercase tracking-[0.08em] mb-5">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-xs font-semibold text-brand uppercase tracking-widest mb-5">
               <Globe className="w-3.5 h-3.5" />
               Global Reach
             </span>
@@ -67,13 +103,13 @@ export function GlobalReachSection() {
             transition={{ delay: 0.1, duration: 0.6, ease }}
           >
             Global markets in{" "}
-            <span className="bg-gradient-to-r from-[#2962FF] via-[#6B8AFF] to-[#AB47BC] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-brand via-brand-light to-accent bg-clip-text text-transparent">
               your hand
             </span>
           </motion.h2>
 
           <motion.p
-            className="max-w-[540px] mx-auto text-[16px] lg:text-[17px] text-white/45 leading-relaxed"
+            className="max-w-[540px] mx-auto text-base lg:text-base text-white/45 leading-relaxed"
             initial={{ opacity: 0, y: 16 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2, duration: 0.6, ease }}
@@ -116,8 +152,13 @@ export function GlobalReachSection() {
                       <Icon className="w-4 h-4" style={{ color: stat.color }} strokeWidth={2} />
                     </div>
                     <div>
-                      <p className="text-[18px] font-bold text-white leading-tight">{stat.value}</p>
-                      <p className="text-[12px] font-medium text-white/50">{stat.label}</p>
+                      <p className="text-lg font-bold text-white leading-tight">
+                        {"staticValue" in stat && stat.staticValue
+                          ? stat.staticValue
+                          : <AnimatedStat target={stat.target} prefix={stat.prefix} suffix={stat.suffix} duration={2} delay={1 + i * 0.15} />
+                        }
+                      </p>
+                      <p className="text-xs font-medium text-white/50">{stat.label}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -128,13 +169,18 @@ export function GlobalReachSection() {
 
         {/* Mobile stats row */}
         <div className="grid grid-cols-4 gap-3 mt-8 md:hidden">
-          {STATS.map((stat) => {
+          {STATS.map((stat, i) => {
             const Icon = stat.icon;
             return (
               <div key={stat.label} className="text-center rounded-xl border border-white/[0.06] py-3 px-2" style={{ background: "rgba(255,255,255,0.02)" }}>
                 <Icon className="w-4 h-4 mx-auto mb-1" style={{ color: stat.color }} />
-                <p className="text-[15px] font-bold text-white">{stat.value}</p>
-                <p className="text-[10px] text-white/40">{stat.label}</p>
+                <p className="text-sm font-bold text-white">
+                  {"staticValue" in stat && stat.staticValue
+                    ? stat.staticValue
+                    : <AnimatedStat target={stat.target} prefix={stat.prefix} suffix={stat.suffix} duration={1.8} delay={0.3 + i * 0.1} />
+                  }
+                </p>
+                <p className="text-2xs text-white/50">{stat.label}</p>
               </div>
             );
           })}
@@ -161,8 +207,8 @@ export function GlobalReachSection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 1.1 + i * 0.08, duration: 0.5, ease }}
             >
-              <h4 className="text-[15px] font-semibold text-white/90 mb-1.5">{item.title}</h4>
-              <p className="text-[13px] text-white/40 leading-relaxed">{item.desc}</p>
+              <h4 className="text-sm font-semibold text-white/90 mb-1.5">{item.title}</h4>
+              <p className="text-xs text-white/50 leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
         </motion.div>

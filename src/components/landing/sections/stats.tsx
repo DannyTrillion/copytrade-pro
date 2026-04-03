@@ -45,7 +45,7 @@ export function StatsSection() {
   ];
 
   return (
-    <section className="relative py-24 lg:py-32 bg-[#F8F9FD]" ref={ref}>
+    <section className="relative py-24 lg:py-32 bg-surface-0" ref={ref}>
       <div className="max-w-[1200px] mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -53,8 +53,8 @@ export function StatsSection() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="text-center mb-16"
         >
-          <span className="inline-block text-[13px] font-semibold text-warning uppercase tracking-[0.08em] mb-4">Platform Performance</span>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-[#131722] leading-tight">
+          <span className="inline-block text-xs font-semibold text-warning uppercase tracking-[0.08em] mb-4">Platform Performance</span>
+          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight">
             Numbers That{" "}
             <span className="bg-gradient-to-r from-warning to-danger bg-clip-text text-transparent">
               Speak
@@ -70,8 +70,8 @@ export function StatsSection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="bg-white border border-[#E0E3EB] rounded-2xl p-8 text-center hover:border-[#C8CBD5] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] h-full">
-                <p className="text-[clamp(2rem,4vw,3rem)] font-bold text-[#131722] mb-2 leading-none">
+              <div className="bg-white border border-border rounded-2xl p-8 text-center hover:border-border-light transition-all duration-300 hover:shadow-card-hover h-full">
+                <p className="text-[clamp(2rem,4vw,3rem)] font-bold text-text-primary mb-2 leading-none">
                   <AnimatedCounter
                     target={stat.value}
                     prefix={stat.prefix}
@@ -79,8 +79,8 @@ export function StatsSection() {
                     delay={i * 0.12}
                   />
                 </p>
-                <p className="text-[14px] text-[#787B86] font-medium mb-3">{stat.label}</p>
-                {/* Sparkline */}
+                <p className="text-sm text-text-secondary font-medium mb-3">{stat.label}</p>
+                {/* Sparkline — draws itself on scroll */}
                 <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none" className="mt-1">
                   <defs>
                     <linearGradient id={`spark-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
@@ -88,7 +88,7 @@ export function StatsSection() {
                       <stop offset="100%" stopColor={STAT_COLORS[i]} stopOpacity="0" />
                     </linearGradient>
                   </defs>
-                  <path
+                  <motion.path
                     d={[
                       "M0,24 L10,22 L20,18 L30,20 L40,15 L50,17 L60,12 L70,14 L80,8 L90,10 L100,6 L110,7 L120,4 L120,32 L0,32 Z",
                       "M0,20 L10,18 L20,22 L30,16 L40,14 L50,18 L60,10 L70,12 L80,8 L90,11 L100,5 L110,6 L120,3 L120,32 L0,32 Z",
@@ -96,8 +96,11 @@ export function StatsSection() {
                       "M0,18 L10,20 L20,16 L30,14 L40,18 L50,12 L60,10 L70,14 L80,8 L90,6 L100,9 L110,5 L120,3 L120,32 L0,32 Z",
                     ][i]}
                     fill={`url(#spark-grad-${i})`}
+                    initial={{ opacity: 0 }}
+                    animate={inView ? { opacity: 1 } : {}}
+                    transition={{ delay: 0.8 + i * 0.15, duration: 0.6 }}
                   />
-                  <polyline
+                  <motion.polyline
                     fill="none"
                     stroke={STAT_COLORS[i]}
                     strokeWidth="2"
@@ -109,6 +112,9 @@ export function StatsSection() {
                       "0,26 10,24 20,20 30,22 40,18 50,15 60,17 70,12 80,14 90,10 100,8 110,9 120,5",
                       "0,18 10,20 20,16 30,14 40,18 50,12 60,10 70,14 80,8 90,6 100,9 110,5 120,3",
                     ][i]}
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={inView ? { pathLength: 1, opacity: 1 } : {}}
+                    transition={{ delay: 0.5 + i * 0.15, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
                   />
                 </svg>
               </div>

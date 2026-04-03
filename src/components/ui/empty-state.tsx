@@ -101,12 +101,16 @@ export function EmptyState({ variant, title, description, actionLabel, actionHre
       transition={{ duration: 0.4, ease: EASE }}
       className="flex flex-col items-center justify-center py-10 px-4 gap-4"
     >
-      {/* Animated icon with rings */}
+      {/* Animated icon with rings — gentle float */}
       <div className="relative">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.5, ease: EASE }}
+          animate={{ scale: 1, opacity: 1, y: [0, -4, 0] }}
+          transition={{
+            scale: { delay: 0.1, duration: 0.5, ease: EASE },
+            opacity: { delay: 0.1, duration: 0.5 },
+            y: { delay: 0.6, duration: 3, repeat: Infinity, ease: "easeInOut" },
+          }}
           className={`p-4 rounded-2xl border ${config.bgColor}`}
         >
           <Icon className={`w-7 h-7 ${config.color}`} />
