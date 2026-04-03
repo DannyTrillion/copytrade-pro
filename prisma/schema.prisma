@@ -1,0 +1,550 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  role          String    @default("FOLLOWER") // ADMIN, MASTER_TRADER, FOLLOWER
+  suspended     Boolean   @default(false)
+  emailVerified Boolean   @default(false)
+  emailVerificationToken  String?  @unique
+  emailVerificationExpiry DateTime?
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  wallet        Wallet?
+  balance       Balance?
+  trader        Trader?
+  following     Follower[]
+  trades        Trade[]
+  transactions  BalanceTransaction[]
+  copyRequests  CopyRequest[]
+  copyResults         CopyResult[]
+  notifications       Notification[]
+  depositRequests     DepositRequest[]
+  withdrawalRequests  WithdrawalRequest[]
+  auditLogs           AuditLog[]     @relation("AuditLogs")
+  supportThreads      SupportThread[]
+  reviewsGiven        TraderReview[] @relation("ReviewAuthor")
+  referralCode        String?        @unique
+  referredBy          String?        // userId of referrer
+  referralRewards     ReferralReward[] @relation("ReferralEarner")
+  sentMessages        DirectMessage[] @relation("MessageSender")
+  receivedMessages    DirectMessage[] @relation("MessageReceiver")
+  passwordResets      PasswordReset[]
+  nextOfKin           NextOfKin?
+  paymentMethods      PaymentMethod[]
+  cardPayments        CardPayment[]
+  onboardingComplete  Boolean        @default(false)
+  theme               String         @default("dark") // dark, light
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean        @default(false)
+  twoFactorBackupCodes String?       // JSON array of hashed backup codes
+}
+
+model Wallet {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  address         String    // checksummed public address (0x...)
+  addressHash     String?   // SHA-256 hash of the address for lookups
+  chainId         Int       @default(1) // connected chain ID
+  connector       String?   // wallet provider name (MetaMask, WalletConnect, etc.)
+  verifiedAt      DateTime? // when ownership was verified via signature
+  isConnected     Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([addressHash])
+}
+
+// ─── Internal Balance System ───
+model Balance {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  totalBalance    Float     @default(0)   // total funds deposited
+  availableBalance Float   @default(0)   // available for allocation
+  allocatedBalance Float   @default(0)   // allocated to copy trading
+  totalProfit     Float     @default(0)   // cumulative profit/loss
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BalanceTransaction {
+  id            String    @id @default(uuid())
+  userId        String
+  type          String    // DEPOSIT, WITHDRAWAL, COPY_PROFIT, COPY_LOSS, ALLOCATION, DEALLOCATION
+  amount        Float
+  balanceBefore Float
+  balanceAfter  Float
+  description   String?
+  txHash        String?   // blockchain tx hash for deposits/withdrawals
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ─── Trader System ───
+model Trader {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  displayName   String
+  bio           String?
+  description   String?
+  performancePct Float    @default(0)   // advertised performance %
+  totalPnl      Float     @default(0)
+  winRate       Float     @default(0)
+  totalTrades   Int       @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  followers     Follower[]
+  signals       Signal[]
+  copyRequests  CopyRequest[]
+  traderTrades  TraderTrade[]
+  reviews       TraderReview[]
+}
+
+// ─── Master Trader Uploaded Trades ───
+model TraderTrade {
+  id            String    @id @default(uuid())
+  traderId      String
+  tradeName     String    // e.g. "BTC Long"
+  market        String    // e.g. "Crypto", "Forex", "Polymarket"
+  tradeType     String?   // BUY, SELL (optional)
+  resultPercent Float     // +10 = +10%, -5 = -5%
+  profitLoss    Float     // absolute $ P&L for the trader
+  tradeAmount   Float?    // optional trade size
+  targetMode    String    @default("ALL") // ALL or SELECTED
+  targetUserIds String?   // comma-separated user IDs when targetMode=SELECTED
+  notes         String?
+  screenshotUrl String?
+  tradeDate     DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  copyResults   CopyResult[]
+
+  @@index([traderId])
+  @@index([tradeDate])
+}
+
+// ─── Copy Results — tracks how each follower was affected by a trader trade ───
+model CopyResult {
+  id              String    @id @default(uuid())
+  userId          String
+  traderTradeId   String
+  balanceBefore   Float
+  balanceAfter    Float
+  profitLoss      Float     // the actual $ change for this follower
+  resultPercent   Float     // the % applied
+  createdAt       DateTime  @default(now())
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  traderTrade     TraderTrade @relation(fields: [traderTradeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, traderTradeId])
+  @@index([userId])
+  @@index([traderTradeId])
+}
+
+// ─── Follower Link ───
+model Follower {
+  id            String    @id @default(uuid())
+  userId        String
+  traderId      String
+  allocationPercent Float @default(100) // % of allocated balance used for this trader
+  copyEnabled   Boolean   @default(true)
+  approved      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, traderId])
+  @@index([traderId])
+}
+
+// ─── Copy Request Approval ───
+model CopyRequest {
+  id            String    @id @default(uuid())
+  userId        String
+  traderId      String
+  traderName    String
+  riskPercent   Float     @default(2)
+  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  message       String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, traderId])
+  @@index([traderId])
+  @@index([status])
+}
+
+// ─── Legacy: Signal + Trade (kept for webhook-based flow) ───
+model Signal {
+  id            String    @id @default(uuid())
+  traderId      String
+  action        String
+  symbol        String
+  price         Float
+  riskPercent   Float
+  status        String    @default("PENDING")
+  metadata      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  trades        Trade[]
+
+  @@index([traderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Trade {
+  id            String    @id @default(uuid())
+  userId        String
+  signalId      String
+  action        String
+  symbol        String
+  amount        Float
+  price         Float
+  status        String    @default("PENDING")
+  txHash        String?
+  error         String?
+  pnl           Float?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  signal        Signal    @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  commission    Commission?
+
+  @@index([userId])
+  @@index([signalId])
+  @@index([status])
+}
+
+model Commission {
+  id            String    @id @default(uuid())
+  tradeId       String    @unique
+  amount        Float
+  rate          Float
+  status        String    @default("PENDING")
+  createdAt     DateTime  @default(now())
+
+  trade         Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+// ─── Deposit Requests ───
+model DepositRequest {
+  id            String    @id @default(uuid())
+  userId        String
+  amount        Float
+  method        String    // CRYPTO, CARD, CHEQUE
+  coin          String?   // BTC, ETH, USDT, etc. (for crypto)
+  network       String?   // e.g. ERC20, TRC20, BEP20
+  txHash        String?   // user-submitted tx hash
+  status        String    @default("PENDING") // PENDING, CONFIRMED, REJECTED
+  userWallet    String?   // the generated tracking wallet address shown to user
+  adminWallet   String?   // the admin wallet funds should be sent to
+  proofUrl      String?   // proof of payment file path
+  cardRef       String?   // card payment reference number
+  bankName      String?   // bank name for cheque deposits
+  chequeNumber  String?   // cheque number
+  note          String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── Withdrawal Requests ───
+model WithdrawalRequest {
+  id            String    @id @default(uuid())
+  userId        String
+  amount        Float
+  walletAddress String    // destination wallet address
+  network       String    // e.g. ERC20, TRC20, BEP20
+  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  txHash        String?   // payout transaction hash (set by admin after sending)
+  note          String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── Admin Audit Log ───
+model AuditLog {
+  id            String    @id @default(uuid())
+  adminId       String
+  action        String    // e.g. REVIEW_DEPOSIT, EDIT_BALANCE, UPDATE_ROLE, etc.
+  targetType    String?   // e.g. USER, DEPOSIT, WITHDRAWAL, TRADER, CONFIG
+  targetId      String?   // ID of the affected record
+  details       String?   // JSON string with before/after or extra context
+  ipAddress     String?
+  createdAt     DateTime  @default(now())
+
+  admin         User      @relation("AuditLogs", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ─── Admin Platform Config ───
+model AdminConfig {
+  id            String    @id @default(uuid())
+  key           String    @unique
+  value         String
+  updatedAt     DateTime  @updatedAt
+}
+
+// ─── Notifications ───
+model Notification {
+  id            String    @id @default(uuid())
+  userId        String
+  type          String    // COPY_REQUEST, COPY_APPROVED, COPY_REJECTED, TRADE_RESULT, DEPOSIT, WITHDRAWAL, SYSTEM
+  title         String
+  message       String
+  read          Boolean   @default(false)
+  actionUrl     String?   // optional link to navigate on click
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+// ─── Support Chat ───
+model SupportThread {
+  id            String    @id @default(uuid())
+  userId        String
+  subject       String
+  status        String    @default("OPEN") // OPEN, RESOLVED
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      SupportMessage[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([lastMessageAt])
+}
+
+model SupportMessage {
+  id            String    @id @default(uuid())
+  threadId      String
+  senderId      String
+  senderRole    String    // USER, ADMIN
+  message       String
+  read          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  thread        SupportThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([createdAt])
+}
+
+// ─── Trader Reviews ───
+model TraderReview {
+  id            String    @id @default(uuid())
+  userId        String
+  traderId      String
+  rating        Int       // 1-5 stars
+  comment       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation("ReviewAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, traderId])
+  @@index([traderId])
+  @@index([rating])
+}
+
+// ─── Referral Rewards ───
+model ReferralReward {
+  id            String    @id @default(uuid())
+  earnerId      String    // user who referred
+  referredId    String    // user who signed up
+  amount        Float     @default(0) // reward amount
+  status        String    @default("PENDING") // PENDING, CREDITED
+  creditedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  earner        User      @relation("ReferralEarner", fields: [earnerId], references: [id], onDelete: Cascade)
+
+  @@index([earnerId])
+  @@index([status])
+}
+
+// ─── Next of Kin ───
+model NextOfKin {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  fullName        String
+  relationship    String    // e.g. Spouse, Sibling, Parent, Child
+  email           String
+  phone           String?
+  beneficiaryId   String?   // another user on platform to receive funds
+  documentUrl     String?   // uploaded verification document
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  adminNote       String?
+  reviewedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+// ─── Saved Payment Methods ───
+model PaymentMethod {
+  id              String    @id @default(uuid())
+  userId          String
+  type            String    // WALLET, CARD
+  label           String    // e.g. "Main ETH Wallet", "Visa ending 4242"
+  // Wallet fields
+  walletAddress   String?
+  network         String?   // ERC20, TRC20, BEP20, SOL, etc.
+  walletType      String?   // DEPOSIT, WITHDRAWAL, BOTH
+  // Card fields (tokenized — no raw card data)
+  cardLast4       String?
+  cardBrand       String?   // Visa, Mastercard, etc.
+  cardExpiry      String?   // MM/YY
+  stripePaymentMethodId String? // Stripe token reference
+  isDefault       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+}
+
+// ─── Card Payments ───
+model CardPayment {
+  id              String    @id @default(uuid())
+  userId          String
+  amount          Float
+  currency        String    @default("USD")
+  cardLast4       String?
+  cardBrand       String?
+  stripePaymentIntentId String?
+  status          String    @default("PENDING") // PENDING, ADMIN_REVIEW, CONFIRMED, REJECTED
+  adminNote       String?
+  reviewedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── Password Reset Tokens ───
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ─── Rate Limiting ───
+model RateLimit {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  attempts    Int      @default(1)
+  windowStart DateTime @default(now())
+
+  @@index([key])
+  @@index([windowStart])
+}
+
+// ─── Email OTP ───
+model EmailOtp {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+// ─── Direct Messaging ───
+model DirectMessage {
+  id            String    @id @default(uuid())
+  senderId      String
+  receiverId    String
+  message       String
+  read          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  sender        User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver      User      @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+}
