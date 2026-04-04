@@ -40,7 +40,7 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-24 lg:py-32 bg-surface-0" ref={ref}>
+    <section id="how-it-works" className="relative py-24 lg:py-32" style={{ background: "#080A12" }} ref={ref}>
       <div className="max-w-[1200px] mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -49,13 +49,13 @@ export function HowItWorksSection() {
           className="text-center mb-16 lg:mb-20"
         >
           <span className="inline-block text-xs font-semibold text-success uppercase tracking-widest mb-4">How It Works</span>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight mb-5">
+          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-white leading-tight mb-5">
             Four Steps to{" "}
             <span className="bg-gradient-to-r from-success to-brand bg-clip-text text-transparent">
               Automated Trading
             </span>
           </h2>
-          <p className="text-base text-text-secondary max-w-[560px] mx-auto leading-relaxed">
+          <p className="text-base text-white/50 max-w-[560px] mx-auto leading-relaxed">
             From wallet connection to automatic trade execution in under two minutes.
           </p>
         </motion.div>
@@ -69,9 +69,9 @@ export function HowItWorksSection() {
               transition={{ delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="relative group"
             >
-              <div className="bg-white border border-border rounded-2xl p-8 hover:border-border-light transition-all duration-300 h-full hover:shadow-card-hover">
+              <div className="border border-white/[0.06] rounded-2xl p-8 hover:border-white/[0.12] transition-all duration-300 h-full hover:shadow-[0_0_30px_rgba(41,98,255,0.08)]" style={{ background: "rgba(255,255,255,0.03)" }}>
                 {/* Step number */}
-                <div className="absolute -top-3 -left-1 text-6xl font-black text-text-primary/[0.03] leading-none select-none pointer-events-none">
+                <div className="absolute -top-3 -left-1 text-6xl font-black text-white/[0.03] leading-none select-none pointer-events-none">
                   {i + 1}
                 </div>
 
@@ -81,8 +81,8 @@ export function HowItWorksSection() {
                   <step.icon className="w-5 h-5" style={{ color: step.color }} />
                 </div>
 
-                <h3 className="text-base font-semibold text-text-primary mb-2">{step.title}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">{step.desc}</p>
+                <h3 className="text-base font-semibold text-white mb-2">{step.title}</h3>
+                <p className="text-sm text-white/50 leading-relaxed">{step.desc}</p>
 
                 {/* Connector — draws itself on scroll */}
                 {i < 3 && (
@@ -98,7 +98,7 @@ export function HowItWorksSection() {
                         y1="1"
                         x2="24"
                         y2="1"
-                        stroke="#C8CBD5"
+                        stroke="#3A3B45"
                         strokeWidth="2"
                         strokeLinecap="round"
                         initial={{ pathLength: 0 }}
@@ -128,28 +128,29 @@ export function HowItWorksSection() {
           initial={{ opacity: 0, y: 28 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-14 bg-white border border-border rounded-2xl overflow-hidden shadow-card"
+          className="mt-14 border border-white/[0.06] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+          style={{ background: "rgba(19,23,34,0.8)" }}
         >
           {/* Dashboard Header */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-surface-2">
+          <div className="flex items-center justify-between px-6 py-3 border-b border-white/[0.06]" style={{ background: "rgba(255,255,255,0.02)" }}>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-danger" />
               <div className="w-3 h-3 rounded-full bg-warning" />
               <div className="w-3 h-3 rounded-full bg-success" />
             </div>
-            <span className="text-2xs font-semibold text-text-secondary uppercase tracking-widest">Dashboard Preview</span>
+            <span className="text-2xs font-semibold text-white/50 uppercase tracking-widest">Dashboard Preview</span>
             <div className="w-2 h-2 rounded-full bg-success animate-pulse live-pulse text-success" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-border">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-white/[0.06]">
             {/* Mini Chart */}
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <span className="text-xs font-semibold text-text-primary">BTC/USD</span>
+                  <span className="text-xs font-semibold text-white">BTC/USD</span>
                   <span className="ml-2 text-xs font-semibold text-success">+2.34%</span>
                 </div>
-                <span className="text-lg font-bold text-text-primary">$67,432</span>
+                <span className="text-lg font-bold text-white">$67,432</span>
               </div>
               <svg width="100%" height="80" viewBox="0 0 280 80" preserveAspectRatio="none" className="rounded-lg">
                 <defs>
@@ -166,21 +167,21 @@ export function HowItWorksSection() {
 
             {/* Active Position */}
             <div className="p-5">
-              <span className="text-2xs font-semibold text-text-secondary uppercase tracking-[0.1em]">Active Position</span>
-              <div className="mt-3 bg-surface-0 border border-border rounded-xl p-4">
+              <span className="text-2xs font-semibold text-white/50 uppercase tracking-[0.1em]">Active Position</span>
+              <div className="mt-3 border border-white/[0.06] rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)" }}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-text-primary">ETH/USD Long</span>
+                  <span className="text-xs font-semibold text-white">ETH/USD Long</span>
                   <span className="text-2xs font-semibold text-white bg-success px-2 py-0.5 rounded-full">OPEN</span>
                 </div>
-                <div className="flex items-center justify-between text-xs text-text-secondary mb-1">
+                <div className="flex items-center justify-between text-xs text-white/50 mb-1">
                   <span>Entry: $3,480.20</span>
                   <span className="text-success font-semibold">+$124.50</span>
                 </div>
-                <div className="flex items-center justify-between text-xs text-text-secondary">
+                <div className="flex items-center justify-between text-xs text-white/50">
                   <span>Size: 0.5 ETH</span>
                   <span className="text-success font-semibold">+3.58%</span>
                 </div>
-                <div className="mt-2 w-full h-1.5 bg-border rounded-full overflow-hidden">
+                <div className="mt-2 w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                   <div className="h-full bg-success rounded-full" style={{ width: "72%" }} />
                 </div>
               </div>
@@ -188,21 +189,21 @@ export function HowItWorksSection() {
 
             {/* Recent Trades */}
             <div className="p-5">
-              <span className="text-2xs font-semibold text-text-secondary uppercase tracking-[0.1em]">Recent Trades</span>
+              <span className="text-2xs font-semibold text-white/50 uppercase tracking-[0.1em]">Recent Trades</span>
               <div className="mt-3 space-y-2">
                 {[
                   { pair: "BTC/USD", side: "BUY", pnl: "+$82.40", time: "2m ago", up: true },
                   { pair: "SOL/USD", side: "SELL", pnl: "-$12.30", time: "8m ago", up: false },
                   { pair: "ETH/USD", side: "BUY", pnl: "+$45.80", time: "15m ago", up: true },
                 ].map((trade, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-surface-0 border border-border/50">
+                  <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
                     <div className="flex items-center gap-2">
                       <span className={`text-2xs font-bold px-1.5 py-0.5 rounded ${trade.up ? "text-success bg-success/10" : "text-danger bg-danger/10"}`}>{trade.side}</span>
-                      <span className="text-xs font-medium text-text-primary">{trade.pair}</span>
+                      <span className="text-xs font-medium text-white">{trade.pair}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-xs font-semibold ${trade.up ? "text-success" : "text-danger"}`}>{trade.pnl}</span>
-                      <span className="text-2xs text-text-secondary">{trade.time}</span>
+                      <span className="text-2xs text-white/40">{trade.time}</span>
                     </div>
                   </div>
                 ))}

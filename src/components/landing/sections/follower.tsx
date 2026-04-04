@@ -10,7 +10,7 @@ export function FollowerSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="relative py-24 lg:py-32 bg-white" ref={ref}>
+    <section className="relative py-24 lg:py-32" style={{ background: "#0A0D14" }} ref={ref}>
       <div className="max-w-[1200px] mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left UI mockup */}
@@ -19,10 +19,10 @@ export function FollowerSection() {
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-card-lg">
+            <div className="border border-white/[0.06] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]" style={{ background: "rgba(19,23,34,0.8)" }}>
               {/* Header */}
-              <div className="px-6 py-4 border-b border-border">
-                <span className="text-xs font-semibold text-text-secondary">Copy Trading Panel</span>
+              <div className="px-6 py-4 border-b border-white/[0.06]">
+                <span className="text-xs font-semibold text-white/50">Copy Trading Panel</span>
               </div>
 
               {/* Trader cards */}
@@ -37,7 +37,7 @@ export function FollowerSection() {
                     initial={{ opacity: 0, x: -12 }}
                     animate={inView ? { opacity: 1, x: 0 } : {}}
                     transition={{ delay: 0.25 + i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-surface-2 border border-border rounded-xl p-5 hover:border-border-light transition-all duration-200"
+                    className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-5 hover:border-white/[0.12] transition-all duration-200"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -45,8 +45,8 @@ export function FollowerSection() {
                           {trader.name[0]}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-text-primary">{trader.name}</p>
-                          <p className="text-2xs text-text-tertiary">{trader.followers} followers</p>
+                          <p className="text-sm font-semibold text-white">{trader.name}</p>
+                          <p className="text-2xs text-white/30">{trader.followers} followers</p>
                         </div>
                       </div>
                       <button className="px-4 py-2 text-xs font-semibold bg-brand text-white rounded-full hover:bg-brand-dark transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30">
@@ -56,7 +56,7 @@ export function FollowerSection() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <span className="text-xs text-success font-semibold">{trader.pnl} PnL</span>
-                        <span className="text-xs text-text-secondary">{trader.winRate} win</span>
+                        <span className="text-xs text-white/50">{trader.winRate} win</span>
                       </div>
                       <svg width="60" height="20" viewBox="0 0 60 20" className="text-success">
                         <polyline
@@ -75,9 +75,9 @@ export function FollowerSection() {
 
               {/* Risk controls */}
               <div className="px-5 pb-5">
-                <div className="bg-surface-2 border border-border rounded-xl p-5">
+                <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-semibold text-text-secondary">Risk Settings</span>
+                    <span className="text-xs font-semibold text-white/50">Risk Settings</span>
                     <span className="text-xs font-medium text-success bg-success/10 px-2.5 py-0.5 rounded-md">Protected</span>
                   </div>
                   <div className="space-y-3">
@@ -87,8 +87,8 @@ export function FollowerSection() {
                       { label: "Max Daily Loss", value: "$5,000" },
                     ].map((setting, i) => (
                       <div key={i} className="flex items-center justify-between">
-                        <span className="text-xs text-text-secondary">{setting.label}</span>
-                        <span className="text-xs font-mono font-semibold text-text-primary">{setting.value}</span>
+                        <span className="text-xs text-white/50">{setting.label}</span>
+                        <span className="text-xs font-mono font-semibold text-white">{setting.value}</span>
                       </div>
                     ))}
                   </div>
@@ -104,13 +104,13 @@ export function FollowerSection() {
             transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
             <span className="inline-block text-xs font-semibold text-brand uppercase tracking-widest mb-4">For Followers</span>
-            <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight mb-5">
+            <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-white leading-tight mb-5">
               Trade Like a Pro.{" "}
               <span className="bg-gradient-to-r from-brand to-accent bg-clip-text text-transparent">
                 Without the Work.
               </span>
             </h2>
-            <p className="text-base text-text-secondary mb-10 leading-relaxed">
+            <p className="text-base text-white/50 mb-10 leading-relaxed">
               No chart reading. No signal watching. Just connect, configure your risk, and let the platform handle everything.
             </p>
 
@@ -132,7 +132,7 @@ export function FollowerSection() {
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${item.bgColor}`}>
                     <item.icon className="w-4.5 h-4.5" style={{ color: item.color }} />
                   </div>
-                  <span className="text-sm text-text-secondary">{item.text}</span>
+                  <span className="text-sm text-white/60">{item.text}</span>
                 </motion.div>
               ))}
             </div>

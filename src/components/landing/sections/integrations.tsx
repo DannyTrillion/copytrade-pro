@@ -36,7 +36,7 @@ export function IntegrationSection() {
   ];
 
   return (
-    <section className="relative py-24 lg:py-32 bg-white" ref={ref}>
+    <section className="relative py-24 lg:py-32" style={{ background: "#0A0D14" }} ref={ref}>
       <div className="max-w-[1200px] mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -45,13 +45,13 @@ export function IntegrationSection() {
           className="text-center mb-16 lg:mb-20"
         >
           <span className="inline-block text-xs font-semibold text-brand uppercase tracking-widest mb-4">Integration Pipeline</span>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight mb-5">
+          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-white leading-tight mb-5">
             Three Platforms.{" "}
             <span className="bg-gradient-to-r from-brand to-success bg-clip-text text-transparent">
               One Flow.
             </span>
           </h2>
-          <p className="text-base text-text-secondary max-w-[560px] mx-auto leading-relaxed">
+          <p className="text-base text-white/50 max-w-[560px] mx-auto leading-relaxed">
             Seamless integration between TradingView signals, our copy engine, and Polymarket execution.
           </p>
         </motion.div>
@@ -69,20 +69,20 @@ export function IntegrationSection() {
               transition={{ delay: i * 0.12, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="relative z-10"
             >
-              <div className="bg-white border border-border rounded-2xl p-8 hover:border-border-light transition-all duration-300 group hover:shadow-card-hover">
+              <div className="border border-white/[0.06] rounded-2xl p-8 hover:border-white/[0.12] transition-all duration-300 group hover:shadow-[0_0_30px_rgba(41,98,255,0.08)]" style={{ background: "rgba(255,255,255,0.03)" }}>
                 <div
                   className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 ${step.bgColor}`}
                 >
                   <step.icon className="w-6 h-6" style={{ color: step.color }} />
                 </div>
 
-                <span className="text-2xs font-semibold uppercase tracking-widest text-text-secondary">{step.label}</span>
-                <h3 className="text-xl font-bold text-text-primary mt-1 mb-3">{step.platform}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">{step.desc}</p>
+                <span className="text-2xs font-semibold uppercase tracking-widest text-white/50">{step.label}</span>
+                <h3 className="text-xl font-bold text-white mt-1 mb-3">{step.platform}</h3>
+                <p className="text-sm text-white/50 leading-relaxed">{step.desc}</p>
 
                 {i < 2 && (
-                  <div className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-white border border-border items-center justify-center shadow-sm">
-                    <ArrowRight className="w-3.5 h-3.5 text-text-secondary" />
+                  <div className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full border border-white/[0.08] items-center justify-center shadow-sm" style={{ background: "#0A0D14" }}>
+                    <ArrowRight className="w-3.5 h-3.5 text-white/40" />
                   </div>
                 )}
               </div>
@@ -95,7 +95,8 @@ export function IntegrationSection() {
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-12 bg-surface-2 border border-border rounded-2xl p-8 lg:p-10"
+          className="mt-12 border border-white/[0.06] rounded-2xl p-8 lg:p-10"
+          style={{ background: "rgba(255,255,255,0.02)" }}
         >
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
@@ -107,8 +108,8 @@ export function IntegrationSection() {
               <div key={i} className="flex gap-4">
                 <span className="text-3xl font-black text-brand/10 leading-none flex-shrink-0">{item.step}</span>
                 <div>
-                  <h4 className="text-sm font-semibold text-text-primary mb-1.5">{item.title}</h4>
-                  <p className="text-xs text-text-secondary leading-relaxed">{item.desc}</p>
+                  <h4 className="text-sm font-semibold text-white mb-1.5">{item.title}</h4>
+                  <p className="text-xs text-white/50 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -120,11 +121,12 @@ export function IntegrationSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.6, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-12 overflow-hidden border border-border rounded-2xl bg-white"
+          className="mt-12 overflow-hidden border border-white/[0.06] rounded-2xl"
+          style={{ background: "rgba(255,255,255,0.03)" }}
         >
-          <div className="flex items-center border-b border-border px-5 py-2.5">
+          <div className="flex items-center border-b border-white/[0.06] px-5 py-2.5">
             <div className="w-2 h-2 rounded-full bg-success animate-pulse live-pulse text-success mr-2" />
-            <span className="text-2xs font-semibold text-text-secondary uppercase tracking-widest">Live Market Prices</span>
+            <span className="text-2xs font-semibold text-white/50 uppercase tracking-widest">Live Market Prices</span>
           </div>
           <div className="relative overflow-hidden">
             <motion.div
@@ -150,9 +152,9 @@ export function IntegrationSection() {
                 { symbol: "GOLD", price: "2,345.10", change: "+0.78%", up: true },
                 { symbol: "SPY", price: "512.40", change: "+0.45%", up: true },
               ].map((item, i) => (
-                <div key={i} className="inline-flex items-center gap-3 mr-8 px-4 py-1.5 rounded-lg bg-surface-2 border border-border/50 hover:bg-surface-3 transition-colors duration-200">
-                  <span className="text-xs font-semibold text-text-primary">{item.symbol}</span>
-                  <span className="text-xs text-text-primary font-medium">${item.price}</span>
+                <div key={i} className="inline-flex items-center gap-3 mr-8 px-4 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] transition-colors duration-200">
+                  <span className="text-xs font-semibold text-white">{item.symbol}</span>
+                  <span className="text-xs text-white/90 font-medium">${item.price}</span>
                   <span className={`text-xs font-semibold ${item.up ? "text-success" : "text-danger"}`}>
                     {item.change}
                   </span>

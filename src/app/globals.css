@@ -378,28 +378,24 @@
 
   /* ─── Auth Pages ─── */
   .auth-card {
-    @apply bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl p-6
-           lg:bg-surface-1 lg:border-border/50 lg:backdrop-blur-none
-           lg:shadow-[0_4px_24px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.03),0_0_0_1px_rgba(0,0,0,0.02)]
-           lg:p-10;
+    @apply bg-[#0a0a0f] border border-[#1a1a24] rounded-2xl p-6 lg:p-10;
   }
 
   .auth-input {
-    @apply input-field pl-10 bg-[#0a0a0a] border-[#222] text-white placeholder:text-white/40
+    @apply input-field pl-10 bg-[#0a0a0f] border-[#1e1e2a] text-white placeholder:text-white/30
            focus:border-brand/60 focus:ring-brand/20
-           lg:bg-surface-0 lg:border-border lg:text-text-primary lg:placeholder:text-text-tertiary
-           lg:hover:border-border-light lg:focus:border-brand/50;
+           hover:border-[#2a2a3a];
   }
 
   .auth-label {
-    @apply text-sm font-medium text-[#a1a1a1] lg:text-text-secondary mb-2 block;
+    @apply text-sm font-medium text-white/50 mb-2 block;
   }
 
   .auth-btn {
     @apply w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-semibold
            bg-gradient-to-b from-brand to-brand-dark text-white
-           shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_8px_rgba(41,98,255,0.2)]
-           hover:shadow-[0_2px_4px_rgba(0,0,0,0.1),0_4px_16px_rgba(41,98,255,0.3)]
+           shadow-[0_1px_2px_rgba(0,0,0,0.2),0_2px_8px_rgba(41,98,255,0.25)]
+           hover:shadow-[0_2px_4px_rgba(0,0,0,0.2),0_4px_16px_rgba(41,98,255,0.35)]
            hover:brightness-110 active:scale-[0.98]
            transition-all duration-200
            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:active:scale-100;
@@ -407,10 +403,8 @@
 
   .auth-btn-google {
     @apply w-full flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-medium
-           border border-[#222] bg-[#0a0a0a] text-white
-           hover:bg-[#111] hover:border-[#333]
-           lg:border-border lg:bg-surface-0 lg:text-text-primary
-           lg:hover:bg-surface-2 lg:hover:border-border-light lg:shadow-sm
+           border border-[#1e1e2a] bg-[#0a0a0f] text-white
+           hover:bg-[#12121a] hover:border-[#2a2a3a]
            active:scale-[0.98] transition-all duration-200;
   }
 }

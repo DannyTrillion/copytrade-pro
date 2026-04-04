@@ -37,7 +37,7 @@ export function CtaSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="relative py-24 lg:py-32 bg-surface-0" ref={ref}>
+    <section className="relative py-24 lg:py-32" style={{ background: "#080A12" }} ref={ref}>
       <div className="max-w-[1100px] mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

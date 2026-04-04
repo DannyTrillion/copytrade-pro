@@ -35,7 +35,7 @@ function RankBadge({ rank }: { rank: number }) {
   }
 
   return (
-    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium bg-white/5 text-text-secondary ring-1 ring-white/10">
+    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium bg-white/5 text-white/50 ring-1 ring-white/10">
       #{rank}
     </span>
   );
@@ -89,7 +89,7 @@ function TraderRow({ trader, index }: { trader: LeaderboardTrader; index: number
           )}
           <div>
             <p className="text-white font-medium text-sm leading-tight">{trader.displayName}</p>
-            <p className="text-text-secondary text-xs mt-0.5">{trader.followers} followers</p>
+            <p className="text-white/50 text-xs mt-0.5">{trader.followers} followers</p>
           </div>
         </div>
       </td>
@@ -166,7 +166,7 @@ function TraderCard({ trader, index }: { trader: LeaderboardTrader; index: numbe
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-    <TiltCard className="bg-surface-2 border border-white/[0.06] rounded-2xl p-5 hover:border-white/[0.12] transition-all duration-300">
+    <TiltCard className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 hover:border-white/[0.12] transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <RankBadge rank={trader.rank} />
@@ -181,7 +181,7 @@ function TraderCard({ trader, index }: { trader: LeaderboardTrader; index: numbe
           )}
           <div>
             <p className="text-white font-medium text-sm">{trader.displayName}</p>
-            <p className="text-text-secondary text-xs">{trader.followers} followers</p>
+            <p className="text-white/50 text-xs">{trader.followers} followers</p>
           </div>
         </div>
         <span
@@ -197,15 +197,15 @@ function TraderCard({ trader, index }: { trader: LeaderboardTrader; index: numbe
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white/[0.03] rounded-xl p-3 text-center">
-          <p className="text-text-secondary text-2xs font-medium uppercase tracking-wider mb-1">Win Rate</p>
+          <p className="text-white/50 text-2xs font-medium uppercase tracking-wider mb-1">Win Rate</p>
           <p className="text-white font-semibold text-sm">{trader.winRate.toFixed(1)}%</p>
         </div>
         <div className="bg-white/[0.03] rounded-xl p-3 text-center">
-          <p className="text-text-secondary text-2xs font-medium uppercase tracking-wider mb-1">Trades</p>
+          <p className="text-white/50 text-2xs font-medium uppercase tracking-wider mb-1">Trades</p>
           <p className="text-text-tertiary font-semibold text-sm">{trader.totalTrades.toLocaleString()}</p>
         </div>
         <div className="bg-white/[0.03] rounded-xl p-3 text-center">
-          <p className="text-text-secondary text-2xs font-medium uppercase tracking-wider mb-1">P&L</p>
+          <p className="text-white/50 text-2xs font-medium uppercase tracking-wider mb-1">P&L</p>
           <p className={`font-semibold text-sm ${isPositive ? "text-success" : "text-danger"}`}>
             {isPositive ? "+" : ""}${formatPnl(trader.totalPnl)}
           </p>
@@ -239,9 +239,9 @@ export function LeaderboardSection() {
   }, []);
 
   return (
-    <section ref={ref} className="relative py-24 lg:py-32 bg-surface-0">
+    <section ref={ref} className="relative py-24 lg:py-32 bg-[#080A12]">
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-surface-0 via-surface-0 to-surface-3 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#080A12] via-[#080A12] to-[#0D0F17] pointer-events-none" />
 
       <div className="relative max-w-[1200px] mx-auto px-6">
         {/* Header */}
@@ -260,7 +260,7 @@ export function LeaderboardSection() {
               Leaderboard
             </span>
           </h2>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-white/50 text-lg max-w-2xl mx-auto leading-relaxed">
             Real performance from verified traders. Follow the best and let their expertise work for you.
           </p>
         </motion.div>
@@ -293,7 +293,7 @@ export function LeaderboardSection() {
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
             </div>
-            <p className="text-text-secondary text-lg">Leaderboard data will appear once traders are active.</p>
+            <p className="text-white/50 text-lg">Leaderboard data will appear once traders are active.</p>
           </motion.div>
         )}
 
@@ -305,26 +305,26 @@ export function LeaderboardSection() {
             transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             {/* Table view for md+ */}
-            <div className="hidden md:block overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-2/60 backdrop-blur-sm">
+            <div className="hidden md:block overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.03]/60 backdrop-blur-sm">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/[0.06]">
-                    <th className="text-left text-2xs font-semibold text-text-secondary uppercase tracking-wider py-3.5 pl-4 pr-2">
+                    <th className="text-left text-2xs font-semibold text-white/50 uppercase tracking-wider py-3.5 pl-4 pr-2">
                       Rank
                     </th>
-                    <th className="text-left text-2xs font-semibold text-text-secondary uppercase tracking-wider py-3.5 px-3">
+                    <th className="text-left text-2xs font-semibold text-white/50 uppercase tracking-wider py-3.5 px-3">
                       Trader
                     </th>
-                    <th className="text-right text-2xs font-semibold text-text-secondary uppercase tracking-wider py-3.5 px-3">
+                    <th className="text-right text-2xs font-semibold text-white/50 uppercase tracking-wider py-3.5 px-3">
                       Win Rate
                     </th>
-                    <th className="text-right text-2xs font-semibold text-text-secondary uppercase tracking-wider py-3.5 px-3 hidden sm:table-cell">
+                    <th className="text-right text-2xs font-semibold text-white/50 uppercase tracking-wider py-3.5 px-3 hidden sm:table-cell">
                       Trades
                     </th>
-                    <th className="text-right text-2xs font-semibold text-text-secondary uppercase tracking-wider py-3.5 px-3">
+                    <th className="text-right text-2xs font-semibold text-white/50 uppercase tracking-wider py-3.5 px-3">
                       P&L
                     </th>
-                    <th className="text-right text-2xs font-semibold text-text-secondary uppercase tracking-wider py-3.5 pl-3 pr-4">
+                    <th className="text-right text-2xs font-semibold text-white/50 uppercase tracking-wider py-3.5 pl-3 pr-4">
                       Performance
                     </th>
                   </tr>
@@ -363,7 +363,7 @@ export function LeaderboardSection() {
               <path d="m12 5 7 7-7 7" />
             </svg>
           </Link>
-          <p className="mt-5 text-text-secondary text-sm">
+          <p className="mt-5 text-white/50 text-sm">
             Join <span className="text-text-tertiary font-medium">1,000+</span> traders on CopyTrade Pro
           </p>
         </motion.div>

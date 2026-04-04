@@ -18,7 +18,7 @@ export function SecuritySection() {
   ];
 
   return (
-    <section id="security" className="relative py-24 lg:py-32 bg-white" ref={ref}>
+    <section id="security" className="relative py-24 lg:py-32" style={{ background: "#0A0D14" }} ref={ref}>
       <div className="max-w-[1200px] mx-auto px-6">
         {/* Security Shield Graphic */}
         <motion.div
@@ -64,13 +64,13 @@ export function SecuritySection() {
           className="text-center mb-16 lg:mb-20"
         >
           <span className="inline-block text-xs font-semibold text-danger uppercase tracking-widest mb-4">Security</span>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight mb-5">
+          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-white leading-tight mb-5">
             Bank-Grade{" "}
             <span className="bg-gradient-to-r from-danger to-warning bg-clip-text text-transparent">
               Security
             </span>
           </h2>
-          <p className="text-base text-text-secondary max-w-[560px] mx-auto leading-relaxed">
+          <p className="text-base text-white/50 max-w-[560px] mx-auto leading-relaxed">
             Your assets and data are protected at every layer of the stack.
           </p>
         </motion.div>
@@ -83,12 +83,12 @@ export function SecuritySection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: i * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="bg-white border border-border rounded-xl p-7 hover:border-border-light transition-all duration-300 hover:shadow-card-hover h-full">
+              <div className="border border-white/[0.06] rounded-xl p-7 hover:border-white/[0.12] transition-all duration-300 hover:shadow-[0_0_30px_rgba(41,98,255,0.08)] h-full" style={{ background: "rgba(255,255,255,0.03)" }}>
                 <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5 ${feature.bgColor}`}>
                   <feature.icon className="w-5 h-5" style={{ color: feature.color }} />
                 </div>
-                <h3 className="text-sm font-semibold text-text-primary mb-2">{feature.title}</h3>
-                <p className="text-xs text-text-secondary leading-relaxed">{feature.desc}</p>
+                <h3 className="text-sm font-semibold text-white mb-2">{feature.title}</h3>
+                <p className="text-xs text-white/50 leading-relaxed">{feature.desc}</p>
               </div>
             </motion.div>
           ))}

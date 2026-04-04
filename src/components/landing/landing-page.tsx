@@ -24,7 +24,7 @@ export function LandingPage() {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
   return (
-    <div className="min-h-screen overflow-hidden bg-white text-text-primary">
+    <div className="min-h-screen overflow-hidden bg-[#080A12] text-white">
       {/* Scroll progress indicator */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-0.5 z-[200] origin-left"
@@ -40,8 +40,8 @@ export function LandingPage() {
       <VideoShowcaseSection />
       {/* 3D Globe — dark section */}
       <GlobalReachSection />
-      {/* All sections below — TradingView light mode */}
-      <div className="relative z-10 bg-white">
+      {/* All sections below — consistent dark theme */}
+      <div className="relative z-10">
         <IntegrationSection />
         <HowItWorksSection />
         <FeaturesSection />

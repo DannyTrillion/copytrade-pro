@@ -42,15 +42,15 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-white">
+    <footer className="border-t border-white/[0.06]" style={{ background: "#080A12" }}>
       <div className="max-w-[1200px] mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-16">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-block mb-5">
-              <Image src="/logo-dark.svg" alt="CopyTrade Pro" width={140} height={24} className="h-5 w-auto" />
+              <Image src="/logo-light.svg" alt="CopyTrade Pro" width={140} height={24} className="h-5 w-auto" />
             </Link>
-            <p className="text-xs text-text-secondary leading-relaxed max-w-xs">
+            <p className="text-xs text-white/50 leading-relaxed max-w-xs">
               Professional copy trading platform connecting TradingView signals with Polymarket execution.
             </p>
           </div>
@@ -58,11 +58,11 @@ export function Footer() {
           {/* Link columns */}
           {footerLinks.map((section, i) => (
             <div key={i}>
-              <h4 className="text-xs font-semibold text-text-primary uppercase tracking-widest mb-5">{section.title}</h4>
+              <h4 className="text-xs font-semibold text-white uppercase tracking-widest mb-5">{section.title}</h4>
               <ul className="space-y-3">
                 {section.links.map((link, j) => (
                   <li key={j}>
-                    <Link href={link.href} className="text-xs text-text-secondary hover:text-brand transition-colors duration-200">
+                    <Link href={link.href} className="text-xs text-white/50 hover:text-brand transition-colors duration-200">
                       {link.label}
                     </Link>
                   </li>
@@ -73,13 +73,13 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-text-tertiary">
+        <div className="pt-8 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-white/30">
             &copy; {new Date().getFullYear()} CopyTrade Pro. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             {["Discord", "Twitter", "GitHub"].map((social) => (
-              <a key={social} href="#" className="text-xs text-text-secondary hover:text-brand transition-colors duration-200">
+              <a key={social} href="#" className="text-xs text-white/50 hover:text-brand transition-colors duration-200">
                 {social}
               </a>
             ))}

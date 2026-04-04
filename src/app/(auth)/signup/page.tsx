@@ -287,7 +287,7 @@ export default function SignupPage() {
       </div>
 
       {/* ===== Right panel / Mobile ===== */}
-      <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-start pt-10 pb-8 lg:justify-center lg:pt-0 px-5 lg:px-12 lg:bg-surface-0 overflow-y-auto">
+      <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-start pt-10 pb-8 lg:justify-center lg:pt-0 px-5 lg:px-12 lg:bg-[#080A12] overflow-y-auto">
         {/* Desktop gradient decoration */}
         <div className="absolute inset-0 hidden lg:block pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_rgba(38,166,154,0.04),transparent_70%)]" />
@@ -327,7 +327,7 @@ export default function SignupPage() {
                             ? "bg-brand text-white shadow-[0_0_12px_rgba(41,98,255,0.25)]"
                             : i === currentStepIndex
                             ? "bg-brand/15 text-brand ring-2 ring-brand/30"
-                            : "bg-[#1a1a1a] text-[#555] lg:bg-surface-2 lg:text-text-tertiary"
+                            : "bg-[#1a1a1a] text-[#555] lg:bg-white/[0.04] lg:text-white/40"
                         }`}
                       >
                         {i < currentStepIndex ? (
@@ -337,12 +337,12 @@ export default function SignupPage() {
                         )}
                       </div>
                       <span className={`text-2xs font-medium transition-colors duration-300 ${
-                        i <= currentStepIndex ? "text-[#a1a1a1] lg:text-text-secondary" : "text-[#555] lg:text-text-tertiary"
+                        i <= currentStepIndex ? "text-[#a1a1a1] lg:text-white/50" : "text-[#555] lg:text-white/40"
                       }`}>{s.label}</span>
                     </div>
                     {i < steps.length - 1 && (
                       <div className={`flex-1 h-px transition-colors duration-500 mb-5 ${
-                        i < currentStepIndex ? "bg-brand" : "bg-[#222] lg:bg-border"
+                        i < currentStepIndex ? "bg-brand" : "bg-[#222] lg:bg-[#1e1e2a]"
                       }`} />
                     )}
                   </div>
@@ -359,10 +359,10 @@ export default function SignupPage() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25, ease }}
                   >
-                    <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">
+                    <h2 className="text-2xl font-bold text-white lg:text-white mb-1">
                       Create your account
                     </h2>
-                    <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary mb-6">
+                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 mb-6">
                       Enter your email to get started
                     </p>
 
@@ -388,9 +388,9 @@ export default function SignupPage() {
                     </motion.button>
 
                     <div className="flex items-center gap-3 my-5">
-                      <div className="flex-1 h-px bg-[#222] lg:bg-border" />
-                      <span className="text-xs text-[#a1a1a1] lg:text-text-tertiary uppercase tracking-wider">or</span>
-                      <div className="flex-1 h-px bg-[#222] lg:bg-border" />
+                      <div className="flex-1 h-px bg-[#222] lg:bg-[#1e1e2a]" />
+                      <span className="text-xs text-[#a1a1a1] lg:text-white/40 uppercase tracking-wider">or</span>
+                      <div className="flex-1 h-px bg-[#222] lg:bg-[#1e1e2a]" />
                     </div>
 
                     <form
@@ -400,9 +400,9 @@ export default function SignupPage() {
                       }}
                       className="space-y-5"
                     >
-                      <FormField label="Email address" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-[#a1a1a1] lg:text-text-secondary">
+                      <FormField label="Email address" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-[#a1a1a1] lg:text-white/50">
                         <div className="relative">
-                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
+                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
                           <input
                             type="email"
                             value={email}
@@ -437,13 +437,13 @@ export default function SignupPage() {
                       </motion.button>
                     </form>
 
-                    <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary text-center mt-5">
+                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 text-center mt-5">
                       Already have an account?{" "}
                       <Link href="/login" className="text-brand hover:text-brand-light transition-colors font-medium">
                         Sign in
                       </Link>
                     </p>
-                    <p className="text-2xs text-[#666] lg:text-text-quaternary text-center mt-4">
+                    <p className="text-2xs text-[#666] lg:text-white/30 text-center mt-4">
                       By signing up, you agree to our Terms & Privacy Policy
                     </p>
                   </motion.div>
@@ -461,18 +461,18 @@ export default function SignupPage() {
                     <button
                       type="button"
                       onClick={() => setStep("email")}
-                      className="flex items-center gap-1.5 text-sm text-[#a1a1a1] hover:text-white/80 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors mb-4"
+                      className="flex items-center gap-1.5 text-sm text-[#a1a1a1] hover:text-white/80 lg:text-white/40 lg:hover:text-white/60 transition-colors mb-4"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
                       Back
                     </button>
 
-                    <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">
+                    <h2 className="text-2xl font-bold text-white lg:text-white mb-1">
                       Check your email
                     </h2>
-                    <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary mb-6">
+                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 mb-6">
                       We sent a 6-digit code to{" "}
-                      <span className="text-white/80 lg:text-text-secondary font-medium">{email}</span>
+                      <span className="text-white/80 lg:text-white/50 font-medium">{email}</span>
                     </p>
 
                     {/* OTP inputs */}
@@ -500,8 +500,8 @@ export default function SignupPage() {
                               otpError
                                 ? "border-danger/40 bg-danger/5 text-danger"
                                 : digit
-                                ? "border-brand/40 bg-brand/[0.08] text-white lg:text-text-primary"
-                                : "border-[#222] bg-[#0a0a0a] text-white lg:text-text-primary lg:border-border lg:bg-surface-0"
+                                ? "border-brand/40 bg-brand/[0.08] text-white lg:text-white"
+                                : "border-[#222] bg-[#0a0a0a] text-white lg:text-white lg:border-[#1e1e2a] lg:bg-[#080A12]"
                             }
                             focus:border-brand focus:ring-2 focus:ring-brand/20 focus:bg-brand/[0.04]
                             disabled:opacity-50
@@ -526,16 +526,16 @@ export default function SignupPage() {
                     {verifyingOtp && (
                       <div className="flex items-center justify-center gap-2 mb-4">
                         <Loader2 className="w-4 h-4 animate-spin text-brand" />
-                        <span className="text-sm text-[#a1a1a1] lg:text-text-tertiary">Verifying...</span>
+                        <span className="text-sm text-[#a1a1a1] lg:text-white/40">Verifying...</span>
                       </div>
                     )}
 
                     {/* Resend */}
                     <div className="text-center">
-                      <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary">
+                      <p className="text-sm text-[#a1a1a1] lg:text-white/40">
                         Didn&apos;t receive the code?{" "}
                         {resendCooldown > 0 ? (
-                          <span className="text-[#a1a1a1] lg:text-text-secondary tabular-nums">
+                          <span className="text-[#a1a1a1] lg:text-white/50 tabular-nums">
                             Resend in {resendCooldown}s
                           </span>
                         ) : (
@@ -569,17 +569,17 @@ export default function SignupPage() {
                       </div>
                     </div>
 
-                    <h2 className="text-2xl font-bold text-white lg:text-text-primary mb-1">
+                    <h2 className="text-2xl font-bold text-white lg:text-white mb-1">
                       Complete your profile
                     </h2>
-                    <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary mb-6">
+                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 mb-6">
                       Set up your name, password, and account type
                     </p>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-                      <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-[#a1a1a1] lg:text-text-secondary">
+                      <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-[#a1a1a1] lg:text-white/50">
                         <div className="relative">
-                          <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
+                          <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
                           <input
                             type="text"
                             value={form.name}
@@ -596,9 +596,9 @@ export default function SignupPage() {
                         </div>
                       </FormField>
 
-                      <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-[#a1a1a1] lg:text-text-secondary">
+                      <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-[#a1a1a1] lg:text-white/50">
                         <div className="relative">
-                          <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-text-tertiary" />
+                          <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
                           <input
                             type={showPassword ? "text" : "password"}
                             value={form.password}
@@ -614,7 +614,7 @@ export default function SignupPage() {
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-white/70 lg:text-text-tertiary lg:hover:text-text-secondary transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-white/70 lg:text-white/40 lg:hover:text-white/60 transition-colors"
                             aria-label={showPassword ? "Hide password" : "Show password"}
                           >
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -637,13 +637,13 @@ export default function SignupPage() {
                               className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                                 form.role === option.value
                                   ? "border-brand bg-brand/[0.06] shadow-[0_0_16px_rgba(41,98,255,0.1)] lg:bg-brand/5"
-                                  : "border-[#222] bg-[#0a0a0a] hover:bg-[#111] hover:border-[#333] lg:border-border lg:bg-surface-0 lg:hover:bg-surface-2 lg:hover:border-border-light"
+                                  : "border-[#222] bg-[#0a0a0a] hover:bg-[#111] hover:border-[#333] lg:border-[#1e1e2a] lg:bg-[#080A12] lg:hover:bg-surface-2 lg:hover:border-[#2a2a3a]"
                               }`}
                             >
-                              <p className={`text-sm font-medium ${form.role === option.value ? "text-brand" : "text-[#ccc] lg:text-text-primary"}`}>
+                              <p className={`text-sm font-medium ${form.role === option.value ? "text-brand" : "text-[#ccc] lg:text-white"}`}>
                                 {option.label}
                               </p>
-                              <p className="text-2xs text-[#888] lg:text-text-tertiary mt-0.5">{option.desc}</p>
+                              <p className="text-2xs text-[#888] lg:text-white/40 mt-0.5">{option.desc}</p>
                             </button>
                           ))}
                         </div>
@@ -666,7 +666,7 @@ export default function SignupPage() {
                       </motion.button>
                     </form>
 
-                    <p className="text-sm text-[#a1a1a1] lg:text-text-tertiary text-center mt-5">
+                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 text-center mt-5">
                       Already have an account?{" "}
                       <Link href="/login" className="text-brand hover:text-brand-light transition-colors font-medium">
                         Sign in

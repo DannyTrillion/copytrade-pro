@@ -16,26 +16,14 @@ const navLinks = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [pastHero, setPastHero] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 20);
-      // Stay dark through hero, video, and globe sections
-      const globeSection = document.getElementById("global-reach");
-      const videoSection = document.getElementById("video-showcase");
-      const darkEnd = globeSection
-        ? globeSection.offsetTop + globeSection.offsetHeight
-        : videoSection
-          ? videoSection.offsetTop + videoSection.offsetHeight
-          : window.innerHeight;
-      setPastHero(window.scrollY > darkEnd - 100);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const isLight = pastHero;
 
   return (
     <motion.nav
@@ -44,20 +32,14 @@ export function Navbar() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? isLight
-            ? "bg-white/90 backdrop-blur-2xl border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-            : "bg-[#0B0E17]/80 backdrop-blur-2xl border-b border-white/[0.06]"
+          ? "bg-[#0B0E17]/80 backdrop-blur-2xl border-b border-white/[0.06]"
           : "bg-transparent"
       }`}
     >
       <div className="max-w-[1360px] mx-auto px-6 h-[64px] flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-0">
-          {isLight ? (
-            <Image src="/logo-dark.svg" alt="CopyTrade Pro" width={160} height={28} className="h-6 w-auto" />
-          ) : (
-            <Image src="/logo-light.svg" alt="CopyTrade Pro" width={160} height={28} className="h-6 w-auto" />
-          )}
+          <Image src="/logo-light.svg" alt="CopyTrade Pro" width={160} height={28} className="h-6 w-auto" />
         </Link>
 
         {/* Desktop nav */}
@@ -66,11 +48,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] ${
-                isLight
-                  ? "text-text-primary/60 hover:text-text-primary hover:bg-surface-2"
-                  : "text-white/50 hover:text-white/90 hover:bg-white/[0.06]"
-              }`}
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] text-white/50 hover:text-white/90 hover:bg-white/[0.06]"
             >
               {link.label}
             </a>
@@ -80,11 +58,7 @@ export function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href="/login"
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] ${
-              isLight
-                ? "text-text-primary/70 hover:text-text-primary hover:bg-surface-2"
-                : "text-white/70 hover:text-white hover:bg-white/[0.06]"
-            }`}
+            className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] text-white/70 hover:text-white hover:bg-white/[0.06]"
           >
             Sign in
           </Link>
@@ -99,9 +73,7 @@ export function Navbar() {
         {/* Mobile toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className={`lg:hidden p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 ${
-            isLight ? "text-text-primary/60 hover:bg-surface-2" : "text-white/60 hover:bg-white/[0.06]"
-          }`}
+          className="lg:hidden p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 text-white/60 hover:bg-white/[0.06]"
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -115,11 +87,7 @@ export function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className={`lg:hidden overflow-hidden border-t ${
-              isLight
-                ? "bg-white/95 backdrop-blur-2xl border-border"
-                : "bg-[#0B0E17]/95 backdrop-blur-2xl border-white/[0.06]"
-            }`}
+            className="lg:hidden overflow-hidden bg-[#0B0E17]/95 backdrop-blur-2xl border-t border-white/[0.06]"
           >
             <div className="px-6 py-5 space-y-1">
               {navLinks.map((link) => (
@@ -127,17 +95,13 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors active:scale-[0.98] ${
-                    isLight
-                      ? "text-text-primary/60 hover:text-text-primary hover:bg-surface-2"
-                      : "text-white/50 hover:text-white hover:bg-white/[0.06]"
-                  }`}
+                  className="block px-4 py-3 text-sm font-medium rounded-lg transition-colors active:scale-[0.98] text-white/50 hover:text-white hover:bg-white/[0.06]"
                 >
                   {link.label}
                 </a>
               ))}
-              <div className={`pt-4 mt-3 border-t flex flex-col gap-2 ${isLight ? "border-border" : "border-white/[0.06]"}`}>
-                <Link href="/login" className={`px-4 py-3 text-sm font-medium rounded-lg ${isLight ? "text-text-primary/70" : "text-white/70"}`}>
+              <div className="pt-4 mt-3 border-t border-white/[0.06] flex flex-col gap-2">
+                <Link href="/login" className="px-4 py-3 text-sm font-medium rounded-lg text-white/70">
                   Sign in
                 </Link>
                 <Link href="/signup" className="px-5 py-3 text-sm font-semibold bg-brand text-white rounded-full text-center active:scale-[0.97]">

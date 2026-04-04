@@ -45,7 +45,7 @@ export function StatsSection() {
   ];
 
   return (
-    <section className="relative py-24 lg:py-32 bg-surface-0" ref={ref}>
+    <section className="relative py-24 lg:py-32" style={{ background: "#080A12" }} ref={ref}>
       <div className="max-w-[1200px] mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -54,7 +54,7 @@ export function StatsSection() {
           className="text-center mb-16"
         >
           <span className="inline-block text-xs font-semibold text-warning uppercase tracking-[0.08em] mb-4">Platform Performance</span>
-          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-text-primary leading-tight">
+          <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-white leading-tight">
             Numbers That{" "}
             <span className="bg-gradient-to-r from-warning to-danger bg-clip-text text-transparent">
               Speak
@@ -70,8 +70,8 @@ export function StatsSection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="bg-white border border-border rounded-2xl p-8 text-center hover:border-border-light transition-all duration-300 hover:shadow-card-hover h-full">
-                <p className="text-[clamp(2rem,4vw,3rem)] font-bold text-text-primary mb-2 leading-none">
+              <div className="border border-white/[0.06] rounded-2xl p-8 text-center hover:border-white/[0.12] transition-all duration-300 hover:shadow-[0_0_30px_rgba(41,98,255,0.08)] h-full" style={{ background: "rgba(255,255,255,0.03)" }}>
+                <p className="text-[clamp(2rem,4vw,3rem)] font-bold text-white mb-2 leading-none">
                   <AnimatedCounter
                     target={stat.value}
                     prefix={stat.prefix}
@@ -79,7 +79,7 @@ export function StatsSection() {
                     delay={i * 0.12}
                   />
                 </p>
-                <p className="text-sm text-text-secondary font-medium mb-3">{stat.label}</p>
+                <p className="text-sm text-white/50 font-medium mb-3">{stat.label}</p>
                 {/* Sparkline — draws itself on scroll */}
                 <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none" className="mt-1">
                   <defs>
