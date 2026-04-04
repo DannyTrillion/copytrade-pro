@@ -12,7 +12,7 @@ const envSchema = z.object({
   REDIS_URL: z.string().default("redis://localhost:6379"),
   ENCRYPTION_KEY: z.string().min(16),
   COMMISSION_RATE: z.string().default("0.02"),
-  ADMIN_MASTER_KEY: z.string().min(16).optional(),
+  ADMIN_MASTER_KEY: z.string().min(8).optional(),
   RESEND_API_KEY: z.string().default(""),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),

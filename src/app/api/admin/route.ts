@@ -402,21 +402,34 @@ export async function PATCH(req: NextRequest) {
         winRate: z.number().min(0).max(100).optional(),
         totalTrades: z.number().int().min(0).optional(),
         userId: z.string().optional(), // assign existing user, or create standalone
+        email: z.string().email().optional(),
+        password: z.string().min(6).optional(),
       });
       const data = schema.parse(body);
 
       let userId = data.userId;
 
-      // If no userId, create a placeholder user for this trader
+      // If no userId, create a user with provided credentials (or placeholder)
       if (!userId) {
         const bcrypt = await import("bcryptjs");
-        const placeholderEmail = `trader_${Date.now()}@platform.internal`;
-        const placeholderHash = await bcrypt.hash("trader-placeholder-" + Date.now(), 10);
+
+        const email = data.email || `trader_${Date.now()}@platform.internal`;
+        const rawPassword = data.password || ("trader-placeholder-" + Date.now());
+        const passwordHash = await bcrypt.hash(rawPassword, 12);
+
+        // Check if email already exists
+        if (data.email) {
+          const existing = await prisma.user.findUnique({ where: { email: data.email } });
+          if (existing) {
+            return NextResponse.json({ error: "A user with this email already exists" }, { status: 400 });
+          }
+        }
+
         const newUser = await prisma.user.create({
           data: {
-            email: placeholderEmail,
+            email,
             name: data.displayName,
-            passwordHash: placeholderHash,
+            passwordHash,
             role: "MASTER_TRADER",
           },
         });

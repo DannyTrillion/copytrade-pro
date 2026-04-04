@@ -77,6 +77,7 @@ const ADMIN_SECTIONS: NavSection[] = [
   {
     items: [
       { label: "Support Chat", href: "/dashboard/admin/support", icon: MessageSquare },
+      { label: "Platform Settings", href: "/dashboard/admin/settings", icon: Settings },
       { label: "Settings", href: "/dashboard/settings", icon: Settings },
     ],
   },

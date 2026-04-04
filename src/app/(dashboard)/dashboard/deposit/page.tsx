@@ -34,6 +34,7 @@ import { SolanaPayForm } from "@/components/payment/solana-pay-form";
 import { SuiSlushForm } from "@/components/payment/sui-slush-form";
 import { toast } from "@/components/ui/toast";
 import { ScrollableTable } from "@/components/ui/scrollable-table";
+import { useRouter } from "next/navigation";
 
 // ─── Types ───
 interface DepositRequest {
@@ -163,6 +164,7 @@ type DepositStep = "form" | "confirm";
 type OnrampProvider = "moonpay" | "transak" | "coinbase" | "crypto_com" | "ramp" | "banxa";
 
 export default function DepositPage() {
+  const router = useRouter();
   const [deposits, setDeposits] = useState<DepositRequest[]>([]);
   const [summary, setSummary] = useState<DepositSummary | null>(null);
   const [trackingWallet, setTrackingWallet] = useState("");
@@ -497,7 +499,46 @@ export default function DepositPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
+                  className="space-y-5"
                 >
+                  {/* Quick links to in-app card flows */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/dashboard/pay/thirdweb")}
+                      className="p-3.5 rounded-xl border border-brand/20 bg-brand/5 hover:border-brand/40 transition-all flex items-center gap-3 text-left cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center shrink-0">
+                        <CreditCard className="w-4 h-4 text-brand" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-text-primary block">Pay with Card</span>
+                        <span className="text-2xs text-text-tertiary">via Thirdweb — instant</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-quaternary ml-auto" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/dashboard/pay/moonpay")}
+                      className="p-3.5 rounded-xl border border-purple-500/20 bg-purple-500/5 hover:border-purple-500/40 transition-all flex items-center gap-3 text-left cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0">
+                        <CreditCard className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-text-primary block">Pay with Card</span>
+                        <span className="text-2xs text-text-tertiary">via MoonPay — global</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-quaternary ml-auto" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-2xs text-text-quaternary">or pay via Stripe</span>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
                   <StripeCardForm
                     onSuccess={() => {
                       toast.success("Card payment submitted! Your deposit is pending admin confirmation.");
@@ -605,10 +646,60 @@ export default function DepositPage() {
                   className="space-y-5"
                 >
                   <p className="text-sm text-text-secondary">
-                    Purchase crypto through a trusted provider below. Once API keys are configured, purchases will deposit directly to your CopyTrade Pro balance.
+                    Pay with your card to add funds instantly. Choose a payment method below.
                   </p>
 
-                  {/* Provider cards */}
+                  {/* ─── Featured: In-app card payments ─── */}
+                  <div>
+                    <p className="text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">Recommended</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => router.push("/dashboard/pay/thirdweb")}
+                        className="group p-4 rounded-xl border border-brand/20 bg-gradient-to-br from-brand/10 to-brand/5 hover:border-brand/40 hover:scale-[1.01] active:scale-[0.99] transition-all text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-9 h-9 rounded-lg bg-brand/15 flex items-center justify-center">
+                            <CreditCard className="w-4.5 h-4.5 text-brand" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-text-primary block">Card Payment</span>
+                            <span className="text-2xs text-brand">Powered by Thirdweb</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {["Visa / Mastercard", "Apple Pay", "Instant"].map((f) => (
+                            <span key={f} className="text-2xs px-2 py-0.5 rounded-full bg-brand/10 text-brand/80">{f}</span>
+                          ))}
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => router.push("/dashboard/pay/moonpay")}
+                        className="group p-4 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-indigo-500/5 hover:border-purple-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-9 h-9 rounded-lg bg-purple-500/15 flex items-center justify-center">
+                            <CreditCard className="w-4.5 h-4.5 text-purple-400" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-text-primary block">Card Payment</span>
+                            <span className="text-2xs text-purple-400">Powered by MoonPay</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {["Visa / Mastercard", "Apple Pay", "Google Pay", "Bank Transfer"].map((f) => (
+                            <span key={f} className="text-2xs px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400/80">{f}</span>
+                          ))}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* ─── Other providers ─── */}
+                  <div>
+                    <p className="text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">Other Providers</p>
+                  </div>
                   <div className="space-y-3">
                     {ONRAMP_PROVIDERS.map((provider) => (
                       <button

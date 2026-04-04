@@ -39,6 +39,7 @@ import {
   Star,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { AnimatedCounter, AnimatedCurrency } from "@/components/ui/animated-counter";
 import { PnlChart } from "@/components/charts/pnl-chart";
 import { Modal } from "@/components/ui/modal";
 import { WalletConnectButton } from "@/components/wallet/wallet-connect-button";
@@ -545,9 +546,11 @@ export function FollowerDashboard() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-1">Total Balance</p>
-              <p className="text-3xl md:text-4xl font-bold tabular-nums tracking-tight">
-                {formatCurrency(balance?.totalBalance ?? 0)}
-              </p>
+              <AnimatedCurrency
+                value={balance?.totalBalance ?? 0}
+                className="text-3xl md:text-4xl font-bold tabular-nums tracking-tight block"
+                duration={1400}
+              />
               {(balance?.totalProfit ?? 0) !== 0 && (
                 <div className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full text-xs font-semibold ${(balance?.totalProfit ?? 0) >= 0 ? "bg-white/20 text-white" : "bg-red-500/30 text-red-100"}`}>
                   {(balance?.totalProfit ?? 0) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -572,19 +575,21 @@ export function FollowerDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5 pt-5 border-t border-white/15">
             <div>
               <p className="text-white/60 text-2xs font-medium uppercase tracking-wider">Available</p>
-              <p className="text-base md:text-lg font-bold tabular-nums mt-0.5">{formatCurrency(balance?.availableBalance ?? 0)}</p>
+              <AnimatedCurrency value={balance?.availableBalance ?? 0} className="text-base md:text-lg font-bold tabular-nums mt-0.5 block" duration={1000} />
             </div>
             <div>
               <p className="text-white/60 text-2xs font-medium uppercase tracking-wider">Allocated</p>
-              <p className="text-base md:text-lg font-bold tabular-nums mt-0.5">{formatCurrency(balance?.allocatedBalance ?? 0)}</p>
+              <AnimatedCurrency value={balance?.allocatedBalance ?? 0} className="text-base md:text-lg font-bold tabular-nums mt-0.5 block" duration={1000} />
             </div>
             <div>
               <p className="text-white/60 text-2xs font-medium uppercase tracking-wider">Win Rate</p>
-              <p className="text-base md:text-lg font-bold tabular-nums mt-0.5">{stats?.winRate ?? 0}%</p>
+              <AnimatedCounter value={stats?.winRate ?? 0} suffix="%" decimals={1} className="text-base md:text-lg font-bold tabular-nums mt-0.5 block" duration={1000} />
             </div>
             <div>
               <p className="text-white/60 text-2xs font-medium uppercase tracking-wider">Following</p>
-              <p className="text-base md:text-lg font-bold tabular-nums mt-0.5">{stats?.following ?? 0} traders</p>
+              <span className="text-base md:text-lg font-bold tabular-nums mt-0.5 block">
+                <AnimatedCounter value={stats?.following ?? 0} decimals={0} duration={800} /> traders
+              </span>
             </div>
           </div>
         </div>
@@ -632,21 +637,19 @@ export function FollowerDashboard() {
               <div className="hidden md:flex items-center gap-5">
                 <div className="text-right">
                   <p className="text-2xs text-text-tertiary">P&L</p>
-                  <p className={`text-sm font-bold tabular-nums ${connectedTrader.pnl >= 0 ? "text-success" : "text-danger"}`}>
-                    {connectedTrader.pnl >= 0 ? "+" : ""}{formatCurrency(connectedTrader.pnl)}
-                  </p>
+                  <AnimatedCurrency value={connectedTrader.pnl} className={`text-sm font-bold tabular-nums block ${connectedTrader.pnl >= 0 ? "text-success" : "text-danger"}`} duration={800} />
                 </div>
                 <div className="text-right">
                   <p className="text-2xs text-text-tertiary">Win Rate</p>
-                  <p className="text-sm font-bold tabular-nums text-text-primary">{connectedTrader.winRate}%</p>
+                  <AnimatedCounter value={connectedTrader.winRate} suffix="%" decimals={1} className="text-sm font-bold tabular-nums text-text-primary block" duration={800} />
                 </div>
                 <div className="text-right">
                   <p className="text-2xs text-text-tertiary">Trades</p>
-                  <p className="text-sm font-bold tabular-nums text-text-primary">{connectedTrader.totalTrades}</p>
+                  <AnimatedCounter value={connectedTrader.totalTrades} decimals={0} className="text-sm font-bold tabular-nums text-text-primary block" duration={800} />
                 </div>
                 <div className="text-right">
                   <p className="text-2xs text-text-tertiary">Followers</p>
-                  <p className="text-sm font-bold tabular-nums text-text-primary">{connectedTrader.followers}</p>
+                  <AnimatedCounter value={connectedTrader.followers} decimals={0} className="text-sm font-bold tabular-nums text-text-primary block" duration={800} />
                 </div>
               </div>
               {/* Action buttons */}
@@ -718,6 +721,7 @@ export function FollowerDashboard() {
             <StatCard
               title="Copied Trades"
               value={String(stats?.totalCopiedTrades ?? 0)}
+              numericValue={stats?.totalCopiedTrades ?? 0}
               icon={Copy}
               iconColor="text-brand"
               delay={0.12}
@@ -725,6 +729,7 @@ export function FollowerDashboard() {
             <StatCard
               title="Copy Win Rate"
               value={`${stats?.winRate ?? 0}%`}
+              numericValue={stats?.winRate ?? 0}
               icon={BarChart3}
               iconColor="text-info"
               delay={0.15}
@@ -732,6 +737,8 @@ export function FollowerDashboard() {
             <StatCard
               title="Total Copy P&L"
               value={formatCurrency(stats?.totalCopyPnl ?? 0)}
+              numericValue={stats?.totalCopyPnl ?? 0}
+              isCurrency
               changeType={(stats?.totalCopyPnl ?? 0) >= 0 ? "positive" : "negative"}
               icon={TrendingUp}
               iconColor={(stats?.totalCopyPnl ?? 0) >= 0 ? "text-success" : "text-danger"}

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@moonpay/moonpay-react": "^1.10.6",
     "@mysten/dapp-kit": "^1.0.4",
     "@mysten/sui": "^2.13.4",
     "@prisma/client": "^5.22.0",
@@ -40,6 +41,7 @@
     "sonner": "^2.0.7",
     "stripe": "^21.0.1",
     "tailwind-merge": "^3.5.0",
+    "thirdweb": "^5.119.3",
     "three": "^0.162.0",
     "viem": "^2.47.6",
     "wagmi": "^2.19.5",

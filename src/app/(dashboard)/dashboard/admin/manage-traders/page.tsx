@@ -48,6 +48,8 @@ interface TraderForm {
   winRate: number;
   totalTrades: number;
   avatar: string;
+  email: string;
+  password: string;
 }
 
 const EMPTY_FORM: TraderForm = {
@@ -59,6 +61,8 @@ const EMPTY_FORM: TraderForm = {
   winRate: 0,
   totalTrades: 0,
   avatar: "",
+  email: "",
+  password: "",
 };
 
 export default function ManageTradersPage() {
@@ -181,7 +185,7 @@ export default function ManageTradersPage() {
             }),
           });
         }
-        setMsg({ type: "success", text: "Trader created successfully" });
+        setMsg({ type: "success", text: `Trader created! They can sign in with ${form.email}` });
         setShowCreate(false);
         resetForm();
         fetchData();
@@ -263,6 +267,8 @@ export default function ManageTradersPage() {
       winRate: trader.winRate,
       totalTrades: trader.totalTrades,
       avatar: trader.user.avatar || "",
+      email: "",
+      password: "",
     });
     setAvatarPreview(trader.user.avatar || null);
     setEditTrader(trader);
@@ -305,8 +311,8 @@ export default function ManageTradersPage() {
       )
     : traders;
 
-  /* ─── Avatar component ─── */
-  const AvatarUploadSection = () => (
+  /* ─── Avatar section (render function, not component — avoids remount) ─── */
+  const renderAvatarUpload = () => (
     <div>
       <label className="block text-xs font-medium text-text-secondary mb-2">
         Profile Picture
@@ -382,10 +388,10 @@ export default function ManageTradersPage() {
     </div>
   );
 
-  /* ─── Trader form fields ─── */
-  const TraderFormFields = ({ isEdit }: { isEdit?: boolean }) => (
+  /* ─── Trader form fields (render function, not component — avoids remount/focus loss) ─── */
+  const renderTraderFormFields = (isEdit?: boolean) => (
     <div className="space-y-4">
-      <AvatarUploadSection />
+      {renderAvatarUpload()}
 
       <div>
         <label className="block text-xs font-medium text-text-secondary mb-1.5">
@@ -400,6 +406,39 @@ export default function ManageTradersPage() {
           required
         />
       </div>
+
+      {/* Login credentials — only shown when creating */}
+      {!isEdit && (
+        <div className="p-3 rounded-lg bg-brand/5 border border-brand/10">
+          <p className="text-xs font-medium text-brand mb-3">Login Credentials</p>
+          <p className="text-2xs text-text-tertiary mb-3">The trader will use these to sign in to their account.</p>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-2xs text-text-tertiary mb-1">Email *</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="input-field text-sm"
+                placeholder="trader@example.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-2xs text-text-tertiary mb-1">Password *</label>
+              <input
+                type="text"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="input-field text-sm"
+                placeholder="Min 6 characters"
+                minLength={6}
+                required
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div>
         <label className="block text-xs font-medium text-text-secondary mb-1.5">
@@ -760,10 +799,10 @@ export default function ManageTradersPage() {
         title="Create Trader"
       >
         <form onSubmit={handleCreate} className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-          <TraderFormFields />
+          {renderTraderFormFields()}
           <button
             type="submit"
-            disabled={saving || !form.displayName}
+            disabled={saving || !form.displayName || !form.email || form.password.length < 6}
             className="btn-primary w-full text-sm gap-2"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
@@ -782,7 +821,7 @@ export default function ManageTradersPage() {
         title={`Edit: ${editTrader?.displayName || "Trader"}`}
       >
         <form onSubmit={handleUpdate} className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-          <TraderFormFields isEdit />
+          {renderTraderFormFields(true)}
           <button type="submit" disabled={saving} className="btn-primary w-full text-sm gap-2">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit3 className="w-4 h-4" />}
             {saving ? "Saving..." : "Save Changes"}
