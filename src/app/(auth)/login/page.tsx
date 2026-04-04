@@ -91,7 +91,7 @@ function LoginPageInner() {
     <div className="min-h-screen bg-[var(--color-auth-bg)] flex relative overflow-hidden">
 
       {/* Mobile solid dark background */}
-      <div className="absolute inset-0 bg-black lg:hidden" />
+      <div className="absolute inset-0 bg-black lg:hidden pointer-events-none" />
 
       {/* ===== Desktop left panel — branding ===== */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
@@ -149,7 +149,7 @@ function LoginPageInner() {
       <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-center px-5 py-8 lg:px-12 lg:bg-surface-0">
 
         {/* Decorative gradient background for desktop */}
-        <div className="absolute inset-0 hidden lg:block">
+        <div className="absolute inset-0 hidden lg:block pointer-events-none">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_rgba(41,98,255,0.04),transparent_70%)]" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_center,_rgba(38,166,154,0.03),transparent_70%)]" />
         </div>

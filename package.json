@@ -24,6 +24,7 @@
     "@tanstack/react-query": "^5.96.1",
     "@types/qrcode.react": "^1.0.5",
     "@types/three": "^0.162.0",
+    "@wert-io/module-react-component": "^5.0.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",

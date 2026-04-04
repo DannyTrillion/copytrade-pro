@@ -81,7 +81,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#F8F9FB",
+  themeColor: "#0D0F17",
 };
 
 export default function RootLayout({
@@ -90,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className="antialiased">
         <Providers>
           <AnalyticsProvider />

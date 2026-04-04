@@ -531,6 +531,20 @@ export default function DepositPage() {
                       </div>
                       <ChevronRight className="w-4 h-4 text-text-quaternary ml-auto" />
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/dashboard/pay/wert")}
+                      className="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40 transition-all flex items-center gap-3 text-left cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
+                        <CreditCard className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-text-primary block">Pay with Card</span>
+                        <span className="text-2xs text-text-tertiary">via Wert — global</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-quaternary ml-auto" />
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -690,6 +704,28 @@ export default function DepositPage() {
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {["Visa / Mastercard", "Apple Pay", "Google Pay", "Bank Transfer"].map((f) => (
                             <span key={f} className="text-2xs px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400/80">{f}</span>
+                          ))}
+                        </div>
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                      <button
+                        type="button"
+                        onClick={() => router.push("/dashboard/pay/wert")}
+                        className="group p-4 rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 hover:border-emerald-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                            <CreditCard className="w-4.5 h-4.5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-text-primary block">Card Payment</span>
+                            <span className="text-2xs text-emerald-400">Powered by Wert</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {["Visa / Mastercard", "Apple Pay", "200+ Countries"].map((f) => (
+                            <span key={f} className="text-2xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400/80">{f}</span>
                           ))}
                         </div>
                       </button>
