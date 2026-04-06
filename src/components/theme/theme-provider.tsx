@@ -10,8 +10,8 @@ import {
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 
-type Theme = "dark" | "light";
-type ThemeMode = "system" | "dark" | "light";
+export type Theme = "dark" | "light" | "luxury";
+type ThemeMode = "system" | "dark" | "light" | "luxury";
 
 interface ThemeContextValue {
   theme: Theme;
@@ -26,31 +26,44 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 const STORAGE_KEY = "cpt-theme";
 const MODE_KEY = "cpt-theme-mode";
 
+const VALID_THEMES: Theme[] = ["dark", "light", "luxury"];
+
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  root.classList.remove("dark", "light");
+  root.classList.remove("dark", "light", "luxury");
   root.classList.add(theme);
   root.setAttribute("data-theme", theme);
 }
 
-function getSystemTheme(): Theme {
+function getSystemTheme(): "dark" | "light" {
   if (typeof window === "undefined") return "dark";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 /** Resolve the effective theme based on mode and route context */
 function resolveTheme(mode: ThemeMode, pathname: string): Theme {
-  if (mode === "dark" || mode === "light") return mode;
+  if (mode === "dark" || mode === "light" || mode === "luxury") return mode;
 
   // System mode: use route-aware defaults with system preference as tiebreaker
   const isDashboard = pathname.startsWith("/dashboard");
   const isLanding = pathname === "/" || pathname.startsWith("/pricing") || pathname.startsWith("/about");
   const isAuth = pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/reset-password");
 
-  if (isLanding || isAuth) return "dark"; // landing + auth = dark first
-  if (isDashboard) return getSystemTheme(); // dashboard follows system
+  if (isLanding || isAuth) return "dark";
+  if (isDashboard) {
+    const systemPref = getSystemTheme();
+    return systemPref === "dark" ? "dark" : "light";
+  }
 
   return getSystemTheme();
+}
+
+function isValidTheme(value: string | null): value is Theme {
+  return VALID_THEMES.includes(value as Theme);
+}
+
+function isValidMode(value: string | null): value is ThemeMode {
+  return value === "system" || VALID_THEMES.includes(value as Theme);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -62,17 +75,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // On mount, read stored preferences
   useEffect(() => {
-    const storedMode = localStorage.getItem(MODE_KEY) as ThemeMode | null;
-    const storedTheme = localStorage.getItem(STORAGE_KEY) as Theme | null;
+    const storedMode = localStorage.getItem(MODE_KEY);
+    const storedTheme = localStorage.getItem(STORAGE_KEY);
 
-    const effectiveMode = storedMode || "system";
+    const effectiveMode = isValidMode(storedMode) ? storedMode : "system";
     setModeState(effectiveMode);
 
     if (effectiveMode === "system") {
       const resolved = resolveTheme("system", window.location.pathname);
       setThemeState(resolved);
       applyTheme(resolved);
-    } else if (storedTheme === "dark" || storedTheme === "light") {
+    } else if (isValidTheme(storedTheme)) {
       setThemeState(storedTheme);
       applyTheme(storedTheme);
     } else {
@@ -95,7 +108,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!mounted || mode !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
-      // Only respond to system changes on dashboard (landing stays dark)
       const isDashboard = pathname.startsWith("/dashboard");
       if (isDashboard) {
         const systemTheme = getSystemTheme();
@@ -120,12 +132,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         return res.json();
       })
       .then((data: { theme?: string }) => {
-        if (data.theme === "light" || data.theme === "dark") {
-          setModeState(data.theme);
-          setThemeState(data.theme);
-          applyTheme(data.theme);
-          localStorage.setItem(MODE_KEY, data.theme);
-          localStorage.setItem(STORAGE_KEY, data.theme);
+        if (isValidTheme(data.theme ?? null)) {
+          const t = data.theme as Theme;
+          setModeState(t);
+          setThemeState(t);
+          applyTheme(t);
+          localStorage.setItem(MODE_KEY, t);
+          localStorage.setItem(STORAGE_KEY, t);
         }
       })
       .catch(() => {});
@@ -137,7 +150,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(next);
     applyTheme(next);
     localStorage.setItem(STORAGE_KEY, next);
-    // When manually setting theme, switch to manual mode
     setModeState(next);
     localStorage.setItem(MODE_KEY, next);
   }, []);
@@ -159,7 +171,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const toggleTheme = useCallback(() => {
-    const next = theme === "dark" ? "light" : "dark";
+    const cycle: Theme[] = ["light", "dark", "luxury"];
+    const idx = cycle.indexOf(theme);
+    const next = cycle[(idx + 1) % cycle.length];
     setTheme(next);
   }, [theme, setTheme]);
 

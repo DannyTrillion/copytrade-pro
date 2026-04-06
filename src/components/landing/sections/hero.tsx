@@ -33,20 +33,13 @@ function AnimatedValue({ target, prefix = "", suffix = "", decimals = 0, duratio
   );
 }
 
-/** Design-system color tokens for SVG attributes that can't use Tailwind classes */
-const COLORS = {
-  brand: "#2962FF",
-  success: "#26A69A",
-  danger: "#EF5350",
-} as const;
-
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function HeroSection() {
   return (
-    <section className="relative h-screen min-h-[700px] flex flex-col overflow-hidden bg-surface-0">
+    <section className="relative h-screen min-h-[700px] flex flex-col overflow-hidden" style={{ background: "#080A12" }}>
 
-      {/* ===== BACKGROUND — TradingView actual assets ===== */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/hero-space.webp"
@@ -55,69 +48,72 @@ export function HeroSection() {
           priority
           sizes="100vw"
           className="object-cover object-[30%_80%] md:object-bottom"
-          quality={90}
         />
-        {/* Top fade — subtle on mobile to keep astronaut area bright */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#131722]/60 via-[#131722]/20 to-transparent md:from-[#131722]/10 md:via-transparent" />
-        {/* Bottom subtle vignette — lighter on mobile */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#131722]/30 via-transparent to-transparent md:hidden" />
-      </div>
-      <div className="absolute inset-0 z-[1] pointer-events-none opacity-25">
-        <Image src="/hero-aurora.webp" alt="" fill sizes="100vw" className="object-cover object-center mix-blend-screen" quality={90} />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080A12]/60 via-[#080A12]/20 to-transparent" />
       </div>
 
-      {/* ===== CENTERED CONTENT — on top of everything ===== */}
+      {/* Centered content */}
       <div className="relative z-[5] flex-1 flex flex-col items-center justify-start pt-[18vh] md:justify-center md:pt-0 px-6">
         <div className="text-center max-w-[800px] mx-auto">
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+          {/* TradingView official logo */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease }}
+            transition={{ duration: 0.6, ease }}
+            className="flex justify-center items-center gap-3 mb-8"
+          >
+            <svg width="36" height="28" viewBox="0 0 36 28" xmlns="http://www.w3.org/2000/svg" className="text-white" aria-hidden="true">
+              <path d="M14 22H7V11H0V4h14v18zM28 22h-8l7.5-18h8L28 22z" fill="currentColor" />
+              <circle cx="20" cy="8" r="4" fill="currentColor" />
+            </svg>
+            <span className="text-white text-[22px] font-bold tracking-tight">TradingView</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.05, ease }}
             className="text-[clamp(2.2rem,7vw,5.5rem)] font-bold leading-[1.04] tracking-[-0.03em] mb-4 md:mb-5"
           >
             <span className="text-white">Copy first </span>
-            <span className="text-white/60 italic font-light">/</span>
+            <span className="text-white/40 italic font-light">/</span>
             <span className="text-white"> Then earn.</span>
           </motion.h1>
 
-          {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.12, ease }}
+            transition={{ duration: 0.6, delay: 0.1, ease }}
             className="text-[clamp(0.9rem,2vw,1.25rem)] text-white/50 max-w-[520px] mx-auto mb-6 md:mb-8 leading-relaxed"
           >
-            The best trades require research, then commitment. Follow verified traders on Polymarket.
+            Follow verified traders on Polymarket. Their trades, your portfolio — automated.
           </motion.p>
 
-          {/* CTA buttons — centered */}
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.24, ease }}
+            transition={{ duration: 0.5, delay: 0.2, ease }}
             className="flex flex-wrap justify-center items-center gap-4 mb-4"
           >
             <Link
               href="/signup"
-              className="px-8 py-3.5 bg-white text-text-primary font-semibold text-sm rounded-full hover:bg-white/90 transition-all duration-200 hover:translate-y-[-1px] shadow-lg shadow-white/10 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              className="px-8 py-3.5 bg-white text-[#080A12] font-semibold text-sm rounded-full hover:bg-white/90 transition-all duration-200 hover:translate-y-[-1px] active:scale-[0.97]"
             >
               Get started for free
             </Link>
             <Link
               href="#how-it-works"
-              className="px-6 py-3.5 text-white/60 font-medium text-sm rounded-full border border-white/[0.12] hover:bg-white/[0.06] hover:text-white/80 transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              className="px-6 py-3.5 text-white/60 font-medium text-sm rounded-full border border-white/[0.1] hover:bg-white/[0.05] hover:text-white/80 transition-all duration-200 active:scale-[0.97]"
             >
               How it works
             </Link>
           </motion.div>
 
-          {/* Subtext */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.35 }}
             className="text-xs text-white/30"
           >
             $0 forever, no credit card needed
@@ -125,7 +121,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ===== CEO INFO BLOCK — bottom right, TradingView style ===== */}
+      {/* CEO info block — bottom right */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -136,10 +132,9 @@ export function HeroSection() {
           className="flex items-center gap-4 pl-2 pr-5 py-2 rounded-2xl border border-white/[0.1] backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.04)]"
           style={{ background: "rgba(20,22,32,0.65)" }}
         >
-          {/* Avatar with glowing ring */}
           <div className="relative flex-shrink-0">
-            <div className="absolute -inset-[3px] rounded-full opacity-50 bg-gradient-to-br from-brand via-success to-accent" />
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-surface-0">
+            <div className="absolute -inset-[3px] rounded-full opacity-50 bg-gradient-to-br from-[#2962FF] via-[#26A69A] to-[#26A69A]" />
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#080A12]">
               <Image
                 src="/ceo-avatar.webp"
                 alt="CEO"
@@ -148,23 +143,21 @@ export function HeroSection() {
                 className="object-cover w-full h-full"
               />
             </div>
-            {/* Online indicator */}
-            <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-surface-0" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#26A69A] border-2 border-[#080A12]" />
           </div>
-          {/* Info */}
           <div>
             <p className="text-sm font-semibold text-white leading-tight">John Doe</p>
             <p className="text-2xs text-white/40 leading-tight mt-0.5">CEO & Co-founder</p>
             <div className="flex items-center gap-1.5 mt-1">
-              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/10 border border-success/15">
-                <TrendingUp className="w-2.5 h-2.5 text-success" />
-                <span className="text-2xs font-semibold text-success">
+              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#26A69A]/10 border border-[#26A69A]/15">
+                <TrendingUp className="w-2.5 h-2.5 text-[#26A69A]" />
+                <span className="text-2xs font-semibold text-[#26A69A]">
                   +<AnimatedValue target={847} duration={2} delay={1.8} />% ROI
                 </span>
               </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-brand/10 border border-brand/15">
-                <Users className="w-2.5 h-2.5 text-brand" />
-                <span className="text-2xs font-semibold text-brand">
+              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#2962FF]/10 border border-[#2962FF]/15">
+                <Users className="w-2.5 h-2.5 text-[#2962FF]" />
+                <span className="text-2xs font-semibold text-[#2962FF]">
                   <AnimatedValue target={12} duration={1.5} delay={2} />K followers
                 </span>
               </div>

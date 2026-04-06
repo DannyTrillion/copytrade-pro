@@ -7,6 +7,8 @@ type NotificationType =
   | "TRADE_RESULT"
   | "DEPOSIT"
   | "WITHDRAWAL"
+  | "TIER_UPGRADE"
+  | "MILESTONE"
   | "SYSTEM";
 
 interface CreateNotificationParams {
@@ -87,5 +89,35 @@ export async function notifyTradeResult(userId: string, tradeName: string, profi
     title: isProfit ? "Copy Trade Profit" : "Copy Trade Loss",
     message: `${tradeName}: ${isProfit ? "+" : ""}$${profitLoss.toFixed(2)}`,
     actionUrl: "/dashboard/follower",
+  });
+}
+
+export async function notifyTierUpgrade(userId: string, tierName: string) {
+  return createNotification({
+    userId,
+    type: "TIER_UPGRADE",
+    title: "Tier Upgraded!",
+    message: `Congratulations! You've been upgraded to ${tierName}. Enjoy new benefits like higher trade limits and lower commissions.`,
+    actionUrl: "/dashboard/deposit",
+  });
+}
+
+export async function notifyMilestone(userId: string, milestone: string) {
+  return createNotification({
+    userId,
+    type: "MILESTONE",
+    title: "Milestone Reached",
+    message: milestone,
+    actionUrl: "/dashboard",
+  });
+}
+
+export async function notifyTradeLimitReached(userId: string, tierName: string) {
+  return createNotification({
+    userId,
+    type: "SYSTEM",
+    title: "Daily Trade Limit Reached",
+    message: `You've hit your daily copy trade limit for the ${tierName} tier. Upgrade your tier for more trades.`,
+    actionUrl: "/dashboard/deposit",
   });
 }

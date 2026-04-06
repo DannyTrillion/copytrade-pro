@@ -336,9 +336,24 @@ function StepDeposit() {
           Fund Your Account
         </h2>
         <p className="text-text-secondary mt-2 max-w-sm leading-relaxed">
-          Deposit funds to start copy trading. You can deposit crypto directly
-          or use fiat on-ramp to purchase with a card.
+          Deposit funds to start copy trading. Higher deposits unlock better tiers
+          with more daily trades and lower commissions.
         </p>
+      </div>
+
+      {/* Tier preview */}
+      <div className="flex gap-2 w-full max-w-xs">
+        {[
+          { name: "Starter", amount: "$0+", trades: "1/day" },
+          { name: "Growth", amount: "$3K+", trades: "5/day" },
+          { name: "VIP", amount: "$10K+", trades: "Unlimited" },
+        ].map((t) => (
+          <div key={t.name} className="flex-1 p-2.5 rounded-xl bg-surface-2 text-center">
+            <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wide">{t.name}</p>
+            <p className="text-xs font-bold text-text-primary mt-0.5">{t.amount}</p>
+            <p className="text-[10px] text-text-tertiary">{t.trades}</p>
+          </div>
+        ))}
       </div>
 
       <a

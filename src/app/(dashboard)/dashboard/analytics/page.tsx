@@ -13,11 +13,14 @@ import {
   ArrowDownRight,
   Wallet,
   Zap,
+  Award,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { PnlChart } from "@/components/charts/pnl-chart";
 import { StatGridSkeleton, ChartSkeleton, TableSkeleton } from "@/components/ui/chart-skeleton";
 import { Skeleton } from "@/components/ui/loading-skeleton";
+import { TierBadge } from "@/components/ui/tier-badge";
+import { TIER_CONFIGS, type TierLevel } from "@/config/constants";
 import { formatCurrency } from "@/lib/utils";
 import { staggerChildren, slideUp } from "@/lib/animations";
 import Link from "next/link";
@@ -90,6 +93,11 @@ export default function UserAnalyticsPage() {
   const [balance, setBalance] = useState<BalanceData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tierData, setTierData] = useState<{
+    tier: { level: TierLevel; name: string; commissionRate: number; maxDailyTrades: number };
+    dailyTradeCount: number;
+    totalDeposited: number;
+  } | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -108,6 +116,7 @@ export default function UserAnalyticsPage() {
 
   useEffect(() => {
     fetchData();
+    fetch("/api/user/tier").then((r) => r.ok ? r.json() : null).then((d) => d && setTierData(d)).catch(() => {});
   }, [fetchData]);
 
   // Build chart data from transactions
@@ -174,7 +183,10 @@ export default function UserAnalyticsPage() {
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-1">Account Value</p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-white/70 text-xs font-medium tracking-wide uppercase">Account Value</p>
+                {tierData && <TierBadge tier={TIER_CONFIGS[tierData.tier.level]} size="sm" />}
+              </div>
               <p className="text-3xl md:text-4xl font-bold tabular-nums tracking-tight">
                 {formatCurrency(balance?.totalBalance || 0)}
               </p>
@@ -242,6 +254,28 @@ export default function UserAnalyticsPage() {
           delay={0.14}
         />
       </div>
+
+      {/* Tier Stats */}
+      {tierData && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+          {[
+            { label: "Tier", value: tierData.tier.name, iconColor: "text-amber-400", iconBg: "bg-amber-500/10", icon: Award },
+            { label: "Commission Rate", value: `${(tierData.tier.commissionRate * 100).toFixed(0)}%`, iconColor: "text-brand", iconBg: "bg-brand/10", icon: Zap },
+            { label: "Daily Trades", value: `${tierData.dailyTradeCount} / ${tierData.tier.maxDailyTrades === -1 ? "∞" : tierData.tier.maxDailyTrades}`, iconColor: "text-info", iconBg: "bg-info/10", icon: Activity },
+            { label: "Total Deposited", value: formatCurrency(tierData.totalDeposited), iconColor: "text-success", iconBg: "bg-success/10", icon: DollarSign },
+          ].map((item, idx) => (
+            <motion.div key={item.label} {...staggerChildren(0.14 + idx * 0.03)} className="glass-panel p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`p-1.5 rounded-lg ${item.iconBg}`}>
+                  <item.icon className={`w-3.5 h-3.5 ${item.iconColor}`} />
+                </div>
+                <span className="text-xs font-medium text-text-tertiary">{item.label}</span>
+              </div>
+              <p className="text-lg font-bold text-text-primary tabular-nums">{item.value}</p>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Balance breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">

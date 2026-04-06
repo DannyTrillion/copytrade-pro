@@ -4,14 +4,24 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { TrendingUp, Mail, Lock, ArrowRight, ShieldCheck, ArrowLeft, CheckCircle } from "lucide-react";
+import { TrendingUp, ArrowRight, ShieldCheck, ArrowLeft, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { FloatingParticles } from "@/components/ui/floating-particles";
 import { toast } from "@/components/ui/toast";
 import { FormField } from "@/components/ui/form-field";
 import { validateField, emailSchema } from "@/lib/validation";
 
 const ease = [0.22, 1, 0.36, 1] as const;
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.6, ease } },
+};
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -29,6 +39,7 @@ function LoginPageInner() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
@@ -54,7 +65,6 @@ function LoginPageInner() {
     });
 
     if (result?.error) {
-      // Check if the server requires a 2FA code
       if (result.error.includes("2FA_REQUIRED")) {
         setRequires2FA(true);
         setTwoFactorCode("");
@@ -88,282 +98,262 @@ function LoginPageInner() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-auth-bg)] flex relative overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
 
-      {/* Mobile solid dark background */}
-      <div className="absolute inset-0 bg-black lg:hidden pointer-events-none" />
+      {/* Floating particles */}
+      <FloatingParticles count={60} />
 
-      {/* ===== Desktop left panel — branding ===== */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="/hero-space.webp"
-            alt=""
-            fill
-            sizes="50vw"
-            className="object-cover object-[30%_80%]"
-            quality={90}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-auth-bg)]/40 via-transparent to-[var(--color-auth-bg)]/90" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/60 via-transparent to-[var(--color-auth-bg)]/40" />
-        </div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(41,98,255,0.12),transparent_70%)]" />
-        <div className="relative z-10 flex flex-col justify-center px-16">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-brand flex items-center justify-center shadow-glow">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-white">CopyTrade Pro</span>
-            </div>
-            <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              Professional Copy Trading
-              <br />
-              <span className="text-gradient">Made Simple</span>
-            </h1>
-            <p className="text-lg text-white/60 max-w-md">
-              Follow top traders, copy their signals automatically, and execute trades on Polymarket with institutional-grade infrastructure.
-            </p>
-            <div className="mt-10 grid grid-cols-3 gap-6">
-              {[
-                { label: "Active Traders", value: "48+" },
-                { label: "Total Volume", value: "$2.8M" },
-                { label: "Avg Win Rate", value: "68%" },
-              ].map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                >
-                  <p className="text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="text-xs text-white/40 uppercase tracking-wider mt-0.5">{stat.label}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+      {/* Dramatic silk/light gradient background — Resend-style */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top-right silk light */}
+        <div
+          className="absolute -top-[30%] -right-[10%] w-[70%] h-[80%] opacity-[0.15]"
+          style={{
+            background: "radial-gradient(ellipse at 60% 40%, rgba(180,190,210,0.6), rgba(120,130,150,0.2) 40%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
+        {/* Bottom-left silk light */}
+        <div
+          className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[70%] opacity-[0.1]"
+          style={{
+            background: "radial-gradient(ellipse at 40% 60%, rgba(160,170,190,0.5), rgba(100,110,130,0.15) 40%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        {/* Center subtle glow */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-[0.04]"
+          style={{
+            background: "radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%)",
+          }}
+        />
       </div>
 
-      {/* ===== Right panel / Mobile — form ===== */}
-      <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-center px-5 py-8 lg:px-12" style={{ background: "#080A12" }}>
-
-        {/* Decorative gradient background for desktop */}
-        <div className="absolute inset-0 hidden lg:block pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_rgba(41,98,255,0.06),transparent_70%)]" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_center,_rgba(38,166,154,0.04),transparent_70%)]" />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease }}
-          className="w-full max-w-[400px]"
+      {/* Back to home */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="absolute top-6 left-6 z-20"
+      >
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
         >
-          {/* Mobile branding header */}
+          <ArrowLeft className="w-4 h-4" />
+          Home
+        </Link>
+      </motion.div>
+
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 w-full max-w-[440px] px-6"
+      >
+        {/* Logo */}
+        <motion.div variants={fadeUp} className="flex flex-col items-center mb-12">
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease }}
-            className="lg:hidden flex flex-col items-center mb-8"
+            whileHover={{ scale: 1.08 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-5"
+            style={{
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 4px 24px rgba(0,0,0,0.4)",
+            }}
           >
-            <div className="w-14 h-14 rounded-2xl bg-brand flex items-center justify-center shadow-glow mb-3">
-              <TrendingUp className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-xl font-bold text-white">CopyTrade Pro</span>
-            <span className="text-xs text-[#888] mt-1">Professional Copy Trading Platform</span>
+            <TrendingUp className="w-7 h-7 text-black" />
           </motion.div>
-
-          {/* Card wrapper */}
-          <div className="auth-card">
-
-            <h2 className="text-2xl font-bold text-white lg:text-white mb-1">Welcome back</h2>
-            <p className="text-sm text-[#a1a1a1] lg:text-white/40 mb-8">Sign in to your account</p>
-
-            {/* Email verified success banner */}
-            {showVerifiedBanner && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
-              >
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <p className="text-sm text-emerald-300">Email verified! You can now log in.</p>
-              </motion.div>
-            )}
-
-            {/* Google OAuth */}
-            <motion.button
-              type="button"
-              disabled={isGoogleLoading}
-              onClick={() => {
-                setIsGoogleLoading(true);
-                signIn("google", { callbackUrl: "/dashboard" });
-              }}
-              whileTap={{ scale: 0.97 }}
-              className="auth-btn-google"
-            >
-              {isGoogleLoading ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <GoogleIcon className="w-5 h-5" />
-                  Continue with Google
-                </>
-              )}
-            </motion.button>
-
-            <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-[#222] lg:bg-[#1e1e2a]" />
-              <span className="text-xs text-[#a1a1a1] lg:text-white/40 uppercase tracking-wider">or</span>
-              <div className="flex-1 h-px bg-[#222] lg:bg-[#1e1e2a]" />
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <FormField label="Email" error={emailError} touched={emailTouched} valid={!emailError && !!email} errorId="login-email-error" labelClassName="text-[#a1a1a1] lg:text-white/50">
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={() => {
-                      setEmailTouched(true);
-                      const error = validateField(emailSchema, email);
-                      setEmailError(error || "");
-                    }}
-                    placeholder="trader@example.com"
-                    className="auth-input pl-10"
-                    autoComplete="email"
-                    required
-                    aria-required="true"
-                    aria-invalid={!!emailError}
-                    aria-describedby={emailError ? "login-email-error" : undefined}
-                  />
-                </div>
-              </FormField>
-
-              <div>
-                <label className="auth-label">Password</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="auth-input pl-10"
-                    autoComplete="current-password"
-                    required
-                    aria-required="true"
-                  />
-                </div>
-              </div>
-
-              {!requires2FA && (
-                <div className="flex justify-end -mt-1">
-                  <Link
-                    href="/reset-password"
-                    className="text-sm text-[#a1a1a1] lg:text-white/40 hover:text-brand transition-colors inline-flex items-center min-h-[44px] py-2 -my-2"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-              )}
-
-              {/* 2FA Code Input */}
-              {requires2FA && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <div className="bg-brand/5 border border-brand/10 rounded-lg p-3 mb-3">
-                    <div className="flex gap-2 items-center">
-                      <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
-                      <p className="text-xs text-[#a1a1a1] lg:text-white/50">
-                        Enter the 6-digit code from your authenticator app
-                      </p>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      value={twoFactorCode}
-                      onChange={(e) => {
-                        const cleaned = e.target.value.replace(/\D/g, "").slice(0, 6);
-                        setTwoFactorCode(cleaned);
-                      }}
-                      placeholder="000000"
-                      maxLength={6}
-                      className="auth-input text-center font-mono text-lg tracking-[0.3em] placeholder:tracking-[0.3em]"
-                      autoFocus
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRequires2FA(false);
-                      setTwoFactorCode("");
-                    }}
-                    className="flex items-center gap-1 text-xs text-[#a1a1a1] lg:text-white/40 hover:text-brand transition-colors mt-2 min-h-[44px] py-2 -my-2"
-                  >
-                    <ArrowLeft className="w-3 h-3" />
-                    Back to login
-                  </button>
-                </motion.div>
-              )}
-
-              <motion.button
-                type="submit"
-                disabled={isLoading || (requires2FA && twoFactorCode.length !== 6)}
-                whileTap={{ scale: 0.97 }}
-                className="auth-btn"
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : requires2FA ? (
-                  <>
-                    Verify & Sign In
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                ) : (
-                  <>
-                    Sign In
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </motion.button>
-            </form>
-
-            <p className="text-sm text-[#a1a1a1] lg:text-white/40 text-center mt-8">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-brand hover:text-brand-light transition-colors font-medium">
-                Create one
-              </Link>
-            </p>
-
-            {/* Trust signals */}
-            <div className="flex items-center justify-center gap-6 mt-8 pt-5 border-t border-[#1a1a1a] lg:mt-10 lg:pt-6 lg:border-white/[0.06]">
-              {[
-                { icon: ShieldCheck, text: "256-bit encryption" },
-                { icon: Lock, text: "SOC 2 compliant" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-1.5 text-[#666] lg:text-white/30">
-                  <item.icon className="w-3.5 h-3.5" />
-                  <span className="text-xs">{item.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </motion.div>
 
-        {/* Mobile bottom safe area spacer */}
-        <div className="lg:hidden h-8" />
-      </div>
+        {/* Heading */}
+        <motion.div variants={fadeUp} className="text-center mb-8">
+          <h1 className="text-[28px] font-semibold text-white tracking-tight leading-tight">
+            Log in to CopyTrade Pro
+          </h1>
+          <p className="text-sm text-white/40 mt-2">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-white/80 hover:text-white transition-colors font-medium">
+              Sign up
+            </Link>
+            .
+          </p>
+        </motion.div>
+
+        {/* Email verified success banner */}
+        {showVerifiedBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 p-3 mb-6 rounded-2xl"
+            style={{ boxShadow: "0 0 0 1px rgba(52,211,153,0.2)", background: "rgba(52,211,153,0.06)" }}
+          >
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+            <p className="text-sm text-emerald-300">Email verified! You can now log in.</p>
+          </motion.div>
+        )}
+
+        {/* Google OAuth */}
+        <motion.div variants={fadeUp}>
+          <motion.button
+            type="button"
+            disabled={isGoogleLoading}
+            onClick={() => {
+              setIsGoogleLoading(true);
+              signIn("google", { callbackUrl: "/dashboard" });
+            }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            className="auth-btn-google"
+          >
+            {isGoogleLoading ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <GoogleIcon className="w-5 h-5" />
+                Log in with Google
+              </>
+            )}
+          </motion.button>
+        </motion.div>
+
+        <motion.div variants={fadeUp} className="flex items-center gap-4 my-7">
+          <div className="flex-1 h-px bg-white/[0.08]" />
+          <span className="text-xs text-white/25 lowercase">or</span>
+          <div className="flex-1 h-px bg-white/[0.08]" />
+        </motion.div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <motion.div variants={fadeUp}>
+            <FormField label="Email" error={emailError} touched={emailTouched} valid={!emailError && !!email} errorId="login-email-error" labelClassName="text-white/40">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => {
+                  setEmailTouched(true);
+                  const error = validateField(emailSchema, email);
+                  setEmailError(error || "");
+                }}
+                placeholder="alan.turing@example.com"
+                className="auth-input"
+                autoComplete="email"
+                required
+                aria-required="true"
+                aria-invalid={!!emailError}
+                aria-describedby={emailError ? "login-email-error" : undefined}
+              />
+            </FormField>
+          </motion.div>
+
+          <motion.div variants={fadeUp}>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-medium text-white/40 tracking-wide uppercase">Password</label>
+              {!requires2FA && (
+                <Link
+                  href="/reset-password"
+                  className="text-xs text-white/40 hover:text-white/70 transition-colors font-medium"
+                >
+                  Forgot your password?
+                </Link>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="auth-input pr-11"
+                autoComplete="current-password"
+                required
+                aria-required="true"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors p-1"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </motion.div>
+
+          {/* 2FA Code Input */}
+          {requires2FA && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div
+                className="flex gap-2.5 items-center p-3.5 mb-4 rounded-2xl"
+                style={{ boxShadow: "0 0 0 1px rgba(41,98,255,0.15)", background: "rgba(41,98,255,0.04)" }}
+              >
+                <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
+                <p className="text-xs text-white/50">
+                  Enter the 6-digit code from your authenticator app
+                </p>
+              </div>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={twoFactorCode}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/\D/g, "").slice(0, 6);
+                  setTwoFactorCode(cleaned);
+                }}
+                placeholder="000000"
+                maxLength={6}
+                className="auth-input text-center font-mono text-lg tracking-[0.3em] placeholder:tracking-[0.3em]"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setRequires2FA(false);
+                  setTwoFactorCode("");
+                }}
+                className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors mt-3"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                Back to login
+              </button>
+            </motion.div>
+          )}
+
+          <motion.div variants={fadeUp}>
+            <motion.button
+              type="submit"
+              disabled={isLoading || (requires2FA && twoFactorCode.length !== 6)}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              className="auth-btn"
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : requires2FA ? (
+                <>
+                  Verify & Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              ) : (
+                "Log In"
+              )}
+            </motion.button>
+          </motion.div>
+        </form>
+
+        {/* Bottom legal text */}
+        <motion.p variants={fadeUp} className="text-2xs text-white/20 text-center mt-8">
+          By signing in, you agree to our{" "}
+          <span className="text-white/30 hover:text-white/50 transition-colors cursor-pointer">Terms</span>
+          {" "}and{" "}
+          <span className="text-white/30 hover:text-white/50 transition-colors cursor-pointer">Privacy Policy</span>.
+        </motion.p>
+      </motion.div>
     </div>
   );
 }

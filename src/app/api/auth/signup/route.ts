@@ -8,7 +8,7 @@ const signupSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2).max(100),
   password: z.string().min(8).max(128),
-  role: z.enum(["FOLLOWER", "MASTER_TRADER"]).default("FOLLOWER"),
+  role: z.literal("FOLLOWER").default("FOLLOWER"),
   referralCode: z.string().max(8).optional(),
 });
 
@@ -84,16 +84,9 @@ export async function POST(req: NextRequest) {
         email: normalizedEmail,
         name: data.name,
         passwordHash,
-        role: data.role,
+        role: "FOLLOWER",
         emailVerified: true, // Email was verified via OTP
         ...(referrerId && { referredBy: referrerId }),
-        ...(data.role === "MASTER_TRADER" && {
-          trader: {
-            create: {
-              displayName: data.name,
-            },
-          },
-        }),
       },
       select: {
         id: true,

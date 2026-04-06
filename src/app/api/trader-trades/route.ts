@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorizedResponse, errorResponse } from "@/lib/auth";
 import { z } from "zod";
 import { notifyTradeResult } from "@/lib/notifications";
+import { canReceiveTrade } from "@/lib/tiers";
 
 const uploadTradeSchema = z.object({
   tradeName: z.string().min(1, "Trade name is required").max(100),
@@ -125,10 +126,18 @@ export async function POST(req: NextRequest) {
     });
 
     let affectedCount = 0;
+    let skippedByTier = 0;
 
     for (const follower of followers) {
       const balance = follower.user.balance;
       if (!balance) continue;
+
+      // ── Tier-based daily trade limit check ──
+      const tradeCheck = await canReceiveTrade(follower.userId);
+      if (!tradeCheck.allowed) {
+        skippedByTier++;
+        continue;
+      }
 
       // Determine the base amount for PnL calculation:
       // Use allocatedBalance if > 0, otherwise fall back to totalBalance
@@ -142,7 +151,11 @@ export async function POST(req: NextRequest) {
       // allocationPercent from Follower record (default 100 = full allocation)
       const allocationPct = follower.allocationPercent ?? 100;
       const followerAllocation = baseAmount * (allocationPct / 100);
-      const followerPnl = followerAllocation * (data.resultPercent / 100);
+
+      // Apply tier-specific commission on profits
+      const rawPnl = followerAllocation * (data.resultPercent / 100);
+      const commission = rawPnl > 0 ? rawPnl * tradeCheck.tier.commissionRate : 0;
+      const followerPnl = rawPnl - commission;
 
       // Calculate new balances
       const newAllocated = Math.max(0, (balance.allocatedBalance > 0 ? balance.allocatedBalance : baseAmount) + followerPnl);
@@ -213,6 +226,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       trade: traderTrade,
       affectedFollowers: affectedCount,
+      skippedByTierLimit: skippedByTier,
     }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {

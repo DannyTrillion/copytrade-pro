@@ -12,6 +12,8 @@ import {
   XCircle,
   TrendingUp,
   Info,
+  Award,
+  Star,
 } from "lucide-react";
 
 interface Notification {
@@ -31,6 +33,8 @@ const TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
   COPY_APPROVED: CheckCircle2,
   COPY_REJECTED: XCircle,
   TRADE_RESULT: TrendingUp,
+  TIER_UPGRADE: Award,
+  MILESTONE: Star,
   SYSTEM: Info,
 };
 
@@ -41,6 +45,8 @@ const TYPE_COLORS: Record<string, string> = {
   COPY_APPROVED: "text-success bg-success/10",
   COPY_REJECTED: "text-danger bg-danger/10",
   TRADE_RESULT: "text-info bg-info/10",
+  TIER_UPGRADE: "text-amber-400 bg-amber-500/10",
+  MILESTONE: "text-purple-400 bg-purple-500/10",
   SYSTEM: "text-text-secondary bg-surface-3",
 };
 

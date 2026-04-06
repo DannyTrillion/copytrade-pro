@@ -11,6 +11,7 @@ import { OnboardingModal } from "@/components/onboarding/onboarding-modal";
 import { TraderOnboardingModal } from "@/components/onboarding/trader-onboarding-modal";
 import { ImpersonationBanner } from "@/components/admin/impersonation-banner";
 import { cn } from "@/lib/utils";
+import { DashboardParticles } from "@/components/ui/dashboard-particles";
 
 export default function DashboardLayout({
   children,
@@ -32,7 +33,8 @@ export default function DashboardLayout({
   const isImpersonating = !!(session as { isImpersonating?: boolean }).isImpersonating;
 
   return (
-    <div className="min-h-screen bg-surface-0 bg-mesh">
+    <div className="min-h-screen bg-surface-0 bg-mesh relative">
+      <DashboardParticles />
       <ImpersonationBanner />
       <Sidebar userRole={session.user.role} userName={session.user.name || "User"} />
       <TopBar title="CopyTrade Pro" />

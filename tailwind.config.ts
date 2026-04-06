@@ -68,6 +68,22 @@ const config: Config = {
           light: "#CE93D8",
           dark: "#8E24AA",
         },
+        gold: {
+          DEFAULT: "#D4AF37",
+          light: "#F5D76E",
+          dark: "#b8962e",
+          muted: "#AA9140",
+          50: "#FDF8E8",
+          100: "#F9EFC5",
+          200: "#F0D98A",
+          300: "#E5C350",
+          400: "#D4AF37",
+          500: "#b8962e",
+          600: "#957826",
+          700: "#725B1D",
+          800: "#4F3F14",
+          900: "#2C220A",
+        },
       },
       fontFamily: {
         sans: [

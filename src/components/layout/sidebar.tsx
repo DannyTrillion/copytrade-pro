@@ -8,7 +8,6 @@ import {
   Users,
   Signal,
   BarChart3,
-  TrendingUp,
   Copy,
   ChevronLeft,
   X,
@@ -28,7 +27,9 @@ import {
   Shield,
   Heart,
 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme/theme-provider";
 import { useDashboardStore } from "@/store/use-dashboard-store";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
@@ -166,6 +167,7 @@ interface SidebarProps {
 export function Sidebar({ userRole, userName }: SidebarProps) {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar, mobileSidebarOpen, setMobileSidebar } = useDashboardStore();
+  const { theme } = useTheme();
 
   // Each role gets its own dedicated nav
   const baseSections =
@@ -184,17 +186,24 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
       {/* Logo */}
       <div className="h-14 flex items-center justify-between px-4 border-b border-border">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center flex-shrink-0 shadow-glow transition-all duration-300 hover:scale-110 hover:shadow-[0_0_16px_rgba(41,98,255,0.4)] hover:rotate-[-4deg]">
-            <TrendingUp className="w-4 h-4 text-white transition-transform duration-300" />
-          </div>
-          {(sidebarOpen || isMobile) && (
-            <motion.span
-              initial={{ opacity: 0, x: -4 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="font-semibold text-text-primary whitespace-nowrap text-sm"
-            >
-              CopyTrade Pro
-            </motion.span>
+          {(sidebarOpen || isMobile) ? (
+            <Image
+              src={theme === "dark" ? "/logo-light.svg" : "/logo-dark.svg"}
+              alt="CopyTrade Pro"
+              width={150}
+              height={28}
+              className="h-6 w-auto"
+              priority
+            />
+          ) : (
+            <Image
+              src="/logo-icon.svg"
+              alt="CopyTrade Pro"
+              width={32}
+              height={32}
+              className="w-8 h-8 flex-shrink-0"
+              priority
+            />
           )}
         </div>
         {isMobile && (
@@ -283,12 +292,12 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
               <p className="text-sm font-medium text-text-primary truncate">{userName}</p>
               <p className="text-xs text-text-tertiary capitalize">{userRole.replace("_", " ").toLowerCase()}</p>
             </div>
-            <ThemeToggle />
+            <ThemeToggle dropdownPosition="above" />
           </motion.div>
         )}
         {!sidebarOpen && !isMobile && (
           <div className="flex justify-center py-1">
-            <ThemeToggle />
+            <ThemeToggle dropdownPosition="above" />
           </div>
         )}
         {!isMobile && (

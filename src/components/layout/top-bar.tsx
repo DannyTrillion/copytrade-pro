@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useDashboardStore } from "@/store/use-dashboard-store";
 import { LazyWalletButton } from "@/components/wallet/wallet-connect-lazy";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 interface TopBarProps {
   title: string;
@@ -46,6 +47,7 @@ export function TopBar({ title }: TopBarProps) {
           <Activity className="w-4 h-4" />
         </button>
         <NotificationDropdown />
+        <ThemeToggle />
         <LazyWalletButton compact />
         <div className="w-px h-5 bg-border mx-0.5 md:mx-1" />
         <button

@@ -34,6 +34,8 @@ import { SuiSlushForm } from "@/components/payment/sui-slush-form";
 import { toast } from "@/components/ui/toast";
 import { ScrollableTable } from "@/components/ui/scrollable-table";
 import { useRouter } from "next/navigation";
+import { TierProgress } from "@/components/ui/tier-progress";
+import { TIER_CONFIGS, type TierLevel } from "@/config/constants";
 
 // ─── Types ───
 interface DepositRequest {
@@ -195,6 +197,16 @@ export default function DepositPage() {
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
+  // Tier data
+  const [tierData, setTierData] = useState<{
+    tier: { level: TierLevel; name: string; label: string; color: string; maxDailyTrades: number; commissionRate: number; benefits: string[] };
+    totalDeposited: number;
+    dailyTradeCount: number;
+    dailyTradesRemaining: number;
+    nextTier: { name: string; minDeposit: number; amountNeeded: number } | null;
+    progress: number;
+  } | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const currentCoin = COINS.find((c) => c.id === selectedCoin);
 
@@ -218,6 +230,11 @@ export default function DepositPage() {
         setSummary(data.summary || null);
       }
     } catch { /* silent */ } finally { setLoading(false); }
+  }, []);
+
+  // Fetch tier data
+  useEffect(() => {
+    fetch("/api/user/tier").then((r) => r.ok ? r.json() : null).then((d) => d && setTierData(d)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -951,6 +968,24 @@ export default function DepositPage() {
 
           {/* Right sidebar */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }} className="space-y-4">
+            {/* Tier Progress */}
+            {tierData && (
+              <div className="glass-panel p-5">
+                <TierProgress
+                  tier={TIER_CONFIGS[tierData.tier.level]}
+                  totalDeposited={tierData.totalDeposited}
+                />
+                {tierData.tier.maxDailyTrades !== -1 && (
+                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs">
+                    <span className="text-text-tertiary">Trades today</span>
+                    <span className="text-text-primary font-medium tabular-nums">
+                      {tierData.dailyTradeCount} / {tierData.tier.maxDailyTrades}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Tracking ID */}
             <div className="glass-panel p-5">
               <div className="flex items-center gap-2.5 mb-3">

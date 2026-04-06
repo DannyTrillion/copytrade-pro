@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, unauthorizedResponse, forbiddenResponse, errorResponse } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { z } from "zod";
+import { getTotalDeposited, getTierFromAmount } from "@/lib/tiers";
+import { notifyTierUpgrade, notifyDeposit } from "@/lib/notifications";
 
 /**
  * GET — Admin dashboard stats + optional entity lists
@@ -630,6 +632,17 @@ export async function PATCH(req: NextRequest) {
             txHash: deposit.txHash || null,
           },
         });
+
+        // Notify user of confirmed deposit
+        notifyDeposit(deposit.userId, deposit.amount).catch(() => {});
+
+        // Check for tier upgrade
+        const prevDeposited = await getTotalDeposited(deposit.userId) - deposit.amount;
+        const prevTier = getTierFromAmount(Math.max(0, prevDeposited));
+        const newTier = getTierFromAmount(prevDeposited + deposit.amount);
+        if (newTier.level !== prevTier.level) {
+          notifyTierUpgrade(deposit.userId, newTier.name).catch(() => {});
+        }
       }
 
       await logAudit({ adminId, action: "REVIEW_DEPOSIT", targetType: "DEPOSIT", targetId: depositId, details: { status, amount: deposit.amount, userId: deposit.userId } });

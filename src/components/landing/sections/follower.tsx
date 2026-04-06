@@ -5,90 +5,71 @@ import { useRef } from "react";
 import Link from "next/link";
 import { Copy, Sliders, Zap, Shield, ArrowRight, TrendingUp } from "lucide-react";
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
 export function FollowerSection() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="relative py-24 lg:py-32" style={{ background: "#0A0D14" }} ref={ref}>
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+    <section className="relative py-24 lg:py-32" style={{ background: "#080A12" }} ref={ref}>
+      <div className="max-w-[1100px] mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left UI mockup */}
           <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, ease }}
           >
-            <div className="border border-white/[0.06] rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.4)]" style={{ background: "rgba(19,23,34,0.8)" }}>
-              {/* Header */}
-              <div className="px-6 py-4 border-b border-white/[0.06]">
-                <span className="text-xs font-semibold text-white/50">Copy Trading Panel</span>
+            <div className="border border-white/[0.06] rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <div className="px-5 py-3.5 border-b border-white/[0.06]">
+                <span className="text-xs font-medium text-white/40">Copy Trading Panel</span>
               </div>
 
-              {/* Trader cards */}
-              <div className="p-5 space-y-3">
+              <div className="p-4 space-y-3">
                 {[
-                  { name: "AlphaTrader", pnl: "+$45,230", winRate: "72.4%", followers: "1,243", change: [10, 15, 12, 18, 22, 20, 28, 25, 30, 35] },
-                  { name: "CryptoKing", pnl: "+$38,120", winRate: "68.1%", followers: "892", change: [8, 10, 14, 11, 16, 20, 18, 22, 24, 28] },
-                  { name: "MarketMaven", pnl: "+$29,840", winRate: "65.7%", followers: "654", change: [5, 8, 6, 12, 10, 15, 14, 18, 16, 20] },
+                  { name: "AlphaTrader", pnl: "+$45,230", winRate: "72.4%", followers: "1,243" },
+                  { name: "CryptoKing", pnl: "+$38,120", winRate: "68.1%", followers: "892" },
+                  { name: "MarketMaven", pnl: "+$29,840", winRate: "65.7%", followers: "654" },
                 ].map((trader, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={inView ? { opacity: 1, x: 0 } : {}}
-                    transition={{ delay: 0.25 + i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-5 hover:border-white/[0.12] transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between mb-3">
+                  <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 hover:border-white/[0.1] transition-colors duration-150">
+                    <div className="flex items-center justify-between mb-2.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-success flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-9 h-9 rounded-full bg-[#2962FF]/15 flex items-center justify-center text-[#2962FF] text-xs font-bold">
                           {trader.name[0]}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white">{trader.name}</p>
-                          <p className="text-2xs text-white/30">{trader.followers} followers</p>
+                          <p className="text-sm font-medium text-white">{trader.name}</p>
+                          <p className="text-[11px] text-white/30">{trader.followers} followers</p>
                         </div>
                       </div>
-                      <button className="px-4 py-2 text-xs font-semibold bg-brand text-white rounded-full hover:bg-brand-dark transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30">
+                      <button className="px-3.5 py-1.5 text-xs font-medium bg-[#2962FF] text-white rounded-full hover:bg-[#1a4fd4] transition-colors duration-150">
                         Copy
                       </button>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-success font-semibold">{trader.pnl} PnL</span>
-                        <span className="text-xs text-white/50">{trader.winRate} win</span>
-                      </div>
-                      <svg width="60" height="20" viewBox="0 0 60 20" className="text-success">
-                        <polyline
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points={trader.change.map((v, j) => `${j * 6.6},${20 - v * 0.55}`).join(" ")}
-                        />
-                      </svg>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs text-[#26A69A] font-medium">{trader.pnl} PnL</span>
+                      <span className="text-xs text-white/40">{trader.winRate} win</span>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
 
-              {/* Risk controls */}
-              <div className="px-5 pb-5">
-                <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-5">
+              <div className="px-4 pb-4">
+                <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-semibold text-white/50">Risk Settings</span>
-                    <span className="text-xs font-medium text-success bg-success/10 px-2.5 py-0.5 rounded-md">Protected</span>
+                    <span className="text-xs font-medium text-white/40">Risk Settings</span>
+                    <span className="text-[11px] font-medium text-[#26A69A] bg-[#26A69A]/10 px-2 py-0.5 rounded">Protected</span>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {[
                       { label: "Risk per Trade", value: "2%" },
                       { label: "Max Trade Size", value: "$1,000" },
                       { label: "Max Daily Loss", value: "$5,000" },
                     ].map((setting, i) => (
                       <div key={i} className="flex items-center justify-between">
-                        <span className="text-xs text-white/50">{setting.label}</span>
-                        <span className="text-xs font-mono font-semibold text-white">{setting.value}</span>
+                        <span className="text-xs text-white/40">{setting.label}</span>
+                        <span className="text-xs font-mono font-medium text-white">{setting.value}</span>
                       </div>
                     ))}
                   </div>
@@ -99,47 +80,38 @@ export function FollowerSection() {
 
           {/* Right content */}
           <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.1, ease }}
           >
-            <span className="inline-block text-xs font-semibold text-brand uppercase tracking-widest mb-4">For Followers</span>
-            <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-bold text-white leading-tight mb-5">
-              Trade Like a Pro.{" "}
-              <span className="bg-gradient-to-r from-brand to-accent bg-clip-text text-transparent">
-                Without the Work.
-              </span>
+            <span className="inline-block text-xs font-medium text-white/40 uppercase tracking-[0.2em] mb-4">For Followers</span>
+            <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-bold text-white leading-tight mb-4">
+              Trade Like a Pro. Without the Work.
             </h2>
-            <p className="text-base text-white/50 mb-10 leading-relaxed">
+            <p className="text-base text-white/50 mb-8 leading-relaxed">
               No chart reading. No signal watching. Just connect, configure your risk, and let the platform handle everything.
             </p>
 
-            <div className="space-y-4 mb-10">
+            <div className="space-y-3.5 mb-8">
               {[
-                { icon: Copy, text: "Copy trades from verified top performers", color: "#2962FF", bgColor: "bg-brand-50" },
-                { icon: Sliders, text: "Set your own risk percentage and limits", color: "#26A69A", bgColor: "bg-success/10" },
-                { icon: Zap, text: "Zero manual trading — fully automated", color: "#FF9800", bgColor: "bg-warning/10" },
-                { icon: Shield, text: "Full control — pause or stop anytime", color: "#EF5350", bgColor: "bg-danger/10" },
-                { icon: TrendingUp, text: "Real-time performance tracking and PnL", color: "#AB47BC", bgColor: "bg-accent/10" },
+                { icon: Copy, text: "Copy trades from verified top performers" },
+                { icon: Sliders, text: "Set your own risk percentage and limits" },
+                { icon: Zap, text: "Zero manual trading — fully automated" },
+                { icon: Shield, text: "Full control — pause or stop anytime" },
+                { icon: TrendingUp, text: "Real-time performance tracking and PnL" },
               ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 12 }}
-                  animate={inView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: 0.25 + i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex items-center gap-4"
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${item.bgColor}`}>
-                    <item.icon className="w-4.5 h-4.5" style={{ color: item.color }} />
+                <div key={i} className="flex items-center gap-3.5">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#2962FF]/10">
+                    <item.icon className="w-4 h-4 text-[#2962FF]" />
                   </div>
-                  <span className="text-sm text-white/60">{item.text}</span>
-                </motion.div>
+                  <span className="text-sm text-white/55">{item.text}</span>
+                </div>
               ))}
             </div>
 
             <Link
               href="/signup"
-              className="group inline-flex items-center gap-2 px-7 py-3 bg-brand hover:bg-brand-dark text-white font-semibold text-sm rounded-full transition-all duration-200 hover:shadow-glow active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+              className="group inline-flex items-center gap-2 px-7 py-3 bg-[#2962FF] text-white font-semibold text-sm rounded-full hover:bg-[#1a4fd4] transition-colors duration-200 active:scale-[0.97]"
             >
               Start Copy Trading
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

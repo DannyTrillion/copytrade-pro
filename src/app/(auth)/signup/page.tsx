@@ -4,26 +4,32 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
-  Mail,
-  Lock,
-  User,
   ArrowRight,
   ArrowLeft,
-  Shield,
   Eye,
   EyeOff,
   Loader2,
   CheckCircle2,
 } from "lucide-react";
+import { FloatingParticles } from "@/components/ui/floating-particles";
 import { toast } from "@/components/ui/toast";
 import { FormField, PasswordStrengthMeter } from "@/components/ui/form-field";
 import { validateField, emailSchema, passwordSchema, nameSchema } from "@/lib/validation";
 
 const ease = [0.22, 1, 0.36, 1] as const;
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.6, ease } },
+};
 
 type Step = "email" | "otp" | "details";
 
@@ -41,7 +47,6 @@ function GoogleIcon({ className }: { className?: string }) {
 export default function SignupPage() {
   const router = useRouter();
 
-  // Step state
   const [step, setStep] = useState<Step>("email");
 
   // Email step
@@ -57,7 +62,7 @@ export default function SignupPage() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Details step
-  const [form, setForm] = useState({ name: "", password: "", role: "FOLLOWER" });
+  const [form, setForm] = useState({ name: "", password: "" });
   const [touched, setTouched] = useState({ name: false, password: false });
   const [fieldErrors, setFieldErrors] = useState({ name: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +76,6 @@ export default function SignupPage() {
     setFieldErrors((prev) => ({ ...prev, [field]: error }));
   };
 
-  // ─── Resend cooldown timer ───
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => {
@@ -80,7 +84,6 @@ export default function SignupPage() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  // ─── Step 1: Send OTP ───
   const handleSendOtp = useCallback(async () => {
     const error = validateField(emailSchema, email);
     if (error) {
@@ -109,7 +112,6 @@ export default function SignupPage() {
       setOtpDigits(["", "", "", "", "", ""]);
       setOtpError("");
       setResendCooldown(60);
-      // Focus first OTP input after transition
       setTimeout(() => inputRefs.current[0]?.focus(), 300);
     } catch {
       setEmailError("Something went wrong. Please try again.");
@@ -118,7 +120,6 @@ export default function SignupPage() {
     }
   }, [email]);
 
-  // ─── Step 2: Verify OTP ───
   const handleVerifyOtp = useCallback(async (code: string) => {
     if (code.length !== 6) return;
     setOtpError("");
@@ -139,7 +140,6 @@ export default function SignupPage() {
         return;
       }
 
-      // Success → move to details step
       setStep("details");
     } catch {
       setOtpError("Something went wrong. Please try again.");
@@ -148,14 +148,12 @@ export default function SignupPage() {
     }
   }, [email]);
 
-  // ─── OTP input handlers ───
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
 
     const newDigits = [...otpDigits];
 
     if (value.length > 1) {
-      // Handle paste
       const pasted = value.slice(0, 6).split("");
       pasted.forEach((d, i) => {
         if (index + i < 6) newDigits[index + i] = d;
@@ -165,23 +163,17 @@ export default function SignupPage() {
       inputRefs.current[nextIndex]?.focus();
 
       const fullCode = newDigits.join("");
-      if (fullCode.length === 6) {
-        handleVerifyOtp(fullCode);
-      }
+      if (fullCode.length === 6) handleVerifyOtp(fullCode);
       return;
     }
 
     newDigits[index] = value;
     setOtpDigits(newDigits);
 
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
+    if (value && index < 5) inputRefs.current[index + 1]?.focus();
 
     const fullCode = newDigits.join("");
-    if (fullCode.length === 6) {
-      handleVerifyOtp(fullCode);
-    }
+    if (fullCode.length === 6) handleVerifyOtp(fullCode);
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
@@ -190,7 +182,6 @@ export default function SignupPage() {
     }
   };
 
-  // ─── Step 3: Complete signup ───
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -203,7 +194,6 @@ export default function SignupPage() {
           email: email.trim(),
           name: form.name,
           password: form.password,
-          role: form.role,
         }),
       });
 
@@ -223,16 +213,13 @@ export default function SignupPage() {
         return;
       }
 
-      const dashboardPath =
-        form.role === "MASTER_TRADER" ? "/dashboard/trader" : "/dashboard/follower";
-      router.push(dashboardPath);
+      router.push("/dashboard/follower");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Signup failed");
       setIsLoading(false);
     }
   };
 
-  // ─── Step indicator ───
   const steps: { key: Step; label: string }[] = [
     { key: "email", label: "Email" },
     { key: "otp", label: "Verify" },
@@ -241,445 +228,464 @@ export default function SignupPage() {
   const currentStepIndex = steps.findIndex((s) => s.key === step);
 
   return (
-    <div className="min-h-screen bg-[var(--color-auth-bg)] flex relative overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
 
-      {/* Mobile solid dark background */}
-      <div className="absolute inset-0 bg-black lg:hidden pointer-events-none" />
+      {/* Floating particles */}
+      <FloatingParticles count={60} />
 
-      {/* ===== Desktop left panel ===== */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <Image src="/hero-space.webp" alt="" fill sizes="50vw" className="object-cover object-[30%_80%]" quality={90} />
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-auth-bg)]/40 via-transparent to-[var(--color-auth-bg)]/90" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-auth-bg)]/60 via-transparent to-[var(--color-auth-bg)]/40" />
-        </div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(38,166,154,0.12),transparent_70%)]" />
-        <div className="relative z-10 flex flex-col justify-center px-16">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-brand flex items-center justify-center shadow-glow">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-white">CopyTrade Pro</span>
-            </div>
-            <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              Start Trading<br /><span className="text-gradient">Like a Pro</span>
-            </h1>
-            <p className="text-lg text-white/60 max-w-md">
-              Join the platform trusted by professional traders. Copy trades automatically or share your signals and earn from followers.
-            </p>
-            <div className="mt-10 space-y-4">
-              {[
-                { icon: Shield, text: "Bank-grade security for your assets" },
-                { icon: TrendingUp, text: "Real-time signal execution" },
-                { icon: User, text: "Follow verified top traders" },
-              ].map((item, i) => (
-                <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.1 }} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center border border-brand/20">
-                    <item.icon className="w-4 h-4 text-brand" />
-                  </div>
-                  <span className="text-sm text-white/60">{item.text}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+      {/* Dramatic silk/light gradient background — Resend-style */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div
+          className="absolute -top-[30%] -right-[10%] w-[70%] h-[80%] opacity-[0.15]"
+          style={{
+            background: "radial-gradient(ellipse at 60% 40%, rgba(180,190,210,0.6), rgba(120,130,150,0.2) 40%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
+        <div
+          className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[70%] opacity-[0.1]"
+          style={{
+            background: "radial-gradient(ellipse at 40% 60%, rgba(160,170,190,0.5), rgba(100,110,130,0.15) 40%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-[0.04]"
+          style={{ background: "radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%)" }}
+        />
       </div>
 
-      {/* ===== Right panel / Mobile ===== */}
-      <div className="relative z-10 w-full lg:w-1/2 flex flex-col items-center justify-start pt-10 pb-8 lg:justify-center lg:pt-0 px-5 lg:px-12 lg:bg-[#080A12] overflow-y-auto">
-        {/* Desktop gradient decoration */}
-        <div className="absolute inset-0 hidden lg:block pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,_rgba(38,166,154,0.04),transparent_70%)]" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_center,_rgba(41,98,255,0.03),transparent_70%)]" />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease }}
-          className="w-full max-w-[400px]"
+      {/* Back to home */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="absolute top-6 left-6 z-20"
+      >
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
         >
-          {/* Mobile branding */}
+          <ArrowLeft className="w-4 h-4" />
+          Home
+        </Link>
+      </motion.div>
+
+      <motion.div
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 w-full max-w-[440px] px-6 py-10"
+      >
+        {/* Logo */}
+        <motion.div variants={fadeUp} className="flex flex-col items-center mb-10">
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease }}
-            className="lg:hidden flex flex-col items-center mb-6"
+            whileHover={{ scale: 1.08 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-5"
+            style={{
+              boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 4px 24px rgba(0,0,0,0.4)",
+            }}
           >
-            <div className="w-14 h-14 rounded-2xl bg-brand flex items-center justify-center shadow-glow mb-3">
-              <TrendingUp className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-xl font-bold text-white">CopyTrade Pro</span>
+            <TrendingUp className="w-7 h-7 text-black" />
           </motion.div>
+        </motion.div>
 
-          {/* Glass card */}
-          <div className="auth-card">
-
-              {/* Step indicator */}
-              <div className="flex items-center gap-3 mb-8">
-                {steps.map((s, i) => (
-                  <div key={s.key} className="flex items-center gap-3 flex-1">
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
-                          i < currentStepIndex
-                            ? "bg-brand text-white shadow-[0_0_12px_rgba(41,98,255,0.25)]"
-                            : i === currentStepIndex
-                            ? "bg-brand/15 text-brand ring-2 ring-brand/30"
-                            : "bg-[#1a1a1a] text-[#555] lg:bg-white/[0.04] lg:text-white/40"
-                        }`}
-                      >
-                        {i < currentStepIndex ? (
-                          <CheckCircle2 className="w-4 h-4" />
-                        ) : (
-                          i + 1
-                        )}
-                      </div>
-                      <span className={`text-2xs font-medium transition-colors duration-300 ${
-                        i <= currentStepIndex ? "text-[#a1a1a1] lg:text-white/50" : "text-[#555] lg:text-white/40"
-                      }`}>{s.label}</span>
-                    </div>
-                    {i < steps.length - 1 && (
-                      <div className={`flex-1 h-px transition-colors duration-500 mb-5 ${
-                        i < currentStepIndex ? "bg-brand" : "bg-[#222] lg:bg-[#1e1e2a]"
-                      }`} />
-                    )}
-                  </div>
-                ))}
+        {/* Step indicator — minimal dots */}
+        <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 mb-10">
+          {steps.map((s, i) => (
+            <div key={s.key} className="flex items-center gap-3">
+              <div className="flex flex-col items-center gap-1.5">
+                <motion.div
+                  animate={{
+                    scale: i === currentStepIndex ? 1 : 0.85,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
+                    i < currentStepIndex
+                      ? "bg-white text-black"
+                      : i === currentStepIndex
+                      ? "text-white"
+                      : "text-white/25"
+                  }`}
+                  style={{
+                    boxShadow: i <= currentStepIndex
+                      ? "0 0 0 1px rgba(255,255,255,0.2)"
+                      : "0 0 0 1px rgba(255,255,255,0.06)",
+                  }}
+                >
+                  {i < currentStepIndex ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    i + 1
+                  )}
+                </motion.div>
+                <span className={`text-[10px] font-medium transition-colors duration-300 ${
+                  i <= currentStepIndex ? "text-white/50" : "text-white/20"
+                }`}>{s.label}</span>
               </div>
+              {i < steps.length - 1 && (
+                <motion.div
+                  animate={{
+                    background: i < currentStepIndex
+                      ? "rgba(255,255,255,0.4)"
+                      : "rgba(255,255,255,0.06)",
+                  }}
+                  transition={{ duration: 0.5 }}
+                  className="w-12 h-px mb-5"
+                />
+              )}
+            </div>
+          ))}
+        </motion.div>
 
-              <AnimatePresence mode="wait">
-                {/* ═══ Step 1: Email ═══ */}
-                {step === "email" && (
-                  <motion.div
-                    key="email-step"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.25, ease }}
+        <AnimatePresence mode="wait">
+          {/* Step 1: Email */}
+          {step === "email" && (
+            <motion.div
+              key="email-step"
+              initial={{ opacity: 0, x: 24, filter: "blur(6px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -24, filter: "blur(6px)" }}
+              transition={{ duration: 0.35, ease }}
+            >
+              <motion.div variants={stagger} initial="hidden" animate="show">
+                <motion.div variants={fadeUp} className="text-center mb-8">
+                  <h1 className="text-[28px] font-semibold text-white tracking-tight leading-tight">
+                    Create your account
+                  </h1>
+                  <p className="text-sm text-white/40 mt-2">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-white/80 hover:text-white transition-colors font-medium">
+                      Sign in
+                    </Link>
+                    .
+                  </p>
+                </motion.div>
+
+                {/* Google OAuth */}
+                <motion.div variants={fadeUp}>
+                  <motion.button
+                    type="button"
+                    disabled={isGoogleLoading}
+                    onClick={() => {
+                      setIsGoogleLoading(true);
+                      signIn("google", { callbackUrl: "/dashboard" });
+                    }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="auth-btn-google"
                   >
-                    <h2 className="text-2xl font-bold text-white lg:text-white mb-1">
-                      Create your account
-                    </h2>
-                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 mb-6">
-                      Enter your email to get started
-                    </p>
+                    {isGoogleLoading ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <GoogleIcon className="w-5 h-5" />
+                        Sign up with Google
+                      </>
+                    )}
+                  </motion.button>
+                </motion.div>
 
-                    {/* Google OAuth */}
+                <motion.div variants={fadeUp} className="flex items-center gap-4 my-7">
+                  <div className="flex-1 h-px bg-white/[0.08]" />
+                  <span className="text-xs text-white/25 lowercase">or</span>
+                  <div className="flex-1 h-px bg-white/[0.08]" />
+                </motion.div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendOtp();
+                  }}
+                  className="space-y-5"
+                >
+                  <motion.div variants={fadeUp}>
+                    <FormField label="Email" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-white/40">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (emailError) setEmailError("");
+                        }}
+                        placeholder="alan.turing@example.com"
+                        className="auth-input"
+                        autoComplete="email"
+                        autoFocus
+                        required
+                        disabled={sendingOtp}
+                      />
+                    </FormField>
+                  </motion.div>
+
+                  <motion.div variants={fadeUp}>
                     <motion.button
-                      type="button"
-                      disabled={isGoogleLoading}
-                      onClick={() => {
-                        setIsGoogleLoading(true);
-                        signIn("google", { callbackUrl: "/dashboard" });
-                      }}
-                      whileTap={{ scale: 0.97 }}
-                      className="auth-btn-google"
+                      type="submit"
+                      disabled={sendingOtp || !email.trim()}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="auth-btn"
                     >
-                      {isGoogleLoading ? (
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      {sendingOtp ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <>
-                          <GoogleIcon className="w-5 h-5" />
-                          Continue with Google
+                          Continue
+                          <ArrowRight className="w-4 h-4" />
                         </>
                       )}
                     </motion.button>
+                  </motion.div>
+                </form>
 
-                    <div className="flex items-center gap-3 my-5">
-                      <div className="flex-1 h-px bg-[#222] lg:bg-[#1e1e2a]" />
-                      <span className="text-xs text-[#a1a1a1] lg:text-white/40 uppercase tracking-wider">or</span>
-                      <div className="flex-1 h-px bg-[#222] lg:bg-[#1e1e2a]" />
-                    </div>
+                <motion.p variants={fadeUp} className="text-2xs text-white/20 text-center mt-6">
+                  By signing up, you agree to our{" "}
+                  <span className="text-white/30 hover:text-white/50 transition-colors cursor-pointer">Terms</span>
+                  {" "}and{" "}
+                  <span className="text-white/30 hover:text-white/50 transition-colors cursor-pointer">Privacy Policy</span>.
+                </motion.p>
+              </motion.div>
+            </motion.div>
+          )}
 
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleSendOtp();
+          {/* Step 2: OTP */}
+          {step === "otp" && (
+            <motion.div
+              key="otp-step"
+              initial={{ opacity: 0, x: 24, filter: "blur(6px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -24, filter: "blur(6px)" }}
+              transition={{ duration: 0.35, ease }}
+            >
+              <motion.div variants={stagger} initial="hidden" animate="show">
+                <motion.div variants={fadeUp}>
+                  <button
+                    type="button"
+                    onClick={() => setStep("email")}
+                    className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white/60 transition-colors mb-6"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    Back
+                  </button>
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="text-center mb-8">
+                  <h1 className="text-[28px] font-semibold text-white tracking-tight leading-tight">
+                    Check your email
+                  </h1>
+                  <p className="text-sm text-white/40 mt-2">
+                    We sent a 6-digit code to{" "}
+                    <span className="text-white/60 font-medium">{email}</span>
+                  </p>
+                </motion.div>
+
+                {/* OTP inputs */}
+                <motion.div variants={fadeUp} className="flex items-center justify-center gap-2.5 mb-5">
+                  {otpDigits.map((digit, i) => (
+                    <motion.input
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.15 + i * 0.05, duration: 0.3, ease }}
+                      ref={(el) => { inputRefs.current[i] = el; }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      onPaste={(e) => {
+                        const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                        if (pasted.length > 1) {
+                          e.preventDefault();
+                          handleOtpChange(0, pasted);
+                        }
                       }}
-                      className="space-y-5"
-                    >
-                      <FormField label="Email address" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-[#a1a1a1] lg:text-white/50">
-                        <div className="relative">
-                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
-                          <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => {
-                              setEmail(e.target.value);
-                              if (emailError) setEmailError("");
-                            }}
-                            placeholder="trader@example.com"
-                            className="auth-input pl-10"
-                            autoComplete="email"
-                            autoFocus
-                            required
-                            disabled={sendingOtp}
-                          />
-                        </div>
-                      </FormField>
+                      disabled={verifyingOtp}
+                      className={`w-[52px] h-[60px] text-center text-2xl font-semibold rounded-2xl outline-none transition-all duration-200
+                        ${
+                          otpError
+                            ? "text-red-400"
+                            : digit
+                            ? "text-white"
+                            : "text-white"
+                        }
+                        disabled:opacity-50
+                      `}
+                      style={{
+                        background: "transparent",
+                        boxShadow: otpError
+                          ? "0 0 0 1px rgba(239,68,68,0.4)"
+                          : digit
+                          ? "0 0 0 1px rgba(255,255,255,0.3), 0 0 0 4px rgba(255,255,255,0.04)"
+                          : "0 0 0 1px rgba(255,255,255,0.12)",
+                      }}
+                      onFocus={(e) => {
+                        (e.target as HTMLInputElement).style.boxShadow = "0 0 0 1px rgba(255,255,255,0.4), 0 0 0 4px rgba(255,255,255,0.06)";
+                      }}
+                      onBlur={(e) => {
+                        const d = (e.target as HTMLInputElement).value;
+                        (e.target as HTMLInputElement).style.boxShadow = d
+                          ? "0 0 0 1px rgba(255,255,255,0.3), 0 0 0 4px rgba(255,255,255,0.04)"
+                          : "0 0 0 1px rgba(255,255,255,0.12)";
+                      }}
+                      aria-label={`Digit ${i + 1}`}
+                    />
+                  ))}
+                </motion.div>
 
-                      <motion.button
-                        type="submit"
-                        disabled={sendingOtp || !email.trim()}
-                        whileTap={{ scale: 0.97 }}
-                        className="auth-btn"
-                      >
-                        {sendingOtp ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            Continue
-                            <ArrowRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </motion.button>
-                    </form>
+                {otpError && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-400 text-center mb-4"
+                  >
+                    {otpError}
+                  </motion.p>
+                )}
 
-                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 text-center mt-5">
-                      Already have an account?{" "}
-                      <Link href="/login" className="text-brand hover:text-brand-light transition-colors font-medium">
-                        Sign in
-                      </Link>
-                    </p>
-                    <p className="text-2xs text-[#666] lg:text-white/30 text-center mt-4">
-                      By signing up, you agree to our Terms & Privacy Policy
-                    </p>
+                {verifyingOtp && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center justify-center gap-2 mb-4"
+                  >
+                    <Loader2 className="w-4 h-4 animate-spin text-white/50" />
+                    <span className="text-sm text-white/40">Verifying...</span>
                   </motion.div>
                 )}
 
-                {/* ═══ Step 2: OTP ═══ */}
-                {step === "otp" && (
-                  <motion.div
-                    key="otp-step"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.25, ease }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setStep("email")}
-                      className="flex items-center gap-1.5 text-sm text-[#a1a1a1] hover:text-white/80 lg:text-white/40 lg:hover:text-white/60 transition-colors mb-4"
-                    >
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                      Back
-                    </button>
-
-                    <h2 className="text-2xl font-bold text-white lg:text-white mb-1">
-                      Check your email
-                    </h2>
-                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 mb-6">
-                      We sent a 6-digit code to{" "}
-                      <span className="text-white/80 lg:text-white/50 font-medium">{email}</span>
-                    </p>
-
-                    {/* OTP inputs */}
-                    <div className="flex items-center justify-center gap-1.5 xs:gap-2 mb-4">
-                      {otpDigits.map((digit, i) => (
-                        <input
-                          key={i}
-                          ref={(el) => { inputRefs.current[i] = el; }}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={6}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(i, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                          onPaste={(e) => {
-                            const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-                            if (pasted.length > 1) {
-                              e.preventDefault();
-                              handleOtpChange(0, pasted);
-                            }
-                          }}
-                          disabled={verifyingOtp}
-                          className={`w-11 h-12 xs:w-[52px] xs:h-[60px] text-center text-xl xs:text-2xl font-bold rounded-lg xs:rounded-xl border-2 transition-all duration-200 outline-none
-                            ${
-                              otpError
-                                ? "border-danger/40 bg-danger/5 text-danger"
-                                : digit
-                                ? "border-brand/40 bg-brand/[0.08] text-white lg:text-white"
-                                : "border-[#222] bg-[#0a0a0a] text-white lg:text-white lg:border-[#1e1e2a] lg:bg-[#080A12]"
-                            }
-                            focus:border-brand focus:ring-2 focus:ring-brand/20 focus:bg-brand/[0.04]
-                            disabled:opacity-50
-                          `}
-                          aria-label={`Digit ${i + 1}`}
-                        />
-                      ))}
-                    </div>
-
-                    {/* OTP error */}
-                    {otpError && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-danger text-center mb-4"
+                <motion.div variants={fadeUp} className="text-center">
+                  <p className="text-sm text-white/40">
+                    Didn&apos;t receive the code?{" "}
+                    {resendCooldown > 0 ? (
+                      <span className="text-white/50 tabular-nums">
+                        Resend in {resendCooldown}s
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={sendingOtp}
+                        className="text-white/80 hover:text-white transition-colors font-medium"
                       >
-                        {otpError}
-                      </motion.p>
+                        Resend code
+                      </button>
                     )}
+                  </p>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
 
-                    {/* Verifying indicator */}
-                    {verifyingOtp && (
-                      <div className="flex items-center justify-center gap-2 mb-4">
-                        <Loader2 className="w-4 h-4 animate-spin text-brand" />
-                        <span className="text-sm text-[#a1a1a1] lg:text-white/40">Verifying...</span>
-                      </div>
-                    )}
-
-                    {/* Resend */}
-                    <div className="text-center">
-                      <p className="text-sm text-[#a1a1a1] lg:text-white/40">
-                        Didn&apos;t receive the code?{" "}
-                        {resendCooldown > 0 ? (
-                          <span className="text-[#a1a1a1] lg:text-white/50 tabular-nums">
-                            Resend in {resendCooldown}s
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={handleSendOtp}
-                            disabled={sendingOtp}
-                            className="text-brand hover:text-brand-light transition-colors font-medium"
-                          >
-                            Resend code
-                          </button>
-                        )}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* ═══ Step 3: Details ═══ */}
-                {step === "details" && (
-                  <motion.div
-                    key="details-step"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.25, ease }}
+          {/* Step 3: Details */}
+          {step === "details" && (
+            <motion.div
+              key="details-step"
+              initial={{ opacity: 0, x: 24, filter: "blur(6px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -24, filter: "blur(6px)" }}
+              transition={{ duration: 0.35, ease }}
+            >
+              <motion.div variants={stagger} initial="hidden" animate="show">
+                <motion.div variants={fadeUp} className="flex items-center justify-center gap-2 mb-5">
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                    style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
                   >
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand/10 border border-brand/20">
-                        <CheckCircle2 className="w-3 h-3 text-brand" />
-                        <span className="text-2xs font-medium text-brand">{email}</span>
-                      </div>
-                    </div>
+                    <CheckCircle2 className="w-3 h-3 text-white/60" />
+                    <span className="text-xs font-medium text-white/60">{email}</span>
+                  </div>
+                </motion.div>
 
-                    <h2 className="text-2xl font-bold text-white lg:text-white mb-1">
-                      Complete your profile
-                    </h2>
-                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 mb-6">
-                      Set up your name, password, and account type
-                    </p>
+                <motion.div variants={fadeUp} className="text-center mb-8">
+                  <h1 className="text-[28px] font-semibold text-white tracking-tight leading-tight">
+                    Complete your profile
+                  </h1>
+                  <p className="text-sm text-white/40 mt-2">
+                    Set up your name, password, and account type
+                  </p>
+                </motion.div>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                      <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-[#a1a1a1] lg:text-white/50">
-                        <div className="relative">
-                          <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
-                          <input
-                            type="text"
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            onBlur={() => { setTouched((p) => ({ ...p, name: true })); validateOnBlur("name"); }}
-                            placeholder="John Doe"
-                            className="auth-input pl-10"
-                            autoComplete="name"
-                            autoFocus
-                            required
-                            minLength={2}
-                            disabled={isLoading}
-                          />
-                        </div>
-                      </FormField>
-
-                      <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-[#a1a1a1] lg:text-white/50">
-                        <div className="relative">
-                          <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666] lg:text-white/40" />
-                          <input
-                            type={showPassword ? "text" : "password"}
-                            value={form.password}
-                            onChange={(e) => setForm({ ...form, password: e.target.value })}
-                            onBlur={() => { setTouched((p) => ({ ...p, password: true })); validateOnBlur("password"); }}
-                            placeholder="Min 8 characters"
-                            className="auth-input pl-10 pr-10"
-                            autoComplete="new-password"
-                            required
-                            minLength={8}
-                            disabled={isLoading}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888] hover:text-white/70 lg:text-white/40 lg:hover:text-white/60 transition-colors"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                          >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                        <PasswordStrengthMeter password={form.password} />
-                      </FormField>
-
-                      <div>
-                        <label className="auth-label">I want to</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
-                            { value: "FOLLOWER", label: "Copy Trades", desc: "Follow top traders" },
-                            { value: "MASTER_TRADER", label: "Share Signals", desc: "Become a trader" },
-                          ].map((option) => (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => setForm({ ...form, role: option.value })}
-                              className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                                form.role === option.value
-                                  ? "border-brand bg-brand/[0.06] shadow-[0_0_16px_rgba(41,98,255,0.1)] lg:bg-brand/5"
-                                  : "border-[#222] bg-[#0a0a0a] hover:bg-[#111] hover:border-[#333] lg:border-[#1e1e2a] lg:bg-[#080A12] lg:hover:bg-surface-2 lg:hover:border-[#2a2a3a]"
-                              }`}
-                            >
-                              <p className={`text-sm font-medium ${form.role === option.value ? "text-brand" : "text-[#ccc] lg:text-white"}`}>
-                                {option.label}
-                              </p>
-                              <p className="text-2xs text-[#888] lg:text-white/40 mt-0.5">{option.desc}</p>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <motion.button
-                        type="submit"
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <motion.div variants={fadeUp}>
+                    <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-white/40">
+                      <input
+                        type="text"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        onBlur={() => { setTouched((p) => ({ ...p, name: true })); validateOnBlur("name"); }}
+                        placeholder="John Doe"
+                        className="auth-input"
+                        autoComplete="name"
+                        autoFocus
+                        required
+                        minLength={2}
                         disabled={isLoading}
-                        whileTap={{ scale: 0.97 }}
-                        className="auth-btn"
-                      >
-                        {isLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            Create Account
-                            <ArrowRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </motion.button>
-                    </form>
-
-                    <p className="text-sm text-[#a1a1a1] lg:text-white/40 text-center mt-5">
-                      Already have an account?{" "}
-                      <Link href="/login" className="text-brand hover:text-brand-light transition-colors font-medium">
-                        Sign in
-                      </Link>
-                    </p>
+                      />
+                    </FormField>
                   </motion.div>
-                )}
-              </AnimatePresence>
-          </div>
-        </motion.div>
 
-        <div className="lg:hidden h-8" />
-      </div>
+                  <motion.div variants={fadeUp}>
+                    <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-white/40">
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={form.password}
+                          onChange={(e) => setForm({ ...form, password: e.target.value })}
+                          onBlur={() => { setTouched((p) => ({ ...p, password: true })); validateOnBlur("password"); }}
+                          placeholder="Min 8 characters"
+                          className="auth-input pr-11"
+                          autoComplete="new-password"
+                          required
+                          minLength={8}
+                          disabled={isLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors p-1"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <PasswordStrengthMeter password={form.password} />
+                    </FormField>
+                  </motion.div>
+
+                  <motion.div variants={fadeUp}>
+                    <motion.button
+                      type="submit"
+                      disabled={isLoading}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="auth-btn"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          Create Account
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </motion.button>
+                  </motion.div>
+                </form>
+
+                <motion.p variants={fadeUp} className="text-sm text-white/40 text-center mt-6">
+                  Already have an account?{" "}
+                  <Link href="/login" className="text-white/80 hover:text-white transition-colors font-medium">
+                    Sign in
+                  </Link>
+                </motion.p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

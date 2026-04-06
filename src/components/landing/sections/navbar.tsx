@@ -9,8 +9,7 @@ import Image from "next/image";
 const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Features", href: "#features" },
-  { label: "For Traders", href: "#traders" },
-  { label: "Security", href: "#security" },
+  { label: "Testimonials", href: "#testimonials" },
 ];
 
 export function Navbar() {
