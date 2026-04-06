@@ -44,6 +44,19 @@ const MOONPAY_API_KEY = process.env.NEXT_PUBLIC_MOONPAY_API_KEY || "pk_test_123"
 type PaymentStatus = "idle" | "processing" | "success" | "error";
 
 export default function MoonPayPaymentPage() {
+  // MoonPay is disabled — test keys only, awaiting production keys
+  return (
+    <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-5">
+        <CreditCard className="w-8 h-8 text-purple-400/50" />
+      </div>
+      <h2 className="text-xl font-bold text-text-primary mb-2">MoonPay — Under Maintenance</h2>
+      <p className="text-sm text-text-tertiary max-w-sm mb-6">This payment method is temporarily unavailable. Please use Thirdweb card payment or crypto deposit instead.</p>
+      <a href="/dashboard/deposit" className="btn-primary text-sm px-6">Back to Deposit</a>
+    </div>
+  );
+
+  // eslint-disable-next-line no-unreachable
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState(CURRENCIES[0]);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);

@@ -26,6 +26,7 @@ import {
   ChevronRight,
   Shield,
   Zap,
+  Lock,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -532,20 +533,17 @@ export default function DepositPage() {
                     <ChevronRight className="w-4 h-4 text-text-quaternary" />
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => router.push("/dashboard/pay/moonpay")}
-                    className="w-full p-4 rounded-xl border border-purple-500/20 bg-purple-500/5 hover:border-purple-500/40 transition-all flex items-center gap-3 text-left cursor-pointer"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0">
-                      <CreditCard className="w-4 h-4 text-purple-400" />
+                  {/* MoonPay — disabled (test keys only, re-enable when production keys are set) */}
+                  <div className="w-full p-4 rounded-xl border border-white/[0.04] bg-surface-2/30 flex items-center gap-3 text-left opacity-50 cursor-not-allowed">
+                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                      <CreditCard className="w-4 h-4 text-purple-400/50" />
                     </div>
                     <div className="flex-1">
-                      <span className="text-sm font-medium text-text-primary block">Pay with Card</span>
-                      <span className="text-2xs text-text-tertiary">via MoonPay — global coverage</span>
+                      <span className="text-sm font-medium text-text-tertiary block">MoonPay</span>
+                      <span className="text-2xs text-text-quaternary">Coming soon — under maintenance</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-text-quaternary" />
-                  </button>
+                    <Lock className="w-4 h-4 text-text-quaternary" />
+                  </div>
                 </motion.div>
               )}
 
@@ -671,26 +669,19 @@ export default function DepositPage() {
                           ))}
                         </div>
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => router.push("/dashboard/pay/moonpay")}
-                        className="group p-4 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 to-indigo-500/5 hover:border-purple-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all text-left cursor-pointer"
-                      >
+                      {/* MoonPay — disabled (test keys, re-enable with production keys) */}
+                      <div className="p-4 rounded-xl border border-white/[0.04] bg-surface-2/30 opacity-50 cursor-not-allowed">
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="w-9 h-9 rounded-lg bg-purple-500/15 flex items-center justify-center">
-                            <CreditCard className="w-4.5 h-4.5 text-purple-400" />
+                          <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                            <CreditCard className="w-4.5 h-4.5 text-purple-400/50" />
                           </div>
                           <div>
-                            <span className="text-sm font-semibold text-text-primary block">Card Payment</span>
-                            <span className="text-2xs text-purple-400">Powered by MoonPay</span>
+                            <span className="text-sm font-semibold text-text-tertiary block">MoonPay</span>
+                            <span className="text-2xs text-text-quaternary">Coming soon</span>
                           </div>
+                          <Lock className="w-4 h-4 text-text-quaternary ml-auto" />
                         </div>
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {["Visa / Mastercard", "Apple Pay", "Google Pay", "Bank Transfer"].map((f) => (
-                            <span key={f} className="text-2xs px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400/80">{f}</span>
-                          ))}
-                        </div>
-                      </button>
+                      </div>
                     </div>
                   </div>
 
