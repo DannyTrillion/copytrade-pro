@@ -93,6 +93,35 @@ const staggerItem = {
   show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
 };
 
+function HeroSparkline({ data }: { data: number[] }) {
+  if (data.length < 2) return null;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const w = 300;
+  const h = 100;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * h * 0.85 - h * 0.05;
+    return `${x},${y}`;
+  });
+  const line = points.join(" ");
+  const area = `0,${h} ${line} ${w},${h}`;
+
+  return (
+    <svg width="100%" height="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="hero-spark-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="white" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={area} fill="url(#hero-spark-fill)" />
+      <polyline points={line} fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.5" />
+    </svg>
+  );
+}
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -331,6 +360,12 @@ export default function DashboardPage() {
           <motion.div variants={staggerItem}>
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand via-brand-dark to-brand-700 p-6 md:p-8 text-white shadow-lg">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZyIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNMCA0MEw0MCAwIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNnKSIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiLz48L3N2Zz4=')] opacity-40" />
+              {/* Background sparkline */}
+              {balanceChartData.length > 1 && (
+                <div className="absolute bottom-0 right-0 w-[60%] h-[70%] opacity-[0.12] pointer-events-none">
+                  <HeroSparkline data={balanceChartData.map((d) => d.balance)} />
+                </div>
+              )}
               <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                   <p className="text-white/60 text-xs font-medium uppercase tracking-wider mb-1">Total Balance</p>
@@ -363,9 +398,9 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Main chart + Allocation donut + Tier */}
-          <motion.div variants={staggerItem} className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
+          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
             {/* Performance chart — 8 cols */}
-            <div className="lg:col-span-8 glass-panel p-5 md:p-6">
+            <div className="md:col-span-8 glass-panel p-5 md:p-6">
               <div className="flex items-start justify-between mb-5">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -387,7 +422,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Sidebar — 4 cols */}
-            <div className="lg:col-span-4 space-y-4">
+            <div className="md:col-span-4 space-y-4">
               {/* Portfolio Allocation Donut */}
               <div className="glass-panel p-5">
                 <div className="flex items-center gap-2 mb-4">
@@ -455,7 +490,7 @@ export default function DashboardPage() {
 
           {/* Additional charts row */}
           {(balanceChartData.length > 1 || pnlBarData.length > 1) && (
-            <motion.div variants={staggerItem} className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+            <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
               {balanceChartData.length > 1 && (
                 <div className="glass-panel p-5 md:p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -478,9 +513,9 @@ export default function DashboardPage() {
           )}
 
           {/* Activity + Top Traders row */}
-          <motion.div variants={staggerItem} className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
+          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
             {/* Recent Activity — 8 cols */}
-            <div className="lg:col-span-8 glass-panel overflow-hidden">
+            <div className="md:col-span-8 glass-panel overflow-hidden">
               <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-text-tertiary" />
@@ -530,7 +565,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Top Traders — 4 cols */}
-            <div className="lg:col-span-4 space-y-4">
+            <div className="md:col-span-4 space-y-4">
               <div className="glass-panel p-4 md:p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -644,8 +679,8 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Chart + Summary */}
-          <motion.div variants={staggerItem} className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
-            <div className="lg:col-span-8 glass-panel p-5 md:p-6">
+          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+            <div className="md:col-span-8 glass-panel p-5 md:p-6">
               <div className="flex items-start justify-between mb-5">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -666,7 +701,7 @@ export default function DashboardPage() {
               <PnlChart data={pnlChartData} height={260} showGrid />
             </div>
 
-            <div className="lg:col-span-4 space-y-4">
+            <div className="md:col-span-4 space-y-4">
               <div className="glass-panel p-4 md:p-5">
                 <h3 className="text-sm font-semibold text-text-primary mb-4">Summary</h3>
                 <div className="space-y-3">

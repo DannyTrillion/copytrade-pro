@@ -349,9 +349,9 @@ function LoginPageInner() {
         {/* Bottom legal text */}
         <motion.p variants={fadeUp} className="text-2xs text-white/20 text-center mt-8">
           By signing in, you agree to our{" "}
-          <span className="text-white/30 hover:text-white/50 transition-colors cursor-pointer">Terms</span>
+          <a href="/terms" className="text-white/30 hover:text-white/50 transition-colors underline">Terms</a>
           {" "}and{" "}
-          <span className="text-white/30 hover:text-white/50 transition-colors cursor-pointer">Privacy Policy</span>.
+          <a href="/privacy" className="text-white/30 hover:text-white/50 transition-colors underline">Privacy Policy</a>.
         </motion.p>
       </motion.div>
     </div>

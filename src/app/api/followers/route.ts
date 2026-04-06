@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorizedResponse, errorResponse } from "@/lib/auth";
+import { rateLimitRequest } from "@/lib/api-rate-limit";
 import { followTraderSchema, riskSettingsSchema } from "@/lib/validators/webhook";
 
 export async function GET() {
@@ -27,6 +28,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = await rateLimitRequest(req, { maxAttempts: 15, windowMs: 60000 });
+    if (limited) return limited;
+
     const user = await requireAuth();
     const body = await req.json();
     const data = followTraderSchema.parse(body);

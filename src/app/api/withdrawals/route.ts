@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorizedResponse, errorResponse } from "@/lib/auth";
+import { rateLimitRequest } from "@/lib/api-rate-limit";
 import { z } from "zod";
 
 const withdrawSchema = z.object({
@@ -41,6 +42,9 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
   try {
+    const limited = await rateLimitRequest(req, { maxAttempts: 5, windowMs: 60000 });
+    if (limited) return limited;
+
     const user = await requireAuth();
     const body = await req.json();
     const data = withdrawSchema.parse(body);

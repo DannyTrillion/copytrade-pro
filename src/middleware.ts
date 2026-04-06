@@ -20,7 +20,10 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname === "/" ||
-    pathname === "/reset-password"
+    pathname === "/reset-password" ||
+    pathname === "/forbidden" ||
+    pathname === "/terms" ||
+    pathname === "/privacy"
   ) {
     return NextResponse.next();
   }
@@ -51,7 +54,7 @@ export async function middleware(req: NextRequest) {
 
   // Admin route protection
   if (pathname.startsWith("/dashboard/admin") && token?.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/forbidden", req.url));
   }
 
   return NextResponse.next();

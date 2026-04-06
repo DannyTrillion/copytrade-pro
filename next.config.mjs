@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Speed up dev server module resolution
@@ -12,13 +14,17 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
 
-  // Allow Supabase storage images in next/image
+  // Allow external images in next/image
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "uzvqwwhjmehbrvoxqibu.supabase.co",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
       },
     ],
   },
@@ -45,7 +51,6 @@ const nextConfig = {
         tls: false,
       };
     }
-    // Suppress known non-critical warnings
     config.ignoreWarnings = [
       { module: /node_modules\/@metamask\/sdk/ },
       { module: /node_modules\/pino/ },
@@ -54,4 +59,21 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Sentry webpack plugin options
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Upload source maps for better error traces
+  widenClientFileUpload: true,
+
+  // Hide source maps from client bundles
+  hideSourceMaps: true,
+
+  // Disable Sentry telemetry
+  disableLogger: true,
+
+  // Don't fail build if Sentry is not configured
+  silent: !process.env.SENTRY_AUTH_TOKEN,
+});

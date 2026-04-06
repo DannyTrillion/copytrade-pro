@@ -5,6 +5,7 @@ import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 import { getTotalDeposited, getTierFromAmount } from "@/lib/tiers";
 import { notifyTierUpgrade, notifyDeposit } from "@/lib/notifications";
+import { sendDepositConfirmedEmail, sendWithdrawalStatusEmail, sendTierUpgradeEmail } from "@/lib/email";
 
 /**
  * GET — Admin dashboard stats + optional entity lists
@@ -633,8 +634,12 @@ export async function PATCH(req: NextRequest) {
           },
         });
 
-        // Notify user of confirmed deposit
+        // Notify user of confirmed deposit (in-app + email)
         notifyDeposit(deposit.userId, deposit.amount).catch(() => {});
+        const depositUser = await prisma.user.findUnique({ where: { id: deposit.userId }, select: { email: true, name: true } });
+        if (depositUser?.email) {
+          sendDepositConfirmedEmail(depositUser.email, depositUser.name || "Trader", deposit.amount).catch(() => {});
+        }
 
         // Check for tier upgrade
         const prevDeposited = await getTotalDeposited(deposit.userId) - deposit.amount;
@@ -642,6 +647,9 @@ export async function PATCH(req: NextRequest) {
         const newTier = getTierFromAmount(prevDeposited + deposit.amount);
         if (newTier.level !== prevTier.level) {
           notifyTierUpgrade(deposit.userId, newTier.name).catch(() => {});
+          if (depositUser?.email) {
+            sendTierUpgradeEmail(depositUser.email, depositUser.name || "Trader", newTier.name).catch(() => {});
+          }
         }
       }
 
@@ -692,6 +700,12 @@ export async function PATCH(req: NextRequest) {
             description: `Withdrawal approved — ${withdrawal.network}`,
           },
         });
+      }
+
+      // Email user about withdrawal status
+      const wdUser = await prisma.user.findUnique({ where: { id: withdrawal.userId }, select: { email: true, name: true } });
+      if (wdUser?.email) {
+        sendWithdrawalStatusEmail(wdUser.email, wdUser.name || "Trader", withdrawal.amount, status).catch(() => {});
       }
 
       await logAudit({ adminId, action: "REVIEW_WITHDRAWAL", targetType: "WITHDRAWAL", targetId: withdrawalId, details: { status, amount: withdrawal.amount, userId: withdrawal.userId } });

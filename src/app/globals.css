@@ -479,7 +479,7 @@
 
   /* ─── Card grid responsive ─── */
   .stat-grid {
-    @apply grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4;
+    @apply grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4;
   }
 
   .stat-grid-3 {
@@ -488,7 +488,7 @@
 
   /* ─── Section spacing ─── */
   .dashboard-section {
-    @apply space-y-4 md:space-y-6;
+    @apply space-y-4 md:space-y-5 lg:space-y-6;
   }
 
   /* ─── Auth Pages (Resend-inspired) ─── */
