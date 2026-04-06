@@ -2,12 +2,13 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = "CopyTrade Pro <noreply@copytradepro.app>";
-const FALLBACK_FROM = "onboarding@resend.dev";
-
+/**
+ * Email sender address.
+ * Set EMAIL_FROM env var to your verified Resend domain (e.g. "CopyTrade Pro <noreply@yourdomain.com>")
+ * Until a domain is verified, uses Resend's shared test sender which works for all recipients.
+ */
 function getFrom(): string {
-  // Use verified domain if available, otherwise use Resend test sender
-  return process.env.EMAIL_FROM || (process.env.NODE_ENV === "production" ? FROM : FALLBACK_FROM);
+  return process.env.EMAIL_FROM || "CopyTrade Pro <onboarding@resend.dev>";
 }
 
 // ─── Email Templates ───
