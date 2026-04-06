@@ -36,7 +36,7 @@ function GoogleIcon({ className }: { className?: string }) {
 
 function LoginPageInner() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
