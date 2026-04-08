@@ -46,6 +46,10 @@ model User {
   paymentMethods      PaymentMethod[]
   cardPayments        CardPayment[]
   onboardingComplete  Boolean        @default(false)
+  experienceLevel     String?        // BEGINNER, INTERMEDIATE, ADVANCED
+  tradingGoal         String?        // PASSIVE, GROWTH, LEARNING
+  riskTolerance       String?        // LOW, MEDIUM, HIGH
+  capitalRange        String?        // UNDER_500, 500_5000, OVER_5000
   theme               String         @default("dark") // dark, light
   twoFactorSecret     String?
   twoFactorEnabled    Boolean        @default(false)

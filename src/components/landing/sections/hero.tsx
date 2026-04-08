@@ -8,6 +8,75 @@ import { ArrowRight, BarChart3, Shield, Zap, Play, CheckCircle2, Star, TrendingU
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
+/* ─── Star field / particle dust canvas ─── */
+function StarField() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    const stars: { x: number; y: number; r: number; o: number; speed: number; twinkle: number; twinkleSpeed: number }[] = [];
+
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.scale(dpr, dpr);
+    };
+
+    const init = () => {
+      stars.length = 0;
+      const count = Math.min(200, Math.floor((window.innerWidth * window.innerHeight) / 5000));
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          r: Math.random() * 1.2 + 0.2,
+          o: Math.random() * 0.6 + 0.1,
+          speed: Math.random() * 0.15 + 0.02,
+          twinkle: Math.random() * Math.PI * 2,
+          twinkleSpeed: Math.random() * 0.015 + 0.005,
+        });
+      }
+    };
+
+    const draw = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      for (const s of stars) {
+        s.y -= s.speed;
+        s.twinkle += s.twinkleSpeed;
+        if (s.y < -2) { s.y = h + 2; s.x = Math.random() * w; }
+
+        const alpha = s.o * (0.5 + 0.5 * Math.sin(s.twinkle));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(180, 200, 255, ${alpha})`;
+        ctx.fill();
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    resize();
+    init();
+    draw();
+
+    window.addEventListener("resize", () => { resize(); init(); });
+    return () => { cancelAnimationFrame(animId); };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />;
+}
+
 /* ─── Animated counter ─── */
 function Counter({ target, suffix = "", prefix = "", delay = 0 }: { target: number; suffix?: string; prefix?: string; delay?: number }) {
   const [val, setVal] = useState(0);
@@ -120,14 +189,8 @@ export function HeroSection() {
   return (
     <section ref={ref} className="relative min-h-screen flex flex-col overflow-hidden" style={{ background: "#04040a" }}>
 
-      {/* Background video */}
-      <div className="absolute inset-0 z-0">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover opacity-[0.18]" poster="/hero-space.webp">
-          <source src="/platform-demo.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#04040a]/70 via-[#04040a]/30 to-[#04040a]/90" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#04040a]/50 via-transparent to-[#04040a]/30" />
-      </div>
+      {/* Star field / particle dust background — canvas */}
+      <StarField />
 
       {/* Grid */}
       <div className="absolute inset-0 z-[1] opacity-[0.015]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
@@ -223,8 +286,6 @@ export function HeroSection() {
                 className="w-full h-auto rounded-2xl lg:rounded-3xl"
               >
                 <source src="/hero-video.mov" type="video/mp4" />
-                {/* Fallback to static image */}
-                <Image src="/screenshots/dashboard-dark.png" alt="CopyTrade Pro Dashboard" width={1646} height={1000} className="w-full h-auto" />
               </video>
             </div>
 

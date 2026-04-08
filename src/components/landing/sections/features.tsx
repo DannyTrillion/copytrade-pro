@@ -44,14 +44,7 @@ export function FeaturesSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="relative py-24 lg:py-32 overflow-hidden" style={{ background: "#06060a" }} ref={ref} id="features">
-      {/* Crypto background video */}
-      <div className="absolute inset-0 pointer-events-none">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover opacity-[0.12]">
-          <source src="/crypt-bg.webm" type="video/webm" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#06060a]/80 via-transparent to-[#06060a]/80" />
-      </div>
+    <section className="relative py-24 lg:py-32" style={{ background: "#06060a" }} ref={ref} id="features">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(13,113,255,0.03),transparent_60%)]" />
 
       <div className="relative max-w-[1140px] mx-auto px-6">

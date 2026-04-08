@@ -7,6 +7,7 @@ import { Navbar } from "./sections/navbar";
 // Lazy-load below-fold sections
 const HowItWorksSection = dynamic(() => import("./sections/how-it-works").then((m) => m.HowItWorksSection));
 const FeaturesSection = dynamic(() => import("./sections/features").then((m) => m.FeaturesSection));
+const LeoSection = dynamic(() => import("./sections/leo-section").then((m) => m.LeoSection));
 const TestimonialsSection = dynamic(() => import("./sections/testimonials").then((m) => m.TestimonialsSection));
 const InsightsSection = dynamic(() => import("./sections/insights").then((m) => m.InsightsSection));
 const CtaSection = dynamic(() => import("./sections/cta").then((m) => m.CtaSection));
@@ -19,6 +20,7 @@ export function LandingPage() {
       <HeroSection />
       <HowItWorksSection />
       <FeaturesSection />
+      <LeoSection />
       <TestimonialsSection />
       <InsightsSection />
       <CtaSection />
