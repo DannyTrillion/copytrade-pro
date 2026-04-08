@@ -8,11 +8,17 @@ import { ArrowRight, BarChart3, Shield, Zap, Play, CheckCircle2, Star, TrendingU
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-/* ─── Star field / particle dust canvas ─── */
+/* ─── Star field — desktop only, disabled on mobile for performance ─── */
 function StarField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return; // Skip on mobile
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -72,8 +78,9 @@ function StarField() {
 
     window.addEventListener("resize", () => { resize(); init(); });
     return () => { cancelAnimationFrame(animId); };
-  }, []);
+  }, [isMobile]);
 
+  if (isMobile) return null;
   return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />;
 }
 
@@ -192,19 +199,23 @@ export function HeroSection() {
       {/* Star field / particle dust background — canvas */}
       <StarField />
 
-      {/* Grid */}
-      <div className="absolute inset-0 z-[1] opacity-[0.015]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
+      {/* Grid — desktop only */}
+      <div className="absolute inset-0 z-[1] opacity-[0.015] hidden md:block" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
 
-      {/* Animated orbs */}
-      <div className="absolute inset-0 z-[1] pointer-events-none">
+      {/* Animated orbs — desktop only */}
+      <div className="absolute inset-0 z-[1] pointer-events-none hidden md:block">
         <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.05, 0.08, 0.05] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-[-15%] left-[10%] w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(13,113,255,0.14),transparent_55%)]" />
         <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.06, 0.03] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }}
           className="absolute bottom-[-15%] right-[0%] w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.1),transparent_55%)]" />
       </div>
+      {/* Mobile: static subtle gradient instead */}
+      <div className="absolute inset-0 z-[1] pointer-events-none md:hidden">
+        <div className="absolute top-0 left-0 w-full h-[50%] bg-[radial-gradient(ellipse_at_50%_0%,rgba(13,113,255,0.06),transparent_60%)]" />
+      </div>
 
       {/* Content */}
-      <div ref={containerRef} className="relative z-10 flex-1 flex items-center px-6 pt-24 pb-16">
+      <div ref={containerRef} className="relative z-10 flex-1 flex items-center px-5 md:px-6 pt-20 md:pt-24 pb-10 md:pb-16">
         <div className="max-w-[1200px] mx-auto w-full">
 
           {/* Top: centered headline block */}
@@ -282,29 +293,32 @@ export function HeroSection() {
                 muted
                 loop
                 playsInline
+                preload="auto"
                 poster="/screenshots/dashboard-dark.png"
                 className="w-full h-auto rounded-2xl lg:rounded-3xl"
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                {...({ "webkit-playsinline": "" } as any)}
               >
                 <source src="/hero-video.mov" type="video/mp4" />
               </video>
             </div>
 
-            {/* Floating card — Copy request */}
+            {/* Floating card — Copy request (desktop only) */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8, x: 40, y: 20 }}
               animate={inView ? { opacity: 1, scale: 1, x: 0, y: 0 } : {}}
               transition={{ delay: 1.6, duration: 0.7, ease }}
-              className="absolute -bottom-6 -left-4 md:-left-10 lg:-left-14 w-[180px] md:w-[220px] lg:w-[250px] rounded-xl lg:rounded-2xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.7)]"
+              className="hidden md:block absolute -bottom-6 -left-10 lg:-left-14 w-[220px] lg:w-[250px] rounded-xl lg:rounded-2xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.7)]"
             >
               <Image src="/screenshots/dashboard-copy-request-dark.png" alt="Copy Request" width={459} height={534} className="w-full h-auto" quality={85} />
             </motion.div>
 
-            {/* Floating card — Trade notification */}
+            {/* Floating card — Trade notification (desktop only) */}
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.9 }}
               animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
               transition={{ delay: 1.9, duration: 0.5, ease }}
-              className="absolute -top-4 -right-2 md:-right-6 lg:-right-10 px-4 py-3 rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+              className="hidden md:flex absolute -top-4 -right-6 lg:-right-10 px-4 py-3 rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
               style={{ background: "rgba(6,6,14,0.92)", backdropFilter: "blur(16px)" }}
             >
               <div className="flex items-center gap-3">
@@ -318,12 +332,12 @@ export function HeroSection() {
               </div>
             </motion.div>
 
-            {/* Floating card — Copytrading peek */}
+            {/* Floating card — Copytrading peek (desktop only) */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ delay: 2.2, duration: 0.6, ease }}
-              className="absolute bottom-[18%] -right-3 md:-right-6 lg:-right-10 w-[160px] md:w-[190px] lg:w-[210px] rounded-xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+              className="hidden md:block absolute bottom-[18%] -right-6 lg:-right-10 w-[190px] lg:w-[210px] rounded-xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
             >
               <Image src="/screenshots/dashboard-copytrading.png" alt="Copy Trading" width={2208} height={1000} className="w-full h-auto" quality={80} />
             </motion.div>
@@ -371,8 +385,8 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+      {/* Scroll — desktop only */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 hidden md:block">
         <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
           <div className="w-5 h-8 rounded-full border border-white/8 flex justify-center pt-1.5">
             <motion.div animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ duration: 2, repeat: Infinity }} className="w-1 h-2 rounded-full bg-white/20" />

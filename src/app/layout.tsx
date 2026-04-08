@@ -11,52 +11,41 @@ export const metadata: Metadata = {
     template: "%s | CopyTrade Pro",
   },
   description:
-    "Follow verified traders, copy winning strategies, and earn automatically. Real-time trade execution on Polymarket with sub-200ms latency. Join 2,800+ traders worldwide.",
-  keywords: [
-    "copy trading",
-    "Polymarket",
-    "automated trading",
-    "crypto trading",
-    "trade signals",
-    "Webull",
-    "prediction markets",
-    "portfolio management",
-    "master traders",
-    "copy trade platform",
-  ],
-  authors: [{ name: "CopyTrade Pro" }],
-  creator: "CopyTrade Pro",
-  publisher: "CopyTrade Pro",
+    "Private access to Webull-powered copy trading infrastructure for advanced traders.",
+  authors: [{ name: "CopyTradesPro" }],
+  creator: "CopyTradesPro",
+  publisher: "CopyTradesPro",
   metadataBase: new URL(SITE_URL),
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    siteName: "CopyTrade Pro",
-    title: "CopyTrade Pro — Copy First, Then Earn",
+    siteName: "CopyTradesPro x Webull",
+    title: "CopyTradesPro x Webull",
     description:
-      "Follow verified traders, copy winning strategies, and earn automatically. Real-time execution on Polymarket with sub-200ms latency. $0 to start, no credit card needed.",
+      "Private access to Webull-powered copy trading infrastructure for advanced traders.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CopyTrade Pro — Copy First, Then Earn",
+    title: "CopyTradesPro x Webull",
     description:
-      "Follow verified traders, copy winning strategies, and earn automatically. Real-time execution on Polymarket. Join 2,800+ traders.",
-    creator: "@CopyTradePro",
+      "Private access to Webull-powered copy trading infrastructure for advanced traders.",
   },
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
+    noarchive: true,
     googleBot: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
+      noimageindex: true,
       "max-video-preview": -1,
-      "max-image-preview": "large",
+      "max-image-preview": "none",
       "max-snippet": -1,
     },
+  },
+  other: {
+    "X-Robots-Tag": "noindex, nofollow, noarchive",
   },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -81,7 +70,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0D0F17",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -90,8 +79,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning style={{ colorScheme: "dark" }}>
-      <body className="antialiased">
+    <html lang="en" className="dark" suppressHydrationWarning style={{ colorScheme: "dark", backgroundColor: "#000000" }}>
+      <head>
+        {process.env.NODE_ENV === "production" && (
+          <script dangerouslySetInnerHTML={{ __html: `
+            document.addEventListener('contextmenu',function(e){e.preventDefault()});
+            document.addEventListener('keydown',function(e){
+              if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='I'||e.key==='J'||e.key==='C'))e.preventDefault();
+              if(e.key==='F12')e.preventDefault();
+              if((e.ctrlKey||e.metaKey)&&e.key==='u')e.preventDefault();
+            });
+          `}} />
+        )}
+      </head>
+      <body className="antialiased" style={{ backgroundColor: "#000000" }}>
         <Providers>
           <AnalyticsProvider />
           {children}

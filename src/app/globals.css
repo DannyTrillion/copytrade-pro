@@ -127,6 +127,7 @@
 
   body {
     @apply bg-surface-0 text-text-primary overflow-x-hidden;
+    background-color: #000000; /* Prevent white flash on load */
   }
 
   ::-webkit-scrollbar {
