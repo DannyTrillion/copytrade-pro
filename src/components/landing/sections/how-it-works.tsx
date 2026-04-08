@@ -90,14 +90,14 @@ export function HowItWorksSection() {
                   whileTap={{ scale: 0.95 }}
                   className={`relative w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${
                     isActive
-                      ? "bg-[#0D71FF]/12 border-[#0D71FF]/25 shadow-[0_0_20px_rgba(13,113,255,0.1)]"
-                      : "bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] hover:border-white/[0.08]"
+                      ? "bg-[#0D71FF]/12 border-[#0D71FF]/20 shadow-[0_0_16px_rgba(13,113,255,0.08)]"
+                      : "bg-white/[0.02] border-transparent hover:bg-white/[0.04]"
                   } border`}
                 >
                   <Icon className={`w-5 h-5 md:w-6 md:h-6 transition-colors duration-300 ${isActive ? "text-[#0D71FF]" : "text-white/25 group-hover:text-white/40"}`} />
                   {/* Step number badge */}
                   <span className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[9px] font-bold flex items-center justify-center transition-all duration-300 ${
-                    isActive ? "bg-[#0D71FF] text-white" : "bg-white/[0.06] text-white/25"
+                    isActive ? "bg-[#0D71FF] text-white" : "bg-white/[0.04] text-white/20"
                   }`}>
                     {i + 1}
                   </span>
@@ -115,7 +115,7 @@ export function HowItWorksSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.25, duration: 0.6, ease }}
-          className="rounded-2xl border border-white/[0.05] overflow-hidden"
+          className="rounded-2xl border border-white/[0.03] overflow-hidden"
           style={{ background: "rgba(255,255,255,0.01)" }}
         >
           {/* Top bar with step info */}
@@ -165,7 +165,7 @@ export function HowItWorksSection() {
                 transition={{ duration: 0.35, ease }}
                 className={`p-4 md:p-6 ${step.isModal ? "flex items-center justify-center" : ""}`}
               >
-                <div className={`rounded-xl overflow-hidden border border-white/[0.04] shadow-[0_8px_32px_rgba(0,0,0,0.3)] ${step.isModal ? "max-w-[380px]" : ""}`}>
+                <div className={`rounded-xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] ${step.isModal ? "max-w-[380px]" : ""}`}>
                   <Image
                     src={step.image}
                     alt={step.title}

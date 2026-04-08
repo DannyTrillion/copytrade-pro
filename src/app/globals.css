@@ -99,10 +99,30 @@
     @apply border-border;
   }
 
+  /* Remove default browser outlines — use custom focus states */
+  *:focus {
+    outline: none;
+  }
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(13, 113, 255, 0.4);
+    border-radius: inherit;
+  }
+  input:focus-visible, textarea:focus-visible, select:focus-visible {
+    box-shadow: none; /* handled by auth-input / input-field classes */
+  }
+
   html {
     @apply antialiased scroll-smooth;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-tap-highlight-color: transparent;
+    color-scheme: dark light;
+  }
+  html.dark, [data-theme="dark"], [data-theme="luxury"] {
+    color-scheme: dark;
+  }
+  html.light, [data-theme="light"] {
+    color-scheme: light;
   }
 
   body {

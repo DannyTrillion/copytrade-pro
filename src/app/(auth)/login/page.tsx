@@ -184,12 +184,12 @@ function LoginPageInner() {
   };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#06060a] flex items-center justify-center relative overflow-hidden px-4 py-8">
+    <div ref={containerRef} className="min-h-screen bg-[#06060a] flex items-center justify-center relative overflow-hidden px-0 py-0 md:px-4 md:py-8">
       <FloatingParticles count={50} />
       <GradientBlob parentRef={containerRef} />
 
-      {/* Back */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="absolute top-5 left-5 z-20">
+      {/* Back — desktop only */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="absolute top-5 left-5 z-20 hidden md:block">
         <Link href="/" className="flex items-center gap-1.5 text-[11px] text-white/25 hover:text-white/50 transition-colors">
           <ArrowLeft className="w-3 h-3" /> Home
         </Link>
@@ -200,13 +200,12 @@ function LoginPageInner() {
         initial={{ opacity: 0, scale: 0.97, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.7, ease }}
-        className="relative w-full max-w-[920px] rounded-[24px] overflow-hidden z-10"
-        style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.5), 0 0 120px rgba(41,98,255,0.03)" }}
+        className="relative w-full max-w-[920px] md:rounded-[24px] overflow-hidden z-10 md:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_40px_80px_rgba(0,0,0,0.5)]"
       >
-        <div className="flex flex-col md:flex-row min-h-[560px]">
+        <div className="flex flex-col md:flex-row md:min-h-[560px]">
 
-          {/* ═══ LEFT — Brand ═══ */}
-          <div className="relative w-full md:w-[46%] bg-[#08080d] p-7 md:p-9 flex flex-col overflow-hidden">
+          {/* ═══ LEFT — Brand (hidden on mobile) ═══ */}
+          <div className="relative hidden md:flex md:w-[46%] bg-[#08080d] p-7 md:p-9 flex-col overflow-hidden">
             {/* Grid */}
             <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
             {/* Ambient */}
@@ -257,24 +256,35 @@ function LoginPageInner() {
           </div>
 
           {/* ═══ RIGHT — Form ═══ */}
-          <div className="w-full md:w-[54%] bg-[#0a0a0f] p-7 md:p-9 md:pl-10 flex items-center border-l border-white/[0.03]">
-            <div className="w-full max-w-[320px] mx-auto">
+          <div className="w-full md:w-[54%] bg-[#0a0a0f] p-6 py-10 md:p-9 md:pl-10 flex items-center md:border-l border-white/[0.03]">
+            <div className="w-full max-w-[340px] mx-auto">
 
-              {/* Mobile logo */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="md:hidden flex items-center gap-2 mb-6">
-                <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center">
-                  <TrendingUp className="w-3.5 h-3.5 text-black" />
+              {/* Mobile header */}
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
+                className="md:hidden text-center mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-[#0D71FF] flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(13,113,255,0.15)]">
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-white/80 font-semibold text-sm">CopyTrade Pro</span>
+                <h1 className="text-xl font-bold text-white mb-1">Welcome Back</h1>
+                <p className="text-xs text-white/30">Sign in to CopyTrade Pro</p>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5, ease }}>
+              {/* Desktop heading */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5, ease }}
+                className="hidden md:block">
                 <h2 className="text-[18px] font-semibold text-white mb-1">Sign in</h2>
                 <p className="text-[12px] text-white/35 mb-6">
                   New here?{" "}
                   <Link href="/signup" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">Create an account</Link>
                 </p>
               </motion.div>
+
+              {/* Mobile sign up link */}
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+                className="md:hidden text-center text-xs text-white/30 mb-6">
+                New here?{" "}
+                <Link href="/signup" className="text-[#0D71FF] font-medium">Create an account</Link>
+              </motion.p>
 
               {showVerifiedBanner && (
                 <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
@@ -291,7 +301,7 @@ function LoginPageInner() {
                       onChange={(e) => setEmail(e.target.value)}
                       onBlur={() => { setEmailTouched(true); setEmailError(validateField(emailSchema, email) || ""); }}
                       placeholder="name@company.com"
-                      className="auth-input !text-[13px] !py-[10px]"
+                      className="auth-input !text-[14px] !py-3 md:!text-[13px] md:!py-[10px]"
                       autoComplete="email" required />
                   </FormField>
                 </motion.div>
@@ -307,7 +317,7 @@ function LoginPageInner() {
                     <input type={showPassword ? "text" : "password"} value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter password"
-                      className="auth-input !text-[13px] !py-[10px] pr-10"
+                      className="auth-input !text-[14px] !py-3 md:!text-[13px] md:!py-[10px] pr-10"
                       autoComplete="current-password" required />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/45 transition-colors"

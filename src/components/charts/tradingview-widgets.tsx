@@ -11,15 +11,11 @@ function useWidget(
   config: Record<string, unknown>,
   deps: unknown[] = []
 ) {
-  const createdRef = useRef(false);
-
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    if (createdRef.current && container.querySelector("script")) return;
-    createdRef.current = true;
-
+    // Always clear and recreate on dependency change (including theme)
     container.innerHTML = "";
 
     const widgetContainer = document.createElement("div");
@@ -43,7 +39,6 @@ function useWidget(
     container.appendChild(widgetContainer);
 
     return () => {
-      createdRef.current = false;
       if (container) container.innerHTML = "";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

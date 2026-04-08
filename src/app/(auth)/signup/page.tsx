@@ -122,21 +122,20 @@ export default function SignupPage() {
   };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#06060a] flex items-center justify-center relative overflow-hidden px-4 py-8">
+    <div ref={containerRef} className="min-h-screen bg-[#06060a] flex items-center justify-center relative overflow-hidden px-0 py-0 md:px-4 md:py-8">
       <FloatingParticles count={50} />
       <GradientBlob parentRef={containerRef} />
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="absolute top-5 left-5 z-20">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="absolute top-5 left-5 z-20 hidden md:block">
         <Link href="/" className="flex items-center gap-1.5 text-[11px] text-white/25 hover:text-white/50 transition-colors"><ArrowLeft className="w-3 h-3" /> Home</Link>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, scale: 0.97, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.7, ease }}
-        className="relative w-full max-w-[920px] rounded-[24px] overflow-hidden z-10"
-        style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.5), 0 0 120px rgba(41,98,255,0.03)" }}>
-        <div className="flex flex-col md:flex-row min-h-[560px]">
+        className="relative w-full max-w-[920px] md:rounded-[24px] overflow-hidden z-10 md:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_40px_80px_rgba(0,0,0,0.5)]">
+        <div className="flex flex-col md:flex-row md:min-h-[560px]">
 
-          {/* ═══ LEFT ═══ */}
-          <div className="relative w-full md:w-[46%] bg-[#08080d] p-7 md:p-9 flex flex-col overflow-hidden">
+          {/* ═══ LEFT (hidden on mobile) ═══ */}
+          <div className="relative hidden md:flex md:w-[46%] bg-[#08080d] p-7 md:p-9 flex-col overflow-hidden">
             <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
             <div className="absolute top-[-20%] right-[-30%] w-[400px] h-[400px] rounded-full bg-blue-600/[0.04] blur-[100px]" />
             <div className="absolute bottom-[-10%] left-[-20%] w-[300px] h-[300px] rounded-full bg-indigo-500/[0.03] blur-[80px]" />
@@ -165,13 +164,17 @@ export default function SignupPage() {
           </div>
 
           {/* ═══ RIGHT ═══ */}
-          <div className="w-full md:w-[54%] bg-[#0a0a0f] p-7 md:p-9 md:pl-10 flex items-center border-l border-white/[0.03]">
-            <div className="w-full max-w-[320px] mx-auto">
+          <div className="w-full md:w-[54%] bg-[#0a0a0f] p-6 py-10 md:p-9 md:pl-10 flex items-center md:border-l border-white/[0.03]">
+            <div className="w-full max-w-[340px] mx-auto">
 
-              {/* Mobile logo */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="md:hidden flex items-center gap-2 mb-6">
-                <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-black" /></div>
-                <span className="text-white/80 font-semibold text-sm">CopyTrade Pro</span>
+              {/* Mobile header */}
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}
+                className="md:hidden text-center mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-[#0D71FF] flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(13,113,255,0.15)]">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-xl font-bold text-white mb-1">Create Account</h1>
+                <p className="text-xs text-white/30">Join CopyTrade Pro for free</p>
               </motion.div>
 
               <AnimatePresence mode="wait">
@@ -183,7 +186,7 @@ export default function SignupPage() {
                     <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }} className="space-y-4">
                       <FormField label="Email" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-white/35 !text-[11px]">
                         <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if(emailError) setEmailError(""); }}
-                          placeholder="name@company.com" className="auth-input !text-[13px] !py-[10px]" autoComplete="email" autoFocus required disabled={sendingOtp} />
+                          placeholder="name@company.com" className="auth-input !text-[14px] !py-3 md:!text-[13px] md:!py-[10px]" autoComplete="email" autoFocus required disabled={sendingOtp} />
                       </FormField>
                       <motion.button type="submit" disabled={sendingOtp || !email.trim()} whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}
                         className="w-full flex items-center justify-center gap-2 py-[10px] rounded-xl text-[13px] font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed"
@@ -241,14 +244,14 @@ export default function SignupPage() {
                       <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-white/35 !text-[11px]">
                         <input type="text" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
                           onBlur={() => { setTouched((p) => ({...p, name: true})); validateOnBlur("name"); }}
-                          placeholder="John Doe" className="auth-input !text-[13px] !py-[10px]" autoComplete="name" autoFocus required minLength={2} disabled={isLoading} />
+                          placeholder="John Doe" className="auth-input !text-[14px] !py-3 md:!text-[13px] md:!py-[10px]" autoComplete="name" autoFocus required minLength={2} disabled={isLoading} />
                       </FormField>
                       <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-white/35 !text-[11px]">
                         <div className="relative">
                           <input type={showPassword ? "text" : "password"} value={form.password}
                             onChange={(e) => setForm({...form, password: e.target.value})}
                             onBlur={() => { setTouched((p) => ({...p, password: true})); validateOnBlur("password"); }}
-                            placeholder="Min 8 characters" className="auth-input !text-[13px] !py-[10px] pr-10" autoComplete="new-password" required minLength={8} disabled={isLoading} />
+                            placeholder="Min 8 characters" className="auth-input !text-[14px] !py-3 md:!text-[13px] md:!py-[10px] pr-10" autoComplete="new-password" required minLength={8} disabled={isLoading} />
                           <button type="button" onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/45 transition-colors">
                             {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}

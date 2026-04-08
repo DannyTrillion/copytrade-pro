@@ -90,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning style={{ colorScheme: "dark" }}>
       <body className="antialiased">
         <Providers>
           <AnalyticsProvider />

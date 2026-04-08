@@ -151,7 +151,7 @@ export function HeroSection() {
               className="flex items-center justify-center gap-3 mb-7">
               <Image src="/webull-logo.svg" alt="Webull" width={80} height={16} className="h-3.5 w-auto brightness-0 invert opacity-40" />
               <div className="w-px h-3.5 bg-white/8" />
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0D71FF]/[0.06] border border-[#0D71FF]/12">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0D71FF]/[0.08]">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#0D71FF] animate-pulse" />
                 <span className="text-[9px] font-medium text-[#0D71FF]/70 uppercase tracking-wider">Live Trading</span>
               </div>
@@ -212,17 +212,20 @@ export function HeroSection() {
             <div className="absolute -inset-16 bg-[#0D71FF]/[0.04] blur-[100px] rounded-full -z-10" />
             <div className="absolute -inset-8 bg-[#6366F1]/[0.02] blur-[50px] rounded-full -z-10" />
 
-            {/* Main screenshot */}
-            <div className="rounded-2xl lg:rounded-3xl overflow-hidden border border-white/[0.06] shadow-[0_40px_100px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.03)]">
-              <Image
-                src="/screenshots/dashboard-dark.png"
-                alt="CopyTrade Pro Dashboard"
-                width={1646}
-                height={1000}
-                className="w-full h-auto"
-                priority
-                quality={90}
-              />
+            {/* Main video showcase */}
+            <div className="rounded-2xl lg:rounded-3xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/screenshots/dashboard-dark.png"
+                className="w-full h-auto rounded-2xl lg:rounded-3xl"
+              >
+                <source src="/hero-video.mov" type="video/mp4" />
+                {/* Fallback to static image */}
+                <Image src="/screenshots/dashboard-dark.png" alt="CopyTrade Pro Dashboard" width={1646} height={1000} className="w-full h-auto" />
+              </video>
             </div>
 
             {/* Floating card — Copy request */}
@@ -230,7 +233,7 @@ export function HeroSection() {
               initial={{ opacity: 0, scale: 0.8, x: 40, y: 20 }}
               animate={inView ? { opacity: 1, scale: 1, x: 0, y: 0 } : {}}
               transition={{ delay: 1.6, duration: 0.7, ease }}
-              className="absolute -bottom-6 -left-4 md:-left-10 lg:-left-14 w-[180px] md:w-[220px] lg:w-[250px] rounded-xl lg:rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_24px_60px_rgba(0,0,0,0.7)]"
+              className="absolute -bottom-6 -left-4 md:-left-10 lg:-left-14 w-[180px] md:w-[220px] lg:w-[250px] rounded-xl lg:rounded-2xl overflow-hidden shadow-[0_24px_60px_rgba(0,0,0,0.7)]"
             >
               <Image src="/screenshots/dashboard-copy-request-dark.png" alt="Copy Request" width={459} height={534} className="w-full h-auto" quality={85} />
             </motion.div>
@@ -240,7 +243,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: -20, scale: 0.9 }}
               animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
               transition={{ delay: 1.9, duration: 0.5, ease }}
-              className="absolute -top-4 -right-2 md:-right-6 lg:-right-10 px-4 py-3 rounded-xl border border-white/[0.08] shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+              className="absolute -top-4 -right-2 md:-right-6 lg:-right-10 px-4 py-3 rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
               style={{ background: "rgba(6,6,14,0.92)", backdropFilter: "blur(16px)" }}
             >
               <div className="flex items-center gap-3">
@@ -259,7 +262,7 @@ export function HeroSection() {
               initial={{ opacity: 0, x: 30 }}
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ delay: 2.2, duration: 0.6, ease }}
-              className="absolute bottom-[18%] -right-3 md:-right-6 lg:-right-10 w-[160px] md:w-[190px] lg:w-[210px] rounded-xl overflow-hidden border border-white/[0.06] shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+              className="absolute bottom-[18%] -right-3 md:-right-6 lg:-right-10 w-[160px] md:w-[190px] lg:w-[210px] rounded-xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
             >
               <Image src="/screenshots/dashboard-copytrading.png" alt="Copy Trading" width={2208} height={1000} className="w-full h-auto" quality={80} />
             </motion.div>

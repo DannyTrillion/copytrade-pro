@@ -33,6 +33,7 @@ import { PnlChart } from "@/components/charts/pnl-chart";
 import { MiniChart } from "@/components/charts/mini-chart";
 import { PortfolioDonut } from "@/components/charts/portfolio-donut";
 import { BalanceOverTimeChart, PnlBarChart } from "@/components/charts/trading-charts";
+import { GenerateCardButton } from "@/components/ui/performance-card";
 import { LiveMarketSection } from "@/components/charts/live-market-section";
 import { formatCurrency } from "@/lib/utils";
 import { StatGridSkeleton, ChartSkeleton, TableSkeleton } from "@/components/ui/chart-skeleton";
@@ -448,6 +449,15 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <GenerateCardButton data={{
+                    totalPnl: followerStats?.totalProfit ?? 0,
+                    totalBalance: followerStats?.totalBalance ?? 0,
+                    winRate: followerStats?.winRate ?? 0,
+                    totalTrades: followerStats?.totalCopiedTrades ?? 0,
+                    following: followerStats?.following ?? 0,
+                    userName: firstName,
+                    pnlHistory: pnlChartData.map((d) => d.pnl),
+                  }} />
                   <Link href="/dashboard/deposit" className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-brand font-medium text-sm rounded-xl hover:bg-white/90 transition-all active:scale-[0.97] shadow-sm">
                     <Wallet className="w-4 h-4" />
                     Deposit
@@ -556,30 +566,6 @@ export default function DashboardPage() {
               )}
             </div>
           </motion.div>
-
-          {/* Additional charts row */}
-          {(balanceChartData.length > 1 || pnlBarData.length > 1) && (
-            <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-              {balanceChartData.length > 1 && (
-                <div className="glass-panel p-5 md:p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <LineChart className="w-4 h-4 text-text-tertiary" />
-                    <h3 className="text-sm font-semibold text-text-primary">Balance History</h3>
-                  </div>
-                  <BalanceOverTimeChart data={balanceChartData} height={220} />
-                </div>
-              )}
-              {pnlBarData.length > 1 && (
-                <div className="glass-panel p-5 md:p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="w-4 h-4 text-text-tertiary" />
-                    <h3 className="text-sm font-semibold text-text-primary">P&L per Trade</h3>
-                  </div>
-                  <PnlBarChart data={pnlBarData} height={220} />
-                </div>
-              )}
-            </motion.div>
-          )}
 
           {/* Activity + Top Traders row */}
           <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
