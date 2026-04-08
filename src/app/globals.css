@@ -13,7 +13,7 @@
     --surface-5: 188 193 204;
     --text-primary: 17 24 39;
     --text-secondary: 75 85 99;
-    --text-tertiary: 156 163 175;
+    --text-tertiary: 107 114 128;
     --text-inverse: 255 255 255;
     --border-default: 229 231 235;
     --border-light: 209 213 219;
@@ -150,14 +150,14 @@
   }
 
   [data-theme="dark"] .glass-panel {
-    background: rgba(15, 15, 26, 0.7);
-    backdrop-filter: blur(20px) saturate(1.2);
-    border-color: rgba(255,255,255,0.06);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.02);
+    background: rgba(14, 14, 22, 0.6);
+    backdrop-filter: blur(16px);
+    border-color: rgba(255,255,255,0.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
   }
   [data-theme="dark"] .glass-panel:hover {
-    border-color: rgba(255,255,255,0.1);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), 0 0 20px rgba(41,98,255,0.03);
+    border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
   }
 
   /* Luxury gold theme overrides */
@@ -196,8 +196,8 @@
   }
 
   .stat-card:hover {
-    box-shadow: var(--shadow-elevated), 0 0 24px rgba(41, 98, 255, 0.05);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+    transform: translateY(-1px);
   }
 
   /* ─── Inputs ─── */
@@ -219,8 +219,8 @@
     @apply bg-surface-2/50 border-white/[0.06];
   }
   [data-theme="dark"] .input-field:focus {
-    box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.15), 0 0 12px rgba(41,98,255,0.06);
-    @apply border-brand/50;
+    box-shadow: 0 0 0 2px rgba(13, 113, 255, 0.12);
+    @apply border-brand/40;
   }
   [data-theme="luxury"] .input-field {
     background: rgba(17,17,17,0.8);

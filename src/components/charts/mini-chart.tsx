@@ -9,9 +9,9 @@ interface MiniChartProps {
 }
 
 const COLORS = {
-  success: "#26A69A",
-  danger: "#EF5350",
-  brand: "#2962FF",
+  success: "#5B8DEF",
+  danger: "#C084A0",
+  brand: "#6B8AE8",
 };
 
 export function MiniChart({ data, color = "success", height = 40 }: MiniChartProps) {

@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
   TrendingDown,
@@ -21,6 +21,9 @@ import {
   Sparkles,
   CircleDollarSign,
   LineChart,
+  RefreshCw,
+  CheckCircle2,
+  Signal,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { DashboardHeader } from "@/components/ui/dashboard-header";
@@ -34,6 +37,7 @@ import { LiveMarketSection } from "@/components/charts/live-market-section";
 import { formatCurrency } from "@/lib/utils";
 import { StatGridSkeleton, ChartSkeleton, TableSkeleton } from "@/components/ui/chart-skeleton";
 import { TierBadge } from "@/components/ui/tier-badge";
+import { ChartRangeSelector, filterByRange, type ChartRange } from "@/components/ui/chart-range-selector";
 import { TIER_CONFIGS, type TierLevel } from "@/config/constants";
 import Link from "next/link";
 
@@ -154,6 +158,11 @@ export default function DashboardPage() {
   const [traderTrades, setTraderTrades] = useState<TraderTrade[]>([]);
   const [traders, setTraders] = useState<TraderItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [followedTraders, setFollowedTraders] = useState<{ name: string; isActive: boolean }[]>([]);
+  const [chartRange, setChartRange] = useState<ChartRange>("30d");
   const [tierData, setTierData] = useState<{
     tier: { level: TierLevel; name: string; color: string; maxDailyTrades: number; commissionRate: number; benefits: string[] };
     totalDeposited: number;
@@ -203,12 +212,37 @@ export default function DashboardPage() {
           setTraderTrades(data.trades || []);
         }
       }
+      // Fetch followed traders for header display
+      if (role === "FOLLOWER") {
+        fetch("/api/followers").then(async (r) => {
+          if (r.ok) {
+            const data = await r.json();
+            setFollowedTraders(
+              (data.following || []).map((f: { trader: { displayName: string; isActive: boolean } }) => ({
+                name: f.trader.displayName,
+                isActive: f.trader.isActive ?? true,
+              }))
+            );
+          }
+        }).catch(() => {});
+      }
+
+      setLastUpdated(new Date());
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [role]);
+
+  const handleRefresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    await fetchData();
+    setRefreshSuccess(true);
+    setTimeout(() => setRefreshSuccess(false), 2000);
+  }, [refreshing, fetchData]);
 
   useEffect(() => {
     if (role === "FOLLOWER") {
@@ -232,10 +266,13 @@ export default function DashboardPage() {
     };
   }, [role, fetchData]);
 
-  // Chart data
+  // Chart data — filtered by selected range
+  const rangedTransactions = filterByRange(transactions, chartRange, "createdAt");
+  const rangedTrades = filterByRange(traderTrades, chartRange, "tradeDate");
+
   const pnlChartData = (() => {
     if (role === "FOLLOWER") {
-      const copyTxs = transactions.filter((t) => t.type === "COPY_PROFIT" || t.type === "COPY_LOSS");
+      const copyTxs = rangedTransactions.filter((t) => t.type === "COPY_PROFIT" || t.type === "COPY_LOSS");
       if (copyTxs.length > 0) {
         return copyTxs.reverse().reduce((acc, t) => {
           const cumPnl = (acc.length > 0 ? acc[acc.length - 1].pnl : 0) + t.amount;
@@ -247,8 +284,8 @@ export default function DashboardPage() {
         }, [] as { date: string; pnl: number }[]);
       }
     }
-    if (role === "MASTER_TRADER" && traderTrades.length > 0) {
-      return traderTrades.slice().reverse().reduce((acc, t) => {
+    if (role === "MASTER_TRADER" && rangedTrades.length > 0) {
+      return rangedTrades.slice().reverse().reduce((acc, t) => {
         const cumPnl = (acc.length > 0 ? acc[acc.length - 1].pnl : 0) + t.profitLoss;
         acc.push({
           date: new Date(t.tradeDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
@@ -263,9 +300,9 @@ export default function DashboardPage() {
     }));
   })();
 
-  // Balance over time data from transactions
-  const balanceChartData = transactions.length > 0
-    ? transactions.slice().reverse().map((t) => ({
+  // Balance over time data
+  const balanceChartData = rangedTransactions.length > 0
+    ? rangedTransactions.slice().reverse().map((t) => ({
         date: new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
         balance: t.balanceAfter,
       }))
@@ -273,13 +310,13 @@ export default function DashboardPage() {
 
   // PnL bar data
   const pnlBarData = (() => {
-    if (role === "MASTER_TRADER" && traderTrades.length > 0) {
-      return traderTrades.slice().reverse().map((t) => ({
+    if (role === "MASTER_TRADER" && rangedTrades.length > 0) {
+      return rangedTrades.slice().reverse().map((t) => ({
         date: new Date(t.tradeDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
         pnl: t.profitLoss,
       }));
     }
-    const copyTxs = transactions.filter((t) => t.type === "COPY_PROFIT" || t.type === "COPY_LOSS");
+    const copyTxs = rangedTransactions.filter((t) => t.type === "COPY_PROFIT" || t.type === "COPY_LOSS");
     if (copyTxs.length > 0) {
       return copyTxs.reverse().map((t) => ({
         date: new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
@@ -333,11 +370,11 @@ export default function DashboardPage() {
       variants={staggerContainer}
       initial="hidden"
       animate="show"
-      className="space-y-5 md:space-y-6"
+      className="space-y-6 md:space-y-8"
     >
       {/* ═══ Header ═══ */}
       <motion.div variants={staggerItem}>
-        <DashboardHeader firstName={firstName}>
+        <DashboardHeader firstName={firstName} followedTraders={followedTraders}>
           {role === "FOLLOWER" && (
             <Link href="/dashboard/deposit" className="btn-primary text-sm gap-2">
               <Wallet className="w-3.5 h-3.5" />
@@ -368,8 +405,39 @@ export default function DashboardPage() {
               )}
               <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                  <p className="text-white/60 text-xs font-medium uppercase tracking-wider mb-1">Total Balance</p>
-                  <AnimatedCurrency value={followerStats?.totalBalance ?? 0} className="text-3xl md:text-4xl font-bold tracking-tight" />
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Total Balance</p>
+                    {lastUpdated && (
+                      <span className="text-white/25 text-[10px] tabular-nums">
+                        Updated {timeAgo(lastUpdated.toISOString())}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <AnimatedCurrency value={followerStats?.totalBalance ?? 0} className="text-3xl md:text-4xl font-bold tracking-tight" />
+                    {/* Refresh button */}
+                    <motion.button
+                      onClick={handleRefresh}
+                      disabled={refreshing}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Refresh balance"
+                      aria-label="Refresh balance"
+                    >
+                      <AnimatePresence mode="wait">
+                        {refreshSuccess ? (
+                          <motion.div key="check" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+                            <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                          </motion.div>
+                        ) : (
+                          <motion.div key="refresh" animate={refreshing ? { rotate: 360 } : {}} transition={refreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : {}}>
+                            <RefreshCw className="w-4 h-4 text-white/70" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  </div>
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${totalPnl >= 0 ? "bg-white/20 text-white" : "bg-red-500/30 text-red-100"}`}>
                       {totalPnl >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -398,7 +466,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Main chart + Allocation donut + Tier */}
-          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
             {/* Performance chart — 8 cols */}
             <div className="md:col-span-8 glass-panel p-5 md:p-6">
               <div className="flex items-start justify-between mb-5">
@@ -406,6 +474,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <Activity className="w-4 h-4 text-text-tertiary" />
                     <h3 className="text-sm font-semibold text-text-primary">Portfolio Performance</h3>
+                    <ChartRangeSelector value={chartRange} onChange={setChartRange} />
                   </div>
                   <div className="flex items-baseline gap-2.5">
                     <AnimatedCurrency value={totalPnl} className={`text-2xl md:text-3xl font-bold tabular-nums tracking-tight ${totalPnl >= 0 ? "text-success" : "text-danger"}`} />
@@ -433,7 +502,7 @@ export default function DashboardPage() {
                   segments={donutSegments}
                   centerLabel="Total"
                   centerValue={formatCurrency(followerStats?.totalBalance ?? 0)}
-                  size={180}
+                  size={140}
                 />
               </div>
 
@@ -449,7 +518,7 @@ export default function DashboardPage() {
                   </div>
                   {tierData.nextTier && (
                     <div className="space-y-1.5 mb-3">
-                      <div className="h-1.5 w-full rounded-full bg-surface-3 overflow-hidden">
+                      <div className="h-1.5 w-full rounded-full bg-surface-3 overflow-hidden" role="progressbar" aria-valuenow={tierData.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Tier progress: ${tierData.progress}%`}>
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${tierData.progress}%` }}
@@ -490,7 +559,7 @@ export default function DashboardPage() {
 
           {/* Additional charts row */}
           {(balanceChartData.length > 1 || pnlBarData.length > 1) && (
-            <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+            <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
               {balanceChartData.length > 1 && (
                 <div className="glass-panel p-5 md:p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -513,7 +582,7 @@ export default function DashboardPage() {
           )}
 
           {/* Activity + Top Traders row */}
-          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
             {/* Recent Activity — 8 cols */}
             <div className="md:col-span-8 glass-panel overflow-hidden">
               <div className="px-5 py-4 border-b border-border flex items-center justify-between">
@@ -679,13 +748,14 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Chart + Summary */}
-          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+          <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
             <div className="md:col-span-8 glass-panel p-5 md:p-6">
               <div className="flex items-start justify-between mb-5">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <Activity className="w-4 h-4 text-text-tertiary" />
                     <h3 className="text-sm font-semibold text-text-primary">Trading Performance</h3>
+                    <ChartRangeSelector value={chartRange} onChange={setChartRange} />
                   </div>
                   <div className="flex items-baseline gap-2.5">
                     <AnimatedCurrency value={totalPnl} className={`text-2xl md:text-3xl font-bold tabular-nums tracking-tight ${totalPnl >= 0 ? "text-success" : "text-danger"}`} />

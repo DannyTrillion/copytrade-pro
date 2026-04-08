@@ -56,7 +56,7 @@ export function StatCard({
         />
       )}
 
-      <div className="relative stat-card">
+      <div className="relative stat-card" role="status" aria-label={`${title}: ${value}`}>
         <div className="flex items-start justify-between mb-3">
           <div
             className={cn(

@@ -76,7 +76,7 @@ export const AdvancedChart = memo(function AdvancedChart({
       interval: "15",
       timezone: "Etc/UTC",
       theme: tvTheme,
-      style: "1",
+      style: "3",
       locale: "en",
       backgroundColor: bgColor,
       gridColor: gridColor,

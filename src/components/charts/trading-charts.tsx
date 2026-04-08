@@ -16,6 +16,14 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { useChartTheme } from "@/hooks/use-chart-theme";
 
+/* ─── Theme-harmonious chart colors ─── */
+const CHART_COLORS = {
+  positive: "#5B8DEF",    // soft brand blue
+  negative: "#C084A0",    // muted rose
+  balance: "#6B8AE8",     // balanced blue
+  cumulative: "#8B7FD4",  // soft purple
+};
+
 /* ─────────────── Balance Over Time Chart ─────────────── */
 
 interface BalanceChartProps {
@@ -25,16 +33,15 @@ interface BalanceChartProps {
 
 export function BalanceOverTimeChart({ data, height = 300 }: BalanceChartProps) {
   const ct = useChartTheme();
-  const gradientId = "balance-gradient";
 
   return (
     <div className="w-full" style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+            <linearGradient id="balance-gradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={CHART_COLORS.balance} stopOpacity={0.15} />
+              <stop offset="100%" stopColor={CHART_COLORS.balance} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid stroke={ct.grid} horizontal vertical={false} />
@@ -44,11 +51,11 @@ export function BalanceOverTimeChart({ data, height = 300 }: BalanceChartProps) 
           <Area
             type="monotone"
             dataKey="balance"
-            stroke="#3B82F6"
+            stroke={CHART_COLORS.balance}
             strokeWidth={2}
-            fill={`url(#${gradientId})`}
+            fill="url(#balance-gradient)"
             dot={false}
-            activeDot={{ r: 4, fill: "#3B82F6", stroke: ct.dotStroke, strokeWidth: 2 }}
+            activeDot={{ r: 4, fill: CHART_COLORS.balance, stroke: ct.dotStroke, strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -83,16 +90,16 @@ export function TradePerformanceChart({ data, height = 300 }: TradePerformancePr
               return [formatCurrency(Number(value)), label];
             }}
           />
-          <Bar yAxisId="bars" dataKey="profit" fill="#26A69A" radius={[3, 3, 0, 0]} barSize={12} />
-          <Bar yAxisId="bars" dataKey="loss" fill="#EF5350" radius={[3, 3, 0, 0]} barSize={12} />
+          <Bar yAxisId="bars" dataKey="profit" fill={CHART_COLORS.positive} fillOpacity={0.7} radius={[3, 3, 0, 0]} barSize={12} />
+          <Bar yAxisId="bars" dataKey="loss" fill={CHART_COLORS.negative} fillOpacity={0.7} radius={[3, 3, 0, 0]} barSize={12} />
           <Line
             yAxisId="line"
             type="monotone"
             dataKey="cumulative"
-            stroke="#A78BFA"
+            stroke={CHART_COLORS.cumulative}
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 3, fill: "#A78BFA", stroke: ct.dotStroke, strokeWidth: 2 }}
+            activeDot={{ r: 3, fill: CHART_COLORS.cumulative, stroke: ct.dotStroke, strokeWidth: 2 }}
           />
         </ComposedChart>
       </ResponsiveContainer>
@@ -128,12 +135,12 @@ export function PnlBarChart({ data, height = 300 }: PnlBarChartProps) {
             dataKey="pnl"
             radius={[3, 3, 0, 0]}
             barSize={16}
-            fill="#26A69A"
+            fill={CHART_COLORS.positive}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             shape={(props: any) => {
               const { x, y, width, height: h, payload } = props;
-              const color = payload.pnl >= 0 ? "#26A69A" : "#EF5350";
-              return <rect x={x} y={y} width={width} height={h} rx={3} fill={color} />;
+              const color = payload.pnl >= 0 ? CHART_COLORS.positive : CHART_COLORS.negative;
+              return <rect x={x} y={y} width={width} height={h} rx={3} fill={color} fillOpacity={0.75} />;
             }}
           />
         </BarChart>

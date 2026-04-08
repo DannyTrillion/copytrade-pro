@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "automated trading",
     "crypto trading",
     "trade signals",
-    "TradingView",
+    "Webull",
     "prediction markets",
     "portfolio management",
     "master traders",

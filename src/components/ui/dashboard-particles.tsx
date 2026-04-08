@@ -59,8 +59,8 @@ export function DashboardParticles() {
           y: Math.random() * h,
           vx: (Math.random() - 0.5) * 0.4,
           vy: (Math.random() - 0.5) * 0.4,
-          radius: Math.random() * 1.2 + 0.4,
-          opacity: Math.random() * 0.1 + 0.05,
+          radius: Math.random() * 0.8 + 0.3,
+          opacity: Math.random() * 0.06 + 0.02,
           pulse: Math.random() * Math.PI * 2,
           pulseSpeed: Math.random() * 0.008 + 0.004,
         });
@@ -123,7 +123,7 @@ export function DashboardParticles() {
           const dy = p.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectDistance) {
-            const lineOpacity = (1 - dist / connectDistance) * 0.04;
+            const lineOpacity = (1 - dist / connectDistance) * 0.02;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);

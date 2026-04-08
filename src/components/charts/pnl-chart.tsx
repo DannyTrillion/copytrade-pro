@@ -14,8 +14,10 @@ export function PnlChart({ data, height = 300, showGrid = false }: PnlChartProps
   const ct = useChartTheme();
   const isPositive = data.length > 0 && data[data.length - 1].pnl >= 0;
   const gradientId = `pnl-gradient-${isPositive ? "pos" : "neg"}`;
-  const strokeColor = isPositive ? "#26A69A" : "#EF5350";
-  const fillColor = isPositive ? "#26A69A" : "#EF5350";
+
+  // Theme-harmonious colors — subtle blue/teal for positive, muted rose for negative
+  const strokeColor = isPositive ? "#5B8DEF" : "#C084A0";
+  const fillColor = isPositive ? "#5B8DEF" : "#C084A0";
 
   return (
     <div className="w-full" style={{ height }}>
@@ -23,7 +25,7 @@ export function PnlChart({ data, height = 300, showGrid = false }: PnlChartProps
         <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={fillColor} stopOpacity={0.2} />
+              <stop offset="0%" stopColor={fillColor} stopOpacity={0.15} />
               <stop offset="100%" stopColor={fillColor} stopOpacity={0} />
             </linearGradient>
           </defs>

@@ -12,7 +12,7 @@ export function CtaSection() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="relative py-24 lg:py-32" style={{ background: "#080A12" }} ref={ref}>
+    <section className="relative py-24 lg:py-32" style={{ background: "#06060a" }} ref={ref}>
       <div className="max-w-[900px] mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -20,43 +20,34 @@ export function CtaSection() {
           transition={{ duration: 0.5, ease }}
           className="relative rounded-2xl overflow-hidden"
         >
-          {/* Background */}
-          <div className="absolute inset-0 bg-[#2962FF]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(38,166,154,0.2),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[#0D71FF]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.25),transparent_60%)]" />
 
-          {/* Content */}
           <div className="relative px-8 py-16 md:px-16 md:py-20 text-center">
             <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-bold text-white mb-4 leading-tight">
               Ready to Trade
               <br />
               Like the Best?
             </h2>
-
             <p className="text-base text-white/70 max-w-[460px] mx-auto mb-8 leading-relaxed">
-              Join thousands of traders already using CopyTrade Pro. Follow top performers or share your own signals.
+              Connect your Webull account and start copying top-performing traders today. No experience required.
             </p>
-
             <div className="flex flex-wrap gap-3 justify-center">
-              <Link
-                href="/signup"
-                className="group inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[#2962FF] font-semibold text-sm rounded-full hover:bg-white/90 active:scale-[0.97] transition-all duration-200"
-              >
-                Start Copy Trading Now
+              <Link href="/signup"
+                className="group inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[#0D71FF] font-semibold text-sm rounded-full hover:bg-white/90 active:scale-[0.97] transition-all duration-200">
+                Start Copy Trading
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
-              <Link
-                href="#how-it-works"
-                className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/15 text-white font-semibold text-sm rounded-full border border-white/20 hover:bg-white/25 active:scale-[0.97] transition-all duration-200"
-              >
+              <Link href="#how-it-works"
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/15 text-white font-semibold text-sm rounded-full border border-white/20 hover:bg-white/25 active:scale-[0.97] transition-all duration-200">
                 See How It Works
               </Link>
             </div>
 
-            {/* Trust stats */}
             <div className="flex flex-wrap justify-center gap-8 mt-10 pt-8 border-t border-white/15">
               {[
                 { value: "2,847+", label: "Trades Copied" },
-                { value: "48+", label: "Master Traders" },
+                { value: "100+", label: "Verified Traders" },
                 { value: "99.9%", label: "Uptime" },
                 { value: "$284K+", label: "Volume" },
               ].map((stat) => (

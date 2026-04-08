@@ -12,6 +12,7 @@ import { TraderOnboardingModal } from "@/components/onboarding/trader-onboarding
 import { ImpersonationBanner } from "@/components/admin/impersonation-banner";
 import { cn } from "@/lib/utils";
 import { DashboardParticles } from "@/components/ui/dashboard-particles";
+import { PageTransition } from "@/components/ui/page-transition";
 
 export default function DashboardLayout({
   children,
@@ -21,8 +22,17 @@ export default function DashboardLayout({
   const { data: session, status } = useSession();
   const { sidebarOpen } = useDashboardStore();
 
-  // Middleware handles auth redirect — just show skeleton while session loads
-  if (status === "loading" || !session?.user) {
+  // Only show skeleton on initial load, not during client-side navigation
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-surface-0 flex items-center justify-center">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
+
+  // If unauthenticated, middleware will redirect — show skeleton meanwhile
+  if (!session?.user) {
     return (
       <div className="min-h-screen bg-surface-0 flex items-center justify-center">
         <DashboardSkeleton />
@@ -46,8 +56,8 @@ export default function DashboardLayout({
           sidebarOpen && "md:pl-[240px]"
         )}
       >
-        <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
-          <ErrorBoundary>{children}</ErrorBoundary>
+        <div className="p-4 md:p-8 max-w-[1440px] mx-auto">
+          <ErrorBoundary><PageTransition>{children}</PageTransition></ErrorBoundary>
         </div>
       </main>
       <InstallPrompt />

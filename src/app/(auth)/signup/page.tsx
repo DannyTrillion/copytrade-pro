@@ -4,15 +4,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import {
-  TrendingUp,
-  ArrowRight,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Loader2,
-  CheckCircle2,
+  TrendingUp, ArrowRight, ArrowLeft, Eye, EyeOff, Loader2, CheckCircle2, Shield, Zap, Users,
 } from "lucide-react";
 import { FloatingParticles } from "@/components/ui/floating-particles";
 import { toast } from "@/components/ui/toast";
@@ -20,671 +14,263 @@ import { FormField, PasswordStrengthMeter } from "@/components/ui/form-field";
 import { validateField, emailSchema, passwordSchema, nameSchema } from "@/lib/validation";
 
 const ease = [0.22, 1, 0.36, 1] as const;
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.6, ease } },
-};
-
 type Step = "email" | "otp" | "details";
 
-function GoogleIcon({ className }: { className?: string }) {
+/* ─── Animated onboarding visual ─── */
+function OnboardingVisual({ step }: { step: Step }) {
+  const stepIdx = step === "email" ? 0 : step === "otp" ? 1 : 2;
+  const VISUALS = [
+    { title: "Start trading", sub: "Join thousands of traders copying signals in real time.", emoji: "📈" },
+    { title: "Verify identity", sub: "We sent a code to your email for security.", emoji: "🔐" },
+    { title: "Almost there", sub: "Set up your profile and you're ready to go.", emoji: "🚀" },
+  ];
+  const v = VISUALS[stepIdx];
+
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 001 12c0 1.77.42 3.44 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-    </svg>
+    <AnimatePresence mode="wait">
+      <motion.div key={step} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.4, ease }}>
+        <div className="text-center md:text-left">
+          <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+            className="text-[48px] mb-4 inline-block">{v.emoji}</motion.div>
+          <h1 className="text-[26px] font-bold text-white leading-[1.1] tracking-tight mb-3">{v.title}</h1>
+          <p className="text-[13px] text-white/35 leading-relaxed max-w-[260px]">{v.sub}</p>
+        </div>
+
+        {/* Progress steps visual */}
+        <div className="flex items-center gap-3 mt-8">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all duration-500 ${
+                i < stepIdx ? "bg-blue-500 text-white" : i === stepIdx ? "bg-blue-500/15 text-blue-400 ring-1 ring-blue-500/30" : "bg-white/[0.03] text-white/20 ring-1 ring-white/[0.06]"
+              }`}>
+                {i < stepIdx ? <CheckCircle2 className="w-3.5 h-3.5" /> : i + 1}
+              </div>
+              {i < 2 && <div className={`w-6 h-px transition-colors duration-500 ${i < stepIdx ? "bg-blue-500/50" : "bg-white/[0.06]"}`} />}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
+}
+
+/* ─── Interactive gradient ─── */
+function GradientBlob({ parentRef }: { parentRef: React.RefObject<HTMLDivElement | null> }) {
+  const x = useMotionValue(50); const y = useMotionValue(40);
+  const bg = useTransform([x, y], ([xv, yv]) => `radial-gradient(500px circle at ${xv}% ${yv}%, rgba(41,98,255,0.06), transparent 60%)`);
+  useEffect(() => {
+    const el = parentRef.current; if (!el) return;
+    const handler = (e: MouseEvent) => { const r = el.getBoundingClientRect(); x.set(((e.clientX - r.left) / r.width) * 100); y.set(((e.clientY - r.top) / r.height) * 100); };
+    el.addEventListener("mousemove", handler); return () => el.removeEventListener("mousemove", handler);
+  }, [parentRef, x, y]);
+  return <motion.div className="absolute inset-0 pointer-events-none z-0" style={{ background: bg }} />;
 }
 
 export default function SignupPage() {
   const router = useRouter();
-
+  const containerRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<Step>("email");
-
-  // Email step
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [sendingOtp, setSendingOtp] = useState(false);
-
-  // OTP step
-  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
-  const [otpError, setOtpError] = useState("");
-  const [verifyingOtp, setVerifyingOtp] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  // Details step
-  const [form, setForm] = useState({ name: "", password: "" });
-  const [touched, setTouched] = useState({ name: false, password: false });
-  const [fieldErrors, setFieldErrors] = useState({ name: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [email, setEmail] = useState(""); const [emailError, setEmailError] = useState(""); const [sendingOtp, setSendingOtp] = useState(false);
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]); const [otpError, setOtpError] = useState(""); const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0); const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [form, setForm] = useState({ name: "", password: "" }); const [touched, setTouched] = useState({ name: false, password: false });
+  const [fieldErrors, setFieldErrors] = useState({ name: "", password: "" }); const [showPassword, setShowPassword] = useState(false); const [isLoading, setIsLoading] = useState(false);
 
   const schemas = { name: nameSchema, password: passwordSchema };
+  const validateOnBlur = (field: "name" | "password") => setFieldErrors((p) => ({ ...p, [field]: validateField(schemas[field], form[field]) }));
 
-  const validateOnBlur = (field: "name" | "password") => {
-    const error = validateField(schemas[field], form[field]);
-    setFieldErrors((prev) => ({ ...prev, [field]: error }));
-  };
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+  useEffect(() => { if (resendCooldown <= 0) return; const t = setInterval(() => setResendCooldown((p) => Math.max(0, p - 1)), 1000); return () => clearInterval(t); }, [resendCooldown]);
 
   const handleSendOtp = useCallback(async () => {
-    const error = validateField(emailSchema, email);
-    if (error) {
-      setEmailError(error);
-      return;
-    }
-    setEmailError("");
-    setSendingOtp(true);
-
+    const err = validateField(emailSchema, email); if (err) { setEmailError(err); return; }
+    setEmailError(""); setSendingOtp(true);
     try {
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-
+      const res = await fetch("/api/auth/send-otp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim() }) });
       const data = await res.json();
-
-      if (!res.ok) {
-        setEmailError(data.error || "Failed to send code");
-        setSendingOtp(false);
-        return;
-      }
-
-      setStep("otp");
-      setOtpDigits(["", "", "", "", "", ""]);
-      setOtpError("");
-      setResendCooldown(60);
+      if (!res.ok) { setEmailError(data.error || "Failed"); setSendingOtp(false); return; }
+      setStep("otp"); setOtpDigits(["","","","","",""]); setOtpError(""); setResendCooldown(60);
       setTimeout(() => inputRefs.current[0]?.focus(), 300);
-    } catch {
-      setEmailError("Something went wrong. Please try again.");
-    } finally {
-      setSendingOtp(false);
-    }
+    } catch { setEmailError("Something went wrong."); } finally { setSendingOtp(false); }
   }, [email]);
 
   const handleVerifyOtp = useCallback(async (code: string) => {
-    if (code.length !== 6) return;
-    setOtpError("");
-    setVerifyingOtp(true);
-
+    if (code.length !== 6) return; setOtpError(""); setVerifyingOtp(true);
     try {
-      const res = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), code }),
-      });
-
+      const res = await fetch("/api/auth/verify-otp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim(), code }) });
       const data = await res.json();
-
-      if (!res.ok) {
-        setOtpError(data.error || "Invalid code");
-        setVerifyingOtp(false);
-        return;
-      }
-
+      if (!res.ok) { setOtpError(data.error || "Invalid"); setVerifyingOtp(false); return; }
       setStep("details");
-    } catch {
-      setOtpError("Something went wrong. Please try again.");
-    } finally {
-      setVerifyingOtp(false);
-    }
+    } catch { setOtpError("Something went wrong."); } finally { setVerifyingOtp(false); }
   }, [email]);
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newDigits = [...otpDigits];
-
-    if (value.length > 1) {
-      const pasted = value.slice(0, 6).split("");
-      pasted.forEach((d, i) => {
-        if (index + i < 6) newDigits[index + i] = d;
-      });
-      setOtpDigits(newDigits);
-      const nextIndex = Math.min(index + pasted.length, 5);
-      inputRefs.current[nextIndex]?.focus();
-
-      const fullCode = newDigits.join("");
-      if (fullCode.length === 6) handleVerifyOtp(fullCode);
-      return;
-    }
-
-    newDigits[index] = value;
-    setOtpDigits(newDigits);
-
-    if (value && index < 5) inputRefs.current[index + 1]?.focus();
-
-    const fullCode = newDigits.join("");
-    if (fullCode.length === 6) handleVerifyOtp(fullCode);
+  const handleOtpChange = (i: number, v: string) => {
+    if (!/^\d*$/.test(v)) return; const d = [...otpDigits];
+    if (v.length > 1) { const p = v.slice(0,6).split(""); p.forEach((c,j) => { if(i+j<6) d[i+j]=c; }); setOtpDigits(d); inputRefs.current[Math.min(i+p.length,5)]?.focus(); if(d.join("").length===6) handleVerifyOtp(d.join("")); return; }
+    d[i]=v; setOtpDigits(d); if(v&&i<5) inputRefs.current[i+1]?.focus(); if(d.join("").length===6) handleVerifyOtp(d.join(""));
   };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
+  const handleOtpKeyDown = (i: number, e: React.KeyboardEvent) => { if(e.key==="Backspace"&&!otpDigits[i]&&i>0) inputRefs.current[i-1]?.focus(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+    e.preventDefault(); setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          name: form.name,
-          password: form.password,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
-      }
-
-      const signInResult = await signIn("credentials", {
-        email: email.trim(),
-        password: form.password,
-        redirect: false,
-      });
-
-      if (signInResult?.error) {
-        router.push("/login");
-        return;
-      }
-
+      const res = await fetch("/api/auth/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim(), name: form.name, password: form.password }) });
+      if (!res.ok) { const d = await res.json(); throw new Error(typeof d.error === "string" ? d.error : "Signup failed"); }
+      const r = await signIn("credentials", { email: email.trim(), password: form.password, redirect: false });
+      if (r?.error) { router.push("/login"); return; }
       router.push("/dashboard/follower");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Signup failed");
-      setIsLoading(false);
-    }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Signup failed"); setIsLoading(false); }
   };
 
-  const steps: { key: Step; label: string }[] = [
-    { key: "email", label: "Email" },
-    { key: "otp", label: "Verify" },
-    { key: "details", label: "Details" },
-  ];
-  const currentStepIndex = steps.findIndex((s) => s.key === step);
-
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
+    <div ref={containerRef} className="min-h-screen bg-[#06060a] flex items-center justify-center relative overflow-hidden px-4 py-8">
+      <FloatingParticles count={50} />
+      <GradientBlob parentRef={containerRef} />
 
-      {/* Floating particles */}
-      <FloatingParticles count={60} />
-
-      {/* Dramatic silk/light gradient background — Resend-style */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute -top-[30%] -right-[10%] w-[70%] h-[80%] opacity-[0.15]"
-          style={{
-            background: "radial-gradient(ellipse at 60% 40%, rgba(180,190,210,0.6), rgba(120,130,150,0.2) 40%, transparent 70%)",
-            filter: "blur(60px)",
-          }}
-        />
-        <div
-          className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[70%] opacity-[0.1]"
-          style={{
-            background: "radial-gradient(ellipse at 40% 60%, rgba(160,170,190,0.5), rgba(100,110,130,0.15) 40%, transparent 70%)",
-            filter: "blur(80px)",
-          }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-[0.04]"
-          style={{ background: "radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%)" }}
-        />
-      </div>
-
-      {/* Back to home */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="absolute top-6 left-6 z-20"
-      >
-        <Link
-          href="/"
-          className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white/70 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Home
-        </Link>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="absolute top-5 left-5 z-20">
+        <Link href="/" className="flex items-center gap-1.5 text-[11px] text-white/25 hover:text-white/50 transition-colors"><ArrowLeft className="w-3 h-3" /> Home</Link>
       </motion.div>
 
-      <motion.div
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-        className="relative z-10 w-full max-w-[440px] px-6 py-10"
-      >
-        {/* Logo */}
-        <motion.div variants={fadeUp} className="flex flex-col items-center mb-10">
-          <motion.div
-            whileHover={{ scale: 1.08 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-            className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-5"
-            style={{
-              boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 4px 24px rgba(0,0,0,0.4)",
-            }}
-          >
-            <TrendingUp className="w-7 h-7 text-black" />
-          </motion.div>
-        </motion.div>
+      <motion.div initial={{ opacity: 0, scale: 0.97, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.7, ease }}
+        className="relative w-full max-w-[920px] rounded-[24px] overflow-hidden z-10"
+        style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 40px 80px rgba(0,0,0,0.5), 0 0 120px rgba(41,98,255,0.03)" }}>
+        <div className="flex flex-col md:flex-row min-h-[560px]">
 
-        {/* Step indicator — minimal dots */}
-        <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 mb-10">
-          {steps.map((s, i) => (
-            <div key={s.key} className="flex items-center gap-3">
-              <div className="flex flex-col items-center gap-1.5">
-                <motion.div
-                  animate={{
-                    scale: i === currentStepIndex ? 1 : 0.85,
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
-                    i < currentStepIndex
-                      ? "bg-white text-black"
-                      : i === currentStepIndex
-                      ? "text-white"
-                      : "text-white/25"
-                  }`}
-                  style={{
-                    boxShadow: i <= currentStepIndex
-                      ? "0 0 0 1px rgba(255,255,255,0.2)"
-                      : "0 0 0 1px rgba(255,255,255,0.06)",
-                  }}
-                >
-                  {i < currentStepIndex ? (
-                    <CheckCircle2 className="w-4 h-4" />
-                  ) : (
-                    i + 1
-                  )}
-                </motion.div>
-                <span className={`text-[10px] font-medium transition-colors duration-300 ${
-                  i <= currentStepIndex ? "text-white/50" : "text-white/20"
-                }`}>{s.label}</span>
+          {/* ═══ LEFT ═══ */}
+          <div className="relative w-full md:w-[46%] bg-[#08080d] p-7 md:p-9 flex flex-col overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+            <div className="absolute top-[-20%] right-[-30%] w-[400px] h-[400px] rounded-full bg-blue-600/[0.04] blur-[100px]" />
+            <div className="absolute bottom-[-10%] left-[-20%] w-[300px] h-[300px] rounded-full bg-indigo-500/[0.03] blur-[80px]" />
+
+            <div className="relative z-10 flex flex-col h-full">
+              <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5, ease }} className="flex items-center gap-2 mb-8">
+                <div className="w-8 h-8 rounded-[10px] bg-white flex items-center justify-center shadow-[0_0_12px_rgba(255,255,255,0.05)]">
+                  <TrendingUp className="w-4 h-4 text-[#08080d]" />
+                </div>
+                <span className="text-white/80 font-semibold text-[15px] tracking-tight">CopyTrade Pro</span>
+              </motion.div>
+
+              <div className="my-auto hidden md:block">
+                <OnboardingVisual step={step} />
               </div>
-              {i < steps.length - 1 && (
-                <motion.div
-                  animate={{
-                    background: i < currentStepIndex
-                      ? "rgba(255,255,255,0.4)"
-                      : "rgba(255,255,255,0.06)",
-                  }}
-                  transition={{ duration: 0.5 }}
-                  className="w-12 h-px mb-5"
-                />
-              )}
-            </div>
-          ))}
-        </motion.div>
 
-        <AnimatePresence mode="wait">
-          {/* Step 1: Email */}
-          {step === "email" && (
-            <motion.div
-              key="email-step"
-              initial={{ opacity: 0, x: 24, filter: "blur(6px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, x: -24, filter: "blur(6px)" }}
-              transition={{ duration: 0.35, ease }}
-            >
-              <motion.div variants={stagger} initial="hidden" animate="show">
-                <motion.div variants={fadeUp} className="text-center mb-8">
-                  <h1 className="text-[28px] font-semibold text-white tracking-tight leading-tight">
-                    Create your account
-                  </h1>
-                  <p className="text-sm text-white/40 mt-2">
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-white/80 hover:text-white transition-colors font-medium">
-                      Sign in
-                    </Link>
-                    .
-                  </p>
-                </motion.div>
-
-                {/* Google OAuth */}
-                <motion.div variants={fadeUp}>
-                  <motion.button
-                    type="button"
-                    disabled={isGoogleLoading}
-                    onClick={() => {
-                      setIsGoogleLoading(true);
-                      signIn("google", { callbackUrl: "/dashboard" });
-                    }}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="auth-btn-google"
-                  >
-                    {isGoogleLoading ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <GoogleIcon className="w-5 h-5" />
-                        Sign up with Google
-                      </>
-                    )}
-                  </motion.button>
-                </motion.div>
-
-                <motion.div variants={fadeUp} className="flex items-center gap-4 my-7">
-                  <div className="flex-1 h-px bg-white/[0.08]" />
-                  <span className="text-xs text-white/25 lowercase">or</span>
-                  <div className="flex-1 h-px bg-white/[0.08]" />
-                </motion.div>
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSendOtp();
-                  }}
-                  className="space-y-5"
-                >
-                  <motion.div variants={fadeUp}>
-                    <FormField label="Email" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-white/40">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          if (emailError) setEmailError("");
-                        }}
-                        placeholder="alan.turing@example.com"
-                        className="auth-input"
-                        autoComplete="email"
-                        autoFocus
-                        required
-                        disabled={sendingOtp}
-                      />
-                    </FormField>
-                  </motion.div>
-
-                  <motion.div variants={fadeUp}>
-                    <motion.button
-                      type="submit"
-                      disabled={sendingOtp || !email.trim()}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="auth-btn"
-                    >
-                      {sendingOtp ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          Continue
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </motion.button>
-                  </motion.div>
-                </form>
-
-                <motion.p variants={fadeUp} className="text-2xs text-white/20 text-center mt-6">
-                  By signing up, you agree to our{" "}
-                  <a href="/terms" className="text-white/30 hover:text-white/50 transition-colors underline">Terms</a>
-                  {" "}and{" "}
-                  <a href="/privacy" className="text-white/30 hover:text-white/50 transition-colors underline">Privacy Policy</a>.
-                </motion.p>
-              </motion.div>
-            </motion.div>
-          )}
-
-          {/* Step 2: OTP */}
-          {step === "otp" && (
-            <motion.div
-              key="otp-step"
-              initial={{ opacity: 0, x: 24, filter: "blur(6px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, x: -24, filter: "blur(6px)" }}
-              transition={{ duration: 0.35, ease }}
-            >
-              <motion.div variants={stagger} initial="hidden" animate="show">
-                <motion.div variants={fadeUp}>
-                  <button
-                    type="button"
-                    onClick={() => setStep("email")}
-                    className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white/60 transition-colors mb-6"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    Back
-                  </button>
-                </motion.div>
-
-                <motion.div variants={fadeUp} className="text-center mb-8">
-                  <h1 className="text-[28px] font-semibold text-white tracking-tight leading-tight">
-                    Check your email
-                  </h1>
-                  <p className="text-sm text-white/40 mt-2">
-                    We sent a 6-digit code to{" "}
-                    <span className="text-white/60 font-medium">{email}</span>
-                  </p>
-                </motion.div>
-
-                {/* OTP inputs */}
-                <motion.div variants={fadeUp} className="flex items-center justify-center gap-2.5 mb-5">
-                  {otpDigits.map((digit, i) => (
-                    <motion.input
-                      key={i}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.15 + i * 0.05, duration: 0.3, ease }}
-                      ref={(el) => { inputRefs.current[i] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(i, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      onPaste={(e) => {
-                        const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-                        if (pasted.length > 1) {
-                          e.preventDefault();
-                          handleOtpChange(0, pasted);
-                        }
-                      }}
-                      disabled={verifyingOtp}
-                      className={`w-[52px] h-[60px] text-center text-2xl font-semibold rounded-2xl outline-none transition-all duration-200
-                        ${
-                          otpError
-                            ? "text-red-400"
-                            : digit
-                            ? "text-white"
-                            : "text-white"
-                        }
-                        disabled:opacity-50
-                      `}
-                      style={{
-                        background: "transparent",
-                        boxShadow: otpError
-                          ? "0 0 0 1px rgba(239,68,68,0.4)"
-                          : digit
-                          ? "0 0 0 1px rgba(255,255,255,0.3), 0 0 0 4px rgba(255,255,255,0.04)"
-                          : "0 0 0 1px rgba(255,255,255,0.12)",
-                      }}
-                      onFocus={(e) => {
-                        (e.target as HTMLInputElement).style.boxShadow = "0 0 0 1px rgba(255,255,255,0.4), 0 0 0 4px rgba(255,255,255,0.06)";
-                      }}
-                      onBlur={(e) => {
-                        const d = (e.target as HTMLInputElement).value;
-                        (e.target as HTMLInputElement).style.boxShadow = d
-                          ? "0 0 0 1px rgba(255,255,255,0.3), 0 0 0 4px rgba(255,255,255,0.04)"
-                          : "0 0 0 1px rgba(255,255,255,0.12)";
-                      }}
-                      aria-label={`Digit ${i + 1}`}
-                    />
-                  ))}
-                </motion.div>
-
-                {otpError && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-sm text-red-400 text-center mb-4"
-                  >
-                    {otpError}
-                  </motion.p>
-                )}
-
-                {verifyingOtp && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center justify-center gap-2 mb-4"
-                  >
-                    <Loader2 className="w-4 h-4 animate-spin text-white/50" />
-                    <span className="text-sm text-white/40">Verifying...</span>
-                  </motion.div>
-                )}
-
-                <motion.div variants={fadeUp} className="text-center">
-                  <p className="text-sm text-white/40">
-                    Didn&apos;t receive the code?{" "}
-                    {resendCooldown > 0 ? (
-                      <span className="text-white/50 tabular-nums">
-                        Resend in {resendCooldown}s
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleSendOtp}
-                        disabled={sendingOtp}
-                        className="text-white/80 hover:text-white transition-colors font-medium"
-                      >
-                        Resend code
-                      </button>
-                    )}
-                  </p>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-          )}
-
-          {/* Step 3: Details */}
-          {step === "details" && (
-            <motion.div
-              key="details-step"
-              initial={{ opacity: 0, x: 24, filter: "blur(6px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, x: -24, filter: "blur(6px)" }}
-              transition={{ duration: 0.35, ease }}
-            >
-              <motion.div variants={stagger} initial="hidden" animate="show">
-                <motion.div variants={fadeUp} className="flex items-center justify-center gap-2 mb-5">
-                  <div
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                    style={{ boxShadow: "0 0 0 1px rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.04)" }}
-                  >
-                    <CheckCircle2 className="w-3 h-3 text-white/60" />
-                    <span className="text-xs font-medium text-white/60">{email}</span>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="hidden md:flex items-center gap-2 mt-auto pt-6">
+                {[{ icon: Shield, t: "Encrypted" }, { icon: Zap, t: "Instant" }, { icon: Users, t: "Free" }].map((p) => (
+                  <div key={p.t} className="flex items-center gap-1 px-2 py-1 rounded-md border border-white/[0.04] bg-white/[0.015]">
+                    <p.icon className="w-2.5 h-2.5 text-white/20" />
+                    <span className="text-[9px] text-white/25 font-medium">{p.t}</span>
                   </div>
-                </motion.div>
-
-                <motion.div variants={fadeUp} className="text-center mb-8">
-                  <h1 className="text-[28px] font-semibold text-white tracking-tight leading-tight">
-                    Complete your profile
-                  </h1>
-                  <p className="text-sm text-white/40 mt-2">
-                    Set up your name, password, and account type
-                  </p>
-                </motion.div>
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <motion.div variants={fadeUp}>
-                    <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-white/40">
-                      <input
-                        type="text"
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        onBlur={() => { setTouched((p) => ({ ...p, name: true })); validateOnBlur("name"); }}
-                        placeholder="John Doe"
-                        className="auth-input"
-                        autoComplete="name"
-                        autoFocus
-                        required
-                        minLength={2}
-                        disabled={isLoading}
-                      />
-                    </FormField>
-                  </motion.div>
-
-                  <motion.div variants={fadeUp}>
-                    <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-white/40">
-                      <div className="relative">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={form.password}
-                          onChange={(e) => setForm({ ...form, password: e.target.value })}
-                          onBlur={() => { setTouched((p) => ({ ...p, password: true })); validateOnBlur("password"); }}
-                          placeholder="Min 8 characters"
-                          className="auth-input pr-11"
-                          autoComplete="new-password"
-                          required
-                          minLength={8}
-                          disabled={isLoading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors p-1"
-                          aria-label={showPassword ? "Hide password" : "Show password"}
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      <PasswordStrengthMeter password={form.password} />
-                    </FormField>
-                  </motion.div>
-
-                  <motion.div variants={fadeUp}>
-                    <motion.button
-                      type="submit"
-                      disabled={isLoading}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="auth-btn"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          Create Account
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </motion.button>
-                  </motion.div>
-                </form>
-
-                <motion.p variants={fadeUp} className="text-sm text-white/40 text-center mt-6">
-                  Already have an account?{" "}
-                  <Link href="/login" className="text-white/80 hover:text-white transition-colors font-medium">
-                    Sign in
-                  </Link>
-                </motion.p>
+                ))}
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+
+          {/* ═══ RIGHT ═══ */}
+          <div className="w-full md:w-[54%] bg-[#0a0a0f] p-7 md:p-9 md:pl-10 flex items-center border-l border-white/[0.03]">
+            <div className="w-full max-w-[320px] mx-auto">
+
+              {/* Mobile logo */}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="md:hidden flex items-center gap-2 mb-6">
+                <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-black" /></div>
+                <span className="text-white/80 font-semibold text-sm">CopyTrade Pro</span>
+              </motion.div>
+
+              <AnimatePresence mode="wait">
+                {/* ═══ Step 1: Email ═══ */}
+                {step === "email" && (
+                  <motion.div key="email" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.3, ease }}>
+                    <h2 className="text-[18px] font-semibold text-white mb-1">Create account</h2>
+                    <p className="text-[12px] text-white/35 mb-6">Already registered? <Link href="/login" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">Sign in</Link></p>
+                    <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }} className="space-y-4">
+                      <FormField label="Email" error={emailError} touched={!!emailError} valid={false} errorId="signup-email-error" labelClassName="text-white/35 !text-[11px]">
+                        <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if(emailError) setEmailError(""); }}
+                          placeholder="name@company.com" className="auth-input !text-[13px] !py-[10px]" autoComplete="email" autoFocus required disabled={sendingOtp} />
+                      </FormField>
+                      <motion.button type="submit" disabled={sendingOtp || !email.trim()} whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}
+                        className="w-full flex items-center justify-center gap-2 py-[10px] rounded-xl text-[13px] font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{ background: "linear-gradient(135deg, #2962FF, #1a47cc)", boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(41,98,255,0.15)" }}>
+                        {sendingOtp ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <>Continue <ArrowRight className="w-3.5 h-3.5" /></>}
+                      </motion.button>
+                    </form>
+                    <p className="text-[10px] text-white/20 text-center mt-5">
+                      By continuing you agree to our <a href="/terms" className="underline text-white/30">Terms</a> & <a href="/privacy" className="underline text-white/30">Privacy</a>
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* ═══ Step 2: OTP ═══ */}
+                {step === "otp" && (
+                  <motion.div key="otp" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.3, ease }}>
+                    <button type="button" onClick={() => setStep("email")} className="flex items-center gap-1 text-[10px] text-white/25 hover:text-white/50 transition-colors mb-4">
+                      <ArrowLeft className="w-2.5 h-2.5" /> Back
+                    </button>
+                    <h2 className="text-[18px] font-semibold text-white mb-1">Verify email</h2>
+                    <p className="text-[12px] text-white/35 mb-6">Code sent to <span className="text-white/50 font-medium">{email}</span></p>
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      {otpDigits.map((digit, i) => (
+                        <motion.input key={i} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08 + i * 0.04, duration: 0.3, ease }}
+                          ref={(el) => { inputRefs.current[i] = el; }} type="text" inputMode="numeric" maxLength={6} value={digit}
+                          onChange={(e) => handleOtpChange(i, e.target.value)} onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                          onPaste={(e) => { const p = e.clipboardData.getData("text").replace(/\D/g,"").slice(0,6); if(p.length>1){e.preventDefault(); handleOtpChange(0,p);} }}
+                          disabled={verifyingOtp}
+                          className="w-[44px] h-[52px] text-center text-xl font-semibold rounded-xl outline-none transition-all duration-200 bg-transparent text-white disabled:opacity-50"
+                          style={{ boxShadow: digit ? "0 0 0 1px rgba(41,98,255,0.3)" : "0 0 0 1px rgba(255,255,255,0.08)" }}
+                          onFocus={(e) => { (e.target as HTMLInputElement).style.boxShadow = "0 0 0 1.5px rgba(41,98,255,0.5), 0 0 8px rgba(41,98,255,0.08)"; }}
+                          onBlur={(e) => { const d = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).style.boxShadow = d ? "0 0 0 1px rgba(41,98,255,0.3)" : "0 0 0 1px rgba(255,255,255,0.08)"; }}
+                          aria-label={`Digit ${i + 1}`} />
+                      ))}
+                    </div>
+                    {otpError && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[11px] text-red-400 text-center mb-3">{otpError}</motion.p>}
+                    {verifyingOtp && <div className="flex items-center justify-center gap-2 mb-3"><Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" /><span className="text-[11px] text-white/30">Verifying...</span></div>}
+                    <p className="text-[11px] text-white/30 text-center">
+                      No code?{" "}{resendCooldown > 0 ? <span className="tabular-nums text-white/40">Resend in {resendCooldown}s</span>
+                        : <button type="button" onClick={handleSendOtp} disabled={sendingOtp} className="text-blue-400 hover:text-blue-300 transition-colors font-medium">Resend</button>}
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* ═══ Step 3: Details ═══ */}
+                {step === "details" && (
+                  <motion.div key="details" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.3, ease }}>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-blue-500/15 bg-blue-500/[0.04] w-fit mb-4">
+                      <CheckCircle2 className="w-3 h-3 text-blue-400" />
+                      <span className="text-[10px] font-medium text-blue-400">{email}</span>
+                    </div>
+                    <h2 className="text-[18px] font-semibold text-white mb-1">Complete profile</h2>
+                    <p className="text-[12px] text-white/35 mb-6">Set your name and password</p>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <FormField label="Full Name" error={fieldErrors.name} touched={touched.name} valid={!fieldErrors.name && !!form.name} errorId="signup-name-error" labelClassName="text-white/35 !text-[11px]">
+                        <input type="text" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
+                          onBlur={() => { setTouched((p) => ({...p, name: true})); validateOnBlur("name"); }}
+                          placeholder="John Doe" className="auth-input !text-[13px] !py-[10px]" autoComplete="name" autoFocus required minLength={2} disabled={isLoading} />
+                      </FormField>
+                      <FormField label="Password" error={fieldErrors.password} touched={touched.password} valid={!fieldErrors.password && !!form.password} errorId="signup-password-error" labelClassName="text-white/35 !text-[11px]">
+                        <div className="relative">
+                          <input type={showPassword ? "text" : "password"} value={form.password}
+                            onChange={(e) => setForm({...form, password: e.target.value})}
+                            onBlur={() => { setTouched((p) => ({...p, password: true})); validateOnBlur("password"); }}
+                            placeholder="Min 8 characters" className="auth-input !text-[13px] !py-[10px] pr-10" autoComplete="new-password" required minLength={8} disabled={isLoading} />
+                          <button type="button" onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/45 transition-colors">
+                            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                        <PasswordStrengthMeter password={form.password} />
+                      </FormField>
+                      <motion.button type="submit" disabled={isLoading} whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}
+                        className="w-full flex items-center justify-center gap-2 py-[10px] rounded-xl text-[13px] font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{ background: "linear-gradient(135deg, #2962FF, #1a47cc)", boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(41,98,255,0.15)" }}>
+                        {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <>Create Account <ArrowRight className="w-3.5 h-3.5" /></>}
+                      </motion.button>
+                    </form>
+                    <p className="text-[12px] text-white/35 text-center mt-5">
+                      Already have an account? <Link href="/login" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">Sign in</Link>
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
