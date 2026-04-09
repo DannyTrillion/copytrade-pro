@@ -7,8 +7,8 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://copytrade-pro-theta
 
 export const metadata: Metadata = {
   title: {
-    default: "CopyTrade Pro — Professional Copy Trading Platform",
-    template: "%s | CopyTrade Pro",
+    default: "Webull CopyTradesPro — Automated Copy Trading",
+    template: "%s | Webull CopyTradesPro",
   },
   description:
     "Private access to Webull-powered copy trading infrastructure for advanced traders.",
@@ -20,16 +20,18 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    siteName: "CopyTradesPro x Webull",
-    title: "CopyTradesPro x Webull",
+    siteName: "Webull CopyTradesPro",
+    title: "Webull CopyTradesPro — Automated Copy Trading",
     description:
       "Private access to Webull-powered copy trading infrastructure for advanced traders.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Webull CopyTradesPro" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CopyTradesPro x Webull",
+    title: "Webull CopyTradesPro — Automated Copy Trading",
     description:
       "Private access to Webull-powered copy trading infrastructure for advanced traders.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: false,
@@ -51,7 +53,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "CopyTrade Pro",
+    title: "Webull CopyTradesPro",
   },
   icons: {
     icon: [
