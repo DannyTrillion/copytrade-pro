@@ -162,3 +162,30 @@ export async function sendTierUpgradeEmail(email: string, name: string, tierName
     </div>
   `));
 }
+
+// ─── Admin Notifications ───
+
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "makindedaniel45@gmail.com";
+
+export async function notifyAdminNewSignup(userName: string, userEmail: string): Promise<SendEmailResult> {
+  const time = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+
+  return sendEmail(ADMIN_EMAIL, `New Signup: ${userName} — CopyTradesPro`, baseTemplate(`
+    <div style="padding:32px 32px 24px;text-align:center">
+      <div style="width:56px;height:56px;margin:0 auto 16px;background:rgba(13,113,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:28px">👤</span>
+      </div>
+      <h1 style="color:#fff;font-size:22px;margin:0 0 8px;font-weight:600">New User Signup</h1>
+      <p style="color:rgba(255,255,255,0.5);font-size:14px;margin:0 0 20px;line-height:1.6">A new user just created an account on CopyTradesPro.</p>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin:0 0 24px;text-align:left">
+        <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:0 0 8px">Name</p>
+        <p style="color:#fff;font-size:16px;font-weight:600;margin:0 0 16px">${userName}</p>
+        <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:0 0 8px">Email</p>
+        <p style="color:#fff;font-size:16px;font-weight:600;margin:0 0 16px">${userEmail}</p>
+        <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:0 0 8px">Time</p>
+        <p style="color:rgba(255,255,255,0.5);font-size:14px;margin:0">${time}</p>
+      </div>
+      ${ctaButton("View in Admin Dashboard", `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard/admin/users`)}
+    </div>
+  `));
+}

@@ -74,7 +74,7 @@ function FeaturedCard({ trader, inView }: { trader: typeof TRADERS[number]; inVi
             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/[0.06]">
               <img src={trader.image} alt={trader.name} className="w-full h-full object-cover" loading="lazy" />
             </div>
-            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#26A69A] border-[2px] border-[#06060a]" />
+            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#0D71FF] border-[2px] border-[#06060a]" />
           </div>
 
           <div className="text-center md:text-left">
@@ -90,17 +90,17 @@ function FeaturedCard({ trader, inView }: { trader: typeof TRADERS[number]; inVi
               ))}
             </div>
 
-            <div className="flex items-center gap-1 mt-3 px-2.5 py-1 rounded-lg bg-[#26A69A]/8 border border-[#26A69A]/12 w-fit mx-auto md:mx-0">
-              <ArrowUpRight className="w-3 h-3 text-[#26A69A]" />
-              <span className="text-xs font-semibold text-[#26A69A]">{trader.pnl} ROI</span>
+            <div className="flex items-center gap-1 mt-3 px-2.5 py-1 rounded-lg bg-[#0D71FF]/8 border border-[#0D71FF]/12 w-fit mx-auto md:mx-0">
+              <ArrowUpRight className="w-3 h-3 text-[#0D71FF]" />
+              <span className="text-xs font-semibold text-[#0D71FF]">{trader.pnl} ROI</span>
             </div>
           </div>
         </div>
 
         {/* Right: Quote + stats */}
         <div className="flex-1 min-w-0">
-          <Quote className="w-6 h-6 text-white/[0.04] mb-3" />
-          <p className="text-[14px] text-white/50 leading-[1.7] mb-6">
+          <Quote className="w-6 h-6 text-white/[0.15] mb-3" />
+          <p className="text-[14px] text-white/55 leading-[1.7] mb-6">
             &ldquo;{trader.quote}&rdquo;
           </p>
 
@@ -120,7 +120,7 @@ function FeaturedCard({ trader, inView }: { trader: typeof TRADERS[number]; inVi
                 style={{ background: "rgba(255,255,255,0.01)" }}
               >
                 <p className="text-xs font-semibold text-white tabular-nums">{stat.value}</p>
-                <p className="text-[9px] text-white/25 mt-0.5">{stat.label}</p>
+                <p className="text-[10px] text-white/30 mt-0.5">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -133,7 +133,7 @@ function FeaturedCard({ trader, inView }: { trader: typeof TRADERS[number]; inVi
 /* ─── Main section ─── */
 export function TestimonialsSection() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, amount: 0.1 });
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export function TestimonialsSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease }}
+          transition={{ duration: 0.9, ease }}
           className="text-center mb-14"
         >
           <span className="inline-block text-xs font-medium text-[#0D71FF] uppercase tracking-[0.2em] mb-4">Testimonials</span>
@@ -221,8 +221,8 @@ export function TestimonialsSection() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <ArrowUpRight className="w-2.5 h-2.5 text-[#26A69A]" />
-                <span className="text-[10px] font-semibold text-[#26A69A]">{trader.pnl}</span>
+                <ArrowUpRight className="w-2.5 h-2.5 text-[#0D71FF]" />
+                <span className="text-[10px] font-semibold text-[#0D71FF]">{trader.pnl}</span>
                 <span className="text-[9px] text-white/15 ml-1">{trader.stats.winRate} win</span>
               </div>
             </motion.button>
@@ -243,8 +243,8 @@ export function TestimonialsSection() {
                   <p className="text-[10px] font-medium text-white/50 truncate">{trader.name}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <ArrowUpRight className="w-2.5 h-2.5 text-[#26A69A]" />
-                  <span className="text-[10px] font-semibold text-[#26A69A]">{trader.pnl}</span>
+                  <ArrowUpRight className="w-2.5 h-2.5 text-[#0D71FF]" />
+                  <span className="text-[10px] font-semibold text-[#0D71FF]">{trader.pnl}</span>
                 </div>
               </button>
             ))}

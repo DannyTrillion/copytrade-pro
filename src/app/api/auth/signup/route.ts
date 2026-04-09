@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { notifyAdminNewSignup } from "@/lib/email";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -112,6 +113,9 @@ export async function POST(req: NextRequest) {
     await prisma.emailOtp.deleteMany({
       where: { email: normalizedEmail },
     });
+
+    // Notify admin of new signup (non-blocking)
+    notifyAdminNewSignup(data.name, normalizedEmail).catch(() => {});
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {

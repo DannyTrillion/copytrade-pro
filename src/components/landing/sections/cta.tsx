@@ -9,15 +9,16 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 export function CtaSection() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, amount: 0.15 });
 
   return (
     <section className="relative py-24 lg:py-32" style={{ background: "#06060a" }} ref={ref}>
       <div className="max-w-[900px] mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease }}
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+          transition={{ duration: 0.7, ease }}
+          style={{ willChange: "transform, opacity" }}
           className="relative rounded-2xl overflow-hidden"
         >
           <div className="absolute inset-0 bg-[#0D71FF]" />
@@ -34,12 +35,12 @@ export function CtaSection() {
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link href="/signup"
-                className="group inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[#0D71FF] font-semibold text-sm rounded-full hover:bg-white/90 active:scale-[0.97] transition-all duration-200">
+                className="group inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[#0D71FF] font-semibold text-sm rounded-full hover:bg-white/90 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.97] transition-all duration-200">
                 Start Copy Trading
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <Link href="#how-it-works"
-                className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/15 text-white font-semibold text-sm rounded-full border border-white/20 hover:bg-white/25 active:scale-[0.97] transition-all duration-200">
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/15 text-white font-semibold text-sm rounded-full border border-white/20 hover:bg-white/25 hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200">
                 See How It Works
               </Link>
             </div>
@@ -53,7 +54,7 @@ export function CtaSection() {
               ].map((stat) => (
                 <div key={stat.label} className="text-center min-w-[70px]">
                   <p className="text-lg font-bold text-white leading-none mb-1">{stat.value}</p>
-                  <p className="text-[11px] text-white/50 font-medium">{stat.label}</p>
+                  <p className="text-xs text-white/60 font-medium">{stat.label}</p>
                 </div>
               ))}
             </div>

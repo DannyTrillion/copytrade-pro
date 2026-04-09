@@ -45,7 +45,7 @@ const STEPS = [
 
 export function HowItWorksSection() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, amount: 0.1 });
   const [activeStep, setActiveStep] = useState(0);
 
   const step = STEPS[activeStep];
@@ -57,7 +57,7 @@ export function HowItWorksSection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease }}
+          transition={{ duration: 0.9, ease }}
           className="text-center mb-14"
         >
           <span className="inline-block text-xs font-medium text-[#0D71FF] uppercase tracking-[0.2em] mb-4">How It Works</span>
@@ -73,7 +73,7 @@ export function HowItWorksSection() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.15, duration: 0.5, ease }}
+          transition={{ delay: 0.15, duration: 0.9, ease }}
           className="flex items-center justify-center gap-3 md:gap-4 mb-10"
         >
           {STEPS.map((s, i) => {
@@ -96,13 +96,13 @@ export function HowItWorksSection() {
                 >
                   <Icon className={`w-5 h-5 md:w-6 md:h-6 transition-colors duration-300 ${isActive ? "text-[#0D71FF]" : "text-white/25 group-hover:text-white/40"}`} />
                   {/* Step number badge */}
-                  <span className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[9px] font-bold flex items-center justify-center transition-all duration-300 ${
+                  <span className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center transition-all duration-300 ${
                     isActive ? "bg-[#0D71FF] text-white" : "bg-white/[0.04] text-white/20"
                   }`}>
                     {i + 1}
                   </span>
                 </motion.div>
-                <span className={`text-[11px] font-medium transition-colors duration-300 ${isActive ? "text-white/70" : "text-white/20"}`}>
+                <span className={`text-xs font-medium transition-colors duration-300 ${isActive ? "text-white/70" : "text-white/20"}`}>
                   {s.label}
                 </span>
               </button>

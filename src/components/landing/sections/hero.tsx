@@ -196,23 +196,30 @@ export function HeroSection() {
   return (
     <section ref={ref} className="relative min-h-screen flex flex-col overflow-hidden" style={{ background: "#04040a" }}>
 
-      {/* Star field / particle dust background — canvas */}
+      {/* Star field — desktop only */}
       <StarField />
 
-      {/* Grid — desktop only */}
-      <div className="absolute inset-0 z-[1] opacity-[0.015] hidden md:block" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "56px 56px" }} />
-
-      {/* Animated orbs — desktop only */}
+      {/* Animated gradient mesh — desktop */}
       <div className="absolute inset-0 z-[1] pointer-events-none hidden md:block">
-        <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.05, 0.08, 0.05] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-15%] left-[10%] w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(13,113,255,0.14),transparent_55%)]" />
-        <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.03, 0.06, 0.03] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }}
-          className="absolute bottom-[-15%] right-[0%] w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.1),transparent_55%)]" />
+        <motion.div
+          animate={{
+            background: [
+              "radial-gradient(ellipse at 20% 20%, rgba(13,113,255,0.12) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 40% 60%, rgba(13,113,255,0.08) 0%, transparent 50%), radial-gradient(ellipse at 60% 20%, rgba(99,102,241,0.12) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 20% 20%, rgba(13,113,255,0.12) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 50%)",
+            ],
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0"
+        />
       </div>
-      {/* Mobile: static subtle gradient instead */}
+      {/* Mobile: static gradient */}
       <div className="absolute inset-0 z-[1] pointer-events-none md:hidden">
         <div className="absolute top-0 left-0 w-full h-[50%] bg-[radial-gradient(ellipse_at_50%_0%,rgba(13,113,255,0.06),transparent_60%)]" />
       </div>
+
+      {/* Grid — desktop only */}
+      <div className="absolute inset-0 z-[2] opacity-[0.012] hidden md:block" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
 
       {/* Content */}
       <div ref={containerRef} className="relative z-10 flex-1 flex items-center px-5 md:px-6 pt-20 md:pt-24 pb-10 md:pb-16">
@@ -231,23 +238,82 @@ export function HeroSection() {
               </div>
             </motion.div>
 
-            {/* Headline with rotating text */}
+            {/* Headline with rotating text + calligraphy underline */}
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.1, duration: 0.8, ease }}
-              className="text-[clamp(2.4rem,6vw,4rem)] font-bold leading-[1.05] tracking-[-0.035em] mb-5"
+              className="text-[clamp(2.6rem,7vw,5rem)] font-bold leading-[1.02] tracking-[-0.04em] mb-7"
             >
-              <span className="text-white">The Smartest Way to</span>
+              <span className="bg-gradient-to-b from-white to-white/80 bg-clip-text text-transparent">The Smartest Way to</span>
               <br />
-              <RotatingText />
+              <span className="relative inline-block">
+                <RotatingText />
+                {/* Premium calligraphy underline */}
+                <svg
+                  viewBox="0 0 320 20"
+                  className="absolute -bottom-3 left-[-5%] w-[110%] h-5 overflow-visible"
+                  fill="none"
+                  preserveAspectRatio="none"
+                >
+                  <defs>
+                    <linearGradient id="brushGrad" x1="0" y1="0" x2="320" y2="0" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#0D71FF" stopOpacity="0" />
+                      <stop offset="15%" stopColor="#0D71FF" stopOpacity="0.7" />
+                      <stop offset="50%" stopColor="#5B8DEF" stopOpacity="0.9" />
+                      <stop offset="85%" stopColor="#6366F1" stopOpacity="0.7" />
+                      <stop offset="100%" stopColor="#6366F1" stopOpacity="0" />
+                    </linearGradient>
+                    <filter id="brushGlow">
+                      <feGaussianBlur stdDeviation="2" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  {/* Glow layer */}
+                  <motion.path
+                    d="M8 12 C25 6, 50 14, 80 9 C110 4, 140 13, 170 8 C200 3, 230 12, 260 7 C280 4, 300 9, 312 6"
+                    stroke="url(#brushGrad)"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    filter="url(#brushGlow)"
+                    opacity="0.3"
+                    initial={{ pathLength: 0 }}
+                    animate={inView ? { pathLength: 1 } : {}}
+                    transition={{ delay: 0.9, duration: 1, ease }}
+                  />
+                  {/* Main stroke */}
+                  <motion.path
+                    d="M8 12 C25 6, 50 14, 80 9 C110 4, 140 13, 170 8 C200 3, 230 12, 260 7 C280 4, 300 9, 312 6"
+                    stroke="url(#brushGrad)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={inView ? { pathLength: 1 } : {}}
+                    transition={{ delay: 0.9, duration: 1, ease }}
+                  />
+                  {/* Thin accent line — offset */}
+                  <motion.path
+                    d="M20 15 C50 10, 90 16, 130 11 C170 6, 210 14, 250 10 C275 7, 295 11, 308 9"
+                    stroke="url(#brushGrad)"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    opacity="0.4"
+                    initial={{ pathLength: 0 }}
+                    animate={inView ? { pathLength: 1 } : {}}
+                    transition={{ delay: 1.1, duration: 0.8, ease }}
+                  />
+                </svg>
+              </span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 14 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.2, duration: 0.6, ease }}
-              className="text-[16px] text-white/30 max-w-[480px] mx-auto leading-[1.7] mb-8"
+              className="text-[16px] text-white/35 max-w-[500px] mx-auto leading-[1.8] mb-8"
             >
               Connect your Webull account, follow verified elite traders, and automatically mirror every trade — completely hands-free.
             </motion.p>
@@ -256,12 +322,15 @@ export function HeroSection() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.3, duration: 0.5, ease }}
               className="flex flex-wrap items-center justify-center gap-3 mb-6">
               <Link href="/signup"
-                className="group inline-flex items-center gap-2.5 px-8 py-4 bg-[#0D71FF] text-white font-semibold text-sm rounded-full hover:bg-[#0B63E0] transition-all duration-300 hover:shadow-[0_4px_28px_rgba(13,113,255,0.4),0_0_80px_rgba(13,113,255,0.08)] active:scale-[0.97]">
+                className="group inline-flex items-center gap-2.5 px-9 py-4 bg-[#0D71FF] text-white font-semibold text-[15px] rounded-full hover:bg-[#0B63E0] hover:-translate-y-1 transition-all duration-300 active:scale-[0.97]"
+                style={{ boxShadow: "0 0 0 0 rgba(13,113,255,0), 0 1px 2px rgba(0,0,0,0.2), 0 4px 12px rgba(13,113,255,0.15), 0 8px 32px rgba(13,113,255,0.1)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 4px rgba(13,113,255,0.1), 0 2px 4px rgba(0,0,0,0.2), 0 8px 24px rgba(13,113,255,0.3), 0 16px 48px rgba(13,113,255,0.15)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 0 rgba(13,113,255,0), 0 1px 2px rgba(0,0,0,0.2), 0 4px 12px rgba(13,113,255,0.15), 0 8px 32px rgba(13,113,255,0.1)"; }}>
                 Get Started Free
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
               <Link href="#features"
-                className="inline-flex items-center gap-2 px-6 py-4 text-white/35 font-medium text-sm rounded-full border border-white/[0.06] hover:bg-white/[0.03] hover:text-white/55 hover:border-white/[0.1] transition-all duration-300">
+                className="inline-flex items-center gap-2 px-6 py-4 text-white/35 font-medium text-sm rounded-full border border-white/[0.06] hover:bg-white/[0.03] hover:text-white/55 hover:border-white/[0.1] hover:-translate-y-0.5 transition-all duration-300">
                 <Play className="w-3.5 h-3.5" />
                 See How It Works
               </Link>
@@ -343,44 +412,54 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* Stats bar below dashboard */}
+          {/* Stats bar with dividers */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.8, duration: 0.5, ease }}
-            className="flex items-center justify-center gap-8 md:gap-12 mt-10 lg:mt-14"
+            transition={{ delay: 0.8, duration: 0.8, ease }}
+            className="flex items-center justify-center mt-12 lg:mt-16"
           >
-            {[
-              { icon: BarChart3, value: 2847, suffix: "+", label: "Trades Copied" },
-              { icon: Users, value: 100, suffix: "+", label: "Verified Traders" },
-              { icon: Shield, value: 99, suffix: ".9%", label: "Uptime" },
-              { icon: Zap, value: 200, prefix: "<", suffix: "ms", label: "Execution" },
-            ].map((s, i) => (
-              <div key={s.label} className="text-center">
-                <p className="text-lg md:text-xl font-bold text-white">
-                  <Counter target={s.value} suffix={s.suffix} prefix={s.prefix || ""} delay={1 + i * 0.15} />
-                </p>
-                <p className="text-[10px] text-white/20 mt-0.5">{s.label}</p>
-              </div>
-            ))}
+            <div className="inline-flex items-center gap-0 rounded-2xl border border-white/[0.04] bg-white/[0.01] px-2 py-3 md:px-4 md:py-4">
+              {[
+                { value: 2847, suffix: "+", label: "Trades Copied" },
+                { value: 100, suffix: "+", label: "Verified Traders" },
+                { value: 99, suffix: ".9%", label: "Uptime" },
+                { value: 200, prefix: "<", suffix: "ms", label: "Execution" },
+              ].map((s, i) => (
+                <div key={s.label} className="flex items-center">
+                  {i > 0 && <div className="w-px h-8 bg-white/[0.06] mx-4 md:mx-6" />}
+                  <div className="text-center px-2 md:px-3">
+                    <p className="text-xl md:text-2xl font-bold text-white tabular-nums">
+                      <Counter target={s.value} suffix={s.suffix} prefix={s.prefix || ""} delay={1 + i * 0.15} />
+                    </p>
+                    <p className="text-[10px] md:text-[11px] text-white/25 mt-1">{s.label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
 
-          {/* Trust strip */}
+          {/* Logo cloud — social proof */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
-            transition={{ delay: 1.2 }}
-            className="flex items-center justify-center gap-3 mt-6"
+            transition={{ delay: 1.2, duration: 0.8 }}
+            className="mt-10 lg:mt-14 text-center"
           >
-            <div className="flex -space-x-2">
-              {["M", "S", "E", "J", "D"].map((l, i) => (
-                <div key={i} className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0D71FF] to-[#6366F1] flex items-center justify-center text-[9px] font-bold text-white border-2 border-[#04040a]">{l}</div>
+            <p className="text-[11px] text-white/15 uppercase tracking-[0.2em] mb-5">Integrated with leading platforms</p>
+            <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap">
+              {["Webull", "Coinbase", "Binance", "Stripe", "Supabase"].map((name, i) => (
+                <motion.div
+                  key={name}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: 1.3 + i * 0.08, duration: 0.5 }}
+                  className="text-[13px] md:text-sm font-semibold text-white/[0.12] tracking-wide hover:text-white/25 transition-colors duration-300"
+                >
+                  {name}
+                </motion.div>
               ))}
             </div>
-            <div className="flex items-center gap-0.5">
-              {[1,2,3,4,5].map((s) => <Star key={s} className="w-3 h-3 text-amber-400 fill-amber-400" />)}
-            </div>
-            <span className="text-[11px] text-white/25">Trusted by 2,800+ traders worldwide</span>
           </motion.div>
         </div>
       </div>

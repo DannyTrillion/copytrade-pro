@@ -8,7 +8,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 export function LeoSection() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, amount: 0.15 });
 
   return (
     <section className="relative py-24 lg:py-32 overflow-hidden" style={{ background: "#05050a" }} ref={ref}>
@@ -21,9 +21,10 @@ export function LeoSection() {
 
           {/* Left — Leo image */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, x: -30, scale: 0.97 }}
+            animate={inView ? { opacity: 1, x: 0, scale: 1 } : {}}
             transition={{ duration: 0.8, ease }}
+            style={{ willChange: "transform, opacity" }}
             className="lg:col-span-5 flex justify-center lg:justify-start"
           >
             <div className="relative">
@@ -49,8 +50,8 @@ export function LeoSection() {
               </div>
 
               {/* Decorative ring */}
-              <div className="absolute -top-3 -right-3 w-[100px] h-[100px] rounded-full border border-[#0D71FF]/10" />
-              <div className="absolute -bottom-4 -left-4 w-[60px] h-[60px] rounded-full border border-white/[0.04]" />
+              <div className="absolute -top-3 -right-3 w-[100px] h-[100px] rounded-full border border-[#0D71FF]/20" />
+              <div className="absolute -bottom-4 -left-4 w-[60px] h-[60px] rounded-full border border-white/[0.08]" />
             </div>
           </motion.div>
 
@@ -59,7 +60,7 @@ export function LeoSection() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.15, duration: 0.7, ease }}
+              transition={{ delay: 0.15, duration: 1, ease }}
             >
               {/* Label */}
               <div className="flex items-center gap-2 mb-6">
@@ -82,7 +83,7 @@ export function LeoSection() {
               transition={{ delay: 0.3, duration: 0.6, ease }}
               className="relative mb-8"
             >
-              <Quote className="w-8 h-8 text-[#0D71FF]/10 mb-3" />
+              <Quote className="w-8 h-8 text-[#0D71FF]/20 mb-3" />
               <p className="text-[15px] text-white/45 leading-[1.8] max-w-[520px]">
                 For years, successful trading was reserved for those with decades of experience, expensive tools, and hours of daily screen time. We built CopyTrade Pro to change that.
               </p>
@@ -121,7 +122,7 @@ export function LeoSection() {
                 ].map((s) => (
                   <div key={s.label} className="text-center">
                     <p className="text-sm font-bold text-white tabular-nums">{s.value}</p>
-                    <p className="text-[9px] text-white/20">{s.label}</p>
+                    <p className="text-[10px] text-white/25">{s.label}</p>
                   </div>
                 ))}
               </div>

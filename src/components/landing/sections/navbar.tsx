@@ -58,7 +58,7 @@ export function Navbar() {
         </div>
 
         <div className="hidden lg:flex items-center gap-2.5">
-          <Link href="/login" className="px-4 py-2 text-[13px] font-medium text-white/40 hover:text-white/70 transition-colors duration-200">
+          <Link href="/login" className="px-4 py-2 text-[13px] font-medium text-white/40 hover:text-white/80 hover:bg-white/[0.04] rounded-lg transition-all duration-200">
             Log in
           </Link>
           <Link href="/signup" className="px-5 py-2 text-[13px] font-semibold bg-[#0D71FF] hover:bg-[#0B63E0] text-white rounded-full transition-all duration-200 hover:shadow-[0_2px_12px_rgba(13,113,255,0.25)] active:scale-[0.97]">

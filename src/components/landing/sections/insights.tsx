@@ -44,7 +44,7 @@ const INSIGHTS = [
 
 export function InsightsSection() {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, amount: 0.1 });
 
   const featured = INSIGHTS.find((i) => i.featured);
   const rest = INSIGHTS.filter((i) => !i.featured);
@@ -52,7 +52,7 @@ export function InsightsSection() {
   return (
     <section className="relative py-24 lg:py-32" style={{ background: "#06060a" }} ref={ref} id="insights">
       <div className="max-w-[1140px] mx-auto px-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, ease }} className="text-center mb-14">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.9, ease }} className="text-center mb-14">
           <span className="inline-block text-xs font-medium text-[#0D71FF] uppercase tracking-[0.2em] mb-4">Insights</span>
           <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-bold text-white leading-tight mb-4">Learn From the Best</h2>
           <p className="text-base text-white/35 max-w-[480px] mx-auto leading-relaxed">Trader breakdowns, market analysis, and strategy guides to sharpen your edge.</p>
@@ -80,7 +80,7 @@ export function InsightsSection() {
                     whileTap={{ scale: 0.95 }}
                     className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center group-hover:bg-white/15 transition-colors duration-300"
                   >
-                    <Play className="w-6 h-6 text-white ml-0.5" fill="white" fillOpacity={0.9} />
+                    <Play className="w-6 h-6 text-white ml-0.5" fill="white" fillOpacity={1} />
                   </motion.div>
                 </div>
 
@@ -96,7 +96,7 @@ export function InsightsSection() {
                 </div>
 
                 {/* Chart pattern decorative */}
-                <svg className="absolute bottom-0 left-0 w-full h-20 opacity-20" viewBox="0 0 400 60" preserveAspectRatio="none">
+                <svg className="absolute bottom-0 left-0 w-full h-20 opacity-35" viewBox="0 0 400 60" preserveAspectRatio="none">
                   <path d="M0 50 C50 40,100 45,150 25 C200 5,250 15,300 10 C350 5,380 8,400 3" stroke="white" strokeWidth="1" fill="none" strokeLinecap="round" />
                 </svg>
               </div>
@@ -116,7 +116,7 @@ export function InsightsSection() {
                 key={item.title}
                 initial={{ opacity: 0, y: 16 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.2 + i * 0.08, duration: 0.5, ease }}
+                transition={{ delay: 0.2 + i * 0.08, duration: 0.9, ease }}
                 className="group flex gap-4 rounded-xl border border-white/[0.05] p-4 cursor-pointer transition-all duration-300 hover:border-white/[0.1] hover:-translate-y-0.5"
                 style={{ background: "rgba(255,255,255,0.015)" }}
               >
@@ -124,7 +124,7 @@ export function InsightsSection() {
                 <div className="relative w-24 h-[72px] rounded-lg overflow-hidden shrink-0" style={{ background: `${item.color}08` }}>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                      <Play className="w-3 h-3 text-white/60 ml-0.5" fill="white" fillOpacity={0.5} />
+                      <Play className="w-3 h-3 text-white/60 ml-0.5" fill="white" fillOpacity={0.8} />
                     </div>
                   </div>
                   <div className="absolute bottom-1 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black/50 backdrop-blur-sm">
