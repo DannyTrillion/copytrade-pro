@@ -171,7 +171,7 @@ export async function GET(
       winRate: trader.winRate,
       totalTrades: trader.totalTrades,
       isActive: trader.isActive,
-      followerCount: trader._count.followers,
+      followerCount: trader.followerCount > 0 ? trader.followerCount : trader._count.followers,
       joinedAt: trader.user.createdAt,
       // Extended stats
       computedStats: {

@@ -14,6 +14,7 @@ export async function GET() {
         winRate: true,
         totalTrades: true,
         totalPnl: true,
+        followerCount: true,
         user: { select: { avatar: true } },
         _count: { select: { followers: true } },
       },
@@ -29,7 +30,7 @@ export async function GET() {
       winRate: t.winRate,
       totalTrades: t.totalTrades,
       totalPnl: t.totalPnl,
-      followers: t._count.followers,
+      followers: t.followerCount > 0 ? t.followerCount : t._count.followers,
     }));
 
     return NextResponse.json(

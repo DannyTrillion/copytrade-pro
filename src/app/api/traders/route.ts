@@ -35,7 +35,7 @@ export async function GET() {
         pnl: t.totalPnl,
         winRate: t.winRate,
         totalTrades: t.totalTrades,
-        followers: t._count.followers,
+        followers: t.followerCount > 0 ? t.followerCount : t._count.followers,
         isFollowing: !!follow,
         allocationPercent: follow?.allocationPercent ?? 0,
         copyEnabled: follow?.copyEnabled ?? false,
