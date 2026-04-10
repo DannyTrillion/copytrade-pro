@@ -485,6 +485,7 @@ export async function PATCH(req: NextRequest) {
         totalPnl: z.number().optional(),
         winRate: z.number().min(0).max(100).optional(),
         totalTrades: z.number().int().min(0).optional(),
+        followerCount: z.number().int().min(0).optional(),
         isActive: z.boolean().optional(),
       });
       const { traderId, ...updateFields } = schema.parse(body);

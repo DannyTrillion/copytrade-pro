@@ -34,6 +34,7 @@ interface TraderRow {
   totalPnl: number;
   winRate: number;
   totalTrades: number;
+  followerCount: number;
   isActive: boolean;
   user: { name: string; email: string; avatar?: string | null };
   _count: { followers: number; traderTrades: number };
@@ -47,6 +48,7 @@ interface TraderForm {
   totalPnl: number;
   winRate: number;
   totalTrades: number;
+  followerCount: number;
   avatar: string;
   email: string;
   password: string;
@@ -60,6 +62,7 @@ const EMPTY_FORM: TraderForm = {
   totalPnl: 0,
   winRate: 0,
   totalTrades: 0,
+  followerCount: 0,
   avatar: "",
   email: "",
   password: "",
@@ -220,6 +223,7 @@ export default function ManageTradersPage() {
           totalPnl: form.totalPnl,
           winRate: form.winRate,
           totalTrades: form.totalTrades,
+          followerCount: form.followerCount,
         }),
       });
 
@@ -266,6 +270,7 @@ export default function ManageTradersPage() {
       totalPnl: trader.totalPnl,
       winRate: trader.winRate,
       totalTrades: trader.totalTrades,
+      followerCount: trader.followerCount || 0,
       avatar: trader.user.avatar || "",
       email: "",
       password: "",
@@ -530,6 +535,20 @@ export default function ManageTradersPage() {
               value={form.totalTrades}
               onChange={(e) =>
                 setForm({ ...form, totalTrades: parseInt(e.target.value) || 0 })
+              }
+              className="input-field text-sm"
+              min="0"
+            />
+          </div>
+          <div>
+            <label className="block text-2xs text-text-tertiary mb-1">
+              Follower Count
+            </label>
+            <input
+              type="number"
+              value={form.followerCount}
+              onChange={(e) =>
+                setForm({ ...form, followerCount: parseInt(e.target.value) || 0 })
               }
               className="input-field text-sm"
               min="0"
