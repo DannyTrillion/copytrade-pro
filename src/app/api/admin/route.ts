@@ -322,8 +322,12 @@ export async function PATCH(req: NextRequest) {
         userId: z.string(),
         operation: z.enum(["add_deposit", "add_profit", "add_loss", "subtract"]),
         amount: z.number().positive(),
-      });
-      const { userId, operation, amount } = schema.parse(body);
+        provider: z.string().optional(),
+        method: z.string().optional(),
+        txId: z.string().optional(),
+        adminNote: z.string().optional(),
+      }).passthrough();
+      const { userId, operation, amount, provider, method, txId, adminNote } = schema.parse(body);
 
       let balance = await prisma.balance.findUnique({ where: { userId } });
       if (!balance) {
@@ -335,6 +339,10 @@ export async function PATCH(req: NextRequest) {
       let txAmount = amount;
       let description = "";
 
+      // Build natural description based on provider/method
+      const providerLabel = provider || "";
+      const methodLabel = method || "";
+
       switch (operation) {
         case "add_deposit":
           updateData = {
@@ -342,7 +350,10 @@ export async function PATCH(req: NextRequest) {
             availableBalance: { increment: amount },
           };
           txType = "DEPOSIT";
-          description = "Admin deposit";
+          // Natural description: "Webull deposit via USDT" or "Bank Transfer deposit" etc.
+          description = providerLabel
+            ? `${providerLabel} deposit${methodLabel ? ` via ${methodLabel}` : ""} confirmed`
+            : "Deposit confirmed";
           break;
         case "add_profit":
           updateData = {
@@ -351,7 +362,7 @@ export async function PATCH(req: NextRequest) {
             totalProfit: { increment: amount },
           };
           txType = "COPY_PROFIT";
-          description = "Admin profit adjustment";
+          description = "Copy trade profit";
           break;
         case "add_loss":
           updateData = {
@@ -361,7 +372,7 @@ export async function PATCH(req: NextRequest) {
           };
           txType = "COPY_LOSS";
           txAmount = -amount;
-          description = "Admin loss adjustment";
+          description = "Copy trade loss";
           break;
         case "subtract":
           updateData = {
@@ -370,7 +381,9 @@ export async function PATCH(req: NextRequest) {
           };
           txType = "WITHDRAWAL";
           txAmount = -amount;
-          description = "Admin balance subtraction";
+          description = providerLabel
+            ? `Withdrawal via ${providerLabel}`
+            : "Withdrawal processed";
           break;
       }
 
@@ -387,10 +400,30 @@ export async function PATCH(req: NextRequest) {
           balanceBefore: balance.totalBalance,
           balanceAfter: updated.totalBalance,
           description,
+          txHash: txId || null,
         },
       });
 
-      await logAudit({ adminId, action: "EDIT_BALANCE", targetType: "USER", targetId: userId, details: { operation, amount, before: balance.totalBalance, after: updated.totalBalance } });
+      // Send email for deposits
+      if (operation === "add_deposit") {
+        const depositUser = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+        if (depositUser?.email) {
+          sendDepositConfirmedEmail(depositUser.email, depositUser.name || "Trader", amount).catch(() => {});
+        }
+        notifyDeposit(userId, amount).catch(() => {});
+
+        // Check tier upgrade
+        const totalDep = await getTotalDeposited(userId);
+        const prevTier = getTierFromAmount(Math.max(0, totalDep - amount));
+        const newTier = getTierFromAmount(totalDep);
+        if (newTier.level !== prevTier.level) {
+          notifyTierUpgrade(userId, newTier.name).catch(() => {});
+          const u = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+          if (u?.email) sendTierUpgradeEmail(u.email, u.name || "Trader", newTier.name).catch(() => {});
+        }
+      }
+
+      await logAudit({ adminId, action: "EDIT_BALANCE", targetType: "USER", targetId: userId, details: { operation, amount, provider, method, adminNote, before: balance.totalBalance, after: updated.totalBalance } });
       return NextResponse.json({ success: true, balance: updated });
     }
 

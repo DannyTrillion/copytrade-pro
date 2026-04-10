@@ -77,6 +77,10 @@ export default function AdminUsersPage() {
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [balanceOp, setBalanceOp] = useState<"add_deposit" | "add_profit" | "add_loss" | "subtract">("add_deposit");
   const [balanceAmount, setBalanceAmount] = useState("");
+  const [balanceProvider, setBalanceProvider] = useState("");
+  const [balanceMethod, setBalanceMethod] = useState("");
+  const [balanceTxId, setBalanceTxId] = useState("");
+  const [balanceNote, setBalanceNote] = useState("");
   const [balanceSaving, setBalanceSaving] = useState(false);
   const [balanceMsg, setBalanceMsg] = useState("");
 
@@ -257,6 +261,10 @@ export default function AdminUsersPage() {
           userId: editingUser.id,
           operation: balanceOp,
           amount: parseFloat(balanceAmount),
+          provider: balanceProvider || undefined,
+          method: balanceMethod || undefined,
+          txId: balanceTxId || undefined,
+          adminNote: balanceNote || undefined,
         }),
       });
       const data = await res.json();
@@ -834,8 +842,8 @@ export default function AdminUsersPage() {
       />
 
       {/* Balance Editor Modal */}
-      <Modal isOpen={!!editingUser} onClose={() => setEditingUser(null)} title={`Edit Balance — ${editingUser?.name}`}>
-        <form onSubmit={handleBalanceEdit} className="space-y-4">
+      <Modal isOpen={!!editingUser} onClose={() => { setEditingUser(null); setBalanceProvider(""); setBalanceMethod(""); setBalanceTxId(""); setBalanceNote(""); }} title={`Edit Balance — ${editingUser?.name}`}>
+        <form onSubmit={handleBalanceEdit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           <div className="bg-surface-1 rounded-lg p-3 flex items-center justify-between">
             <span className="text-xs text-text-tertiary">Current Balance</span>
             <span className="text-sm font-semibold text-text-primary">
@@ -870,6 +878,75 @@ export default function AdminUsersPage() {
               required
             />
           </div>
+
+          {/* Provider & Method — shown for deposits/withdrawals */}
+          {(balanceOp === "add_deposit" || balanceOp === "subtract") && (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Payment Provider</label>
+                <select value={balanceProvider} onChange={(e) => setBalanceProvider(e.target.value)} className="input-field">
+                  <option value="">Select provider...</option>
+                  <option value="Webull">Webull</option>
+                  <option value="Binance">Binance</option>
+                  <option value="Coinbase">Coinbase</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Crypto Wallet">Crypto Wallet</option>
+                  <option value="Card Payment">Card Payment</option>
+                  <option value="Wire Transfer">Wire Transfer</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Payment Method</label>
+                <select value={balanceMethod} onChange={(e) => setBalanceMethod(e.target.value)} className="input-field">
+                  <option value="">Select method...</option>
+                  <option value="USDT">USDT</option>
+                  <option value="USDC">USDC</option>
+                  <option value="BTC">BTC</option>
+                  <option value="ETH">ETH</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Debit Card">Debit Card</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Wire">Wire</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Transaction ID <span className="text-text-tertiary">(optional)</span></label>
+                <input
+                  type="text"
+                  value={balanceTxId}
+                  onChange={(e) => setBalanceTxId(e.target.value)}
+                  className="input-field font-mono text-xs"
+                  placeholder="0x... or reference number"
+                />
+              </div>
+            </>
+          )}
+
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">Admin Note <span className="text-text-tertiary">(internal only)</span></label>
+            <input
+              type="text"
+              value={balanceNote}
+              onChange={(e) => setBalanceNote(e.target.value)}
+              className="input-field text-xs"
+              placeholder="Internal note — not visible to user"
+            />
+          </div>
+
+          {/* Preview what user sees */}
+          {balanceOp === "add_deposit" && balanceAmount && (
+            <div className="bg-surface-2/50 rounded-lg p-3 border border-border/50">
+              <p className="text-[10px] text-text-tertiary uppercase tracking-wider mb-1">User will see</p>
+              <p className="text-xs text-text-primary font-medium">
+                {balanceProvider
+                  ? `${balanceProvider} deposit${balanceMethod ? ` via ${balanceMethod}` : ""} confirmed`
+                  : "Deposit confirmed"}
+              </p>
+              <p className="text-xs text-success font-semibold mt-0.5">+${parseFloat(balanceAmount || "0").toFixed(2)}</p>
+            </div>
+          )}
 
           {balanceMsg && (
             <p className={`text-xs ${balanceMsg === "Balance updated" ? "text-success" : "text-danger"}`}>
