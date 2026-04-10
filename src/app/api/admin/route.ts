@@ -479,21 +479,27 @@ export async function PATCH(req: NextRequest) {
       const schema = z.object({
         traderId: z.string(),
         displayName: z.string().optional(),
-        description: z.string().optional(),
-        bio: z.string().optional(),
-        performancePct: z.number().optional(),
-        totalPnl: z.number().optional(),
-        winRate: z.number().min(0).max(100).optional(),
-        totalTrades: z.number().int().min(0).optional(),
-        followerCount: z.number().int().min(0).optional(),
+        description: z.string().nullable().optional(),
+        bio: z.string().nullable().optional(),
+        performancePct: z.union([z.number(), z.string().transform(Number)]).optional(),
+        totalPnl: z.union([z.number(), z.string().transform(Number)]).optional(),
+        winRate: z.union([z.number(), z.string().transform(Number)]).optional(),
+        totalTrades: z.union([z.number(), z.string().transform(Number)]).pipe(z.number().int().min(0)).optional(),
+        followerCount: z.union([z.number(), z.string().transform(Number)]).pipe(z.number().int().min(0)).optional(),
         isActive: z.boolean().optional(),
-      });
-      const { traderId, ...updateFields } = schema.parse(body);
+      }).passthrough();
 
-      // Remove undefined values
+      const parsed = schema.parse(body);
+      const { traderId, action: _action, ...updateFields } = parsed;
+
+      // Remove undefined/null action fields
       const cleanData = Object.fromEntries(
-        Object.entries(updateFields).filter(([, v]) => v !== undefined)
+        Object.entries(updateFields).filter(([k, v]) => v !== undefined && k !== "action")
       );
+
+      // Convert empty strings to null for nullable fields
+      if (cleanData.description === "") cleanData.description = null;
+      if (cleanData.bio === "") cleanData.bio = null;
 
       const trader = await prisma.trader.update({
         where: { id: traderId },
