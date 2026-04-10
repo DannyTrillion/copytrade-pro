@@ -207,7 +207,8 @@ export default function SignupPage() {
                       <ArrowLeft className="w-2.5 h-2.5" /> Back
                     </button>
                     <h2 className="text-[18px] font-semibold text-white mb-1">Verify email</h2>
-                    <p className="text-[12px] text-white/35 mb-6">Code sent to <span className="text-white/50 font-medium">{email}</span></p>
+                    <p className="text-[12px] text-white/35 mb-2">Code sent to <span className="text-white/50 font-medium">{email}</span></p>
+                    <p className="text-[10px] text-white/20 mb-5">Can&apos;t find it? Check your spam or junk folder.</p>
                     <div className="flex items-center justify-center gap-2 mb-4">
                       {otpDigits.map((digit, i) => (
                         <motion.input key={i} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.08 + i * 0.04, duration: 0.3, ease }}
