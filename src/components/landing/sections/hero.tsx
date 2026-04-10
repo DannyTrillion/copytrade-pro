@@ -412,49 +412,52 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* Stats bar with dividers */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.8, duration: 0.8, ease }}
-            className="flex items-center justify-center mt-12 lg:mt-16"
-          >
-            <div className="inline-flex items-center gap-0 rounded-2xl border border-white/[0.04] bg-white/[0.01] px-2 py-3 md:px-4 md:py-4">
-              {[
-                { value: 2847, suffix: "+", label: "Trades Copied" },
-                { value: 100, suffix: "+", label: "Verified Traders" },
-                { value: 99, suffix: ".9%", label: "Uptime" },
-                { value: 200, prefix: "<", suffix: "ms", label: "Execution" },
-              ].map((s, i) => (
-                <div key={s.label} className="flex items-center">
-                  {i > 0 && <div className="w-px h-8 bg-white/[0.06] mx-4 md:mx-6" />}
-                  <div className="text-center px-2 md:px-3">
-                    <p className="text-xl md:text-2xl font-bold text-white tabular-nums">
-                      <Counter target={s.value} suffix={s.suffix} prefix={s.prefix || ""} delay={1 + i * 0.15} />
-                    </p>
-                    <p className="text-[10px] md:text-[11px] text-white/25 mt-1">{s.label}</p>
-                  </div>
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-10 md:mt-14 lg:mt-16 max-w-[800px] mx-auto px-2">
+            {[
+              { icon: BarChart3, value: 2847, suffix: "+", label: "Trades Copied", color: "#0D71FF" },
+              { icon: Users, value: 100, suffix: "+", label: "Verified Traders", color: "#6366F1" },
+              { icon: Shield, value: 99, suffix: ".9%", label: "Uptime SLA", color: "#0D71FF" },
+              { icon: Zap, value: 200, prefix: "<", suffix: "ms", label: "Execution", color: "#6366F1" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+                transition={{ delay: 0.8 + i * 0.1, duration: 0.7, ease }}
+                className="relative group rounded-2xl border border-white/[0.04] p-4 md:p-5 text-center transition-all duration-300 hover:border-white/[0.08] overflow-hidden"
+                style={{ background: "rgba(255,255,255,0.015)" }}
+              >
+                {/* Subtle hover glow */}
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 0%, ${s.color}08, transparent 70%)` }} />
+
+                <div className="relative">
+                  <s.icon className="w-4 h-4 mx-auto mb-2.5 md:mb-3" style={{ color: `${s.color}50` }} />
+                  <p className="text-2xl md:text-3xl font-bold text-white tabular-nums leading-none">
+                    <Counter target={s.value} suffix={s.suffix} prefix={s.prefix || ""} delay={1 + i * 0.12} />
+                  </p>
+                  <p className="text-[10px] md:text-[11px] text-white/25 mt-1.5 uppercase tracking-wider font-medium">{s.label}</p>
                 </div>
-              ))}
-            </div>
-          </motion.div>
+              </motion.div>
+            ))}
+          </div>
 
           {/* Logo cloud — social proof */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
-            transition={{ delay: 1.2, duration: 0.8 }}
-            className="mt-10 lg:mt-14 text-center"
+            transition={{ delay: 1.4, duration: 0.8 }}
+            className="mt-8 md:mt-12 lg:mt-14 text-center"
           >
-            <p className="text-[11px] text-white/15 uppercase tracking-[0.2em] mb-5">Integrated with leading platforms</p>
-            <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap">
+            <p className="text-[10px] md:text-[11px] text-white/15 uppercase tracking-[0.2em] mb-4 md:mb-5">Integrated with leading platforms</p>
+            <div className="flex items-center justify-center gap-6 md:gap-10 flex-wrap px-4">
               {["Webull", "Coinbase", "Binance", "Stripe", "Supabase"].map((name, i) => (
                 <motion.div
                   key={name}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 1.3 + i * 0.08, duration: 0.5 }}
-                  className="text-[13px] md:text-sm font-semibold text-white/[0.12] tracking-wide hover:text-white/25 transition-colors duration-300"
+                  transition={{ delay: 1.5 + i * 0.06, duration: 0.5 }}
+                  className="text-xs md:text-[13px] font-semibold text-white/[0.1] tracking-wide hover:text-white/25 transition-colors duration-300"
                 >
                   {name}
                 </motion.div>
