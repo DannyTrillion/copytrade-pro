@@ -404,6 +404,23 @@ export async function PATCH(req: NextRequest) {
         },
       });
 
+      // Create DepositRequest record for deposits so they appear in user deposit history
+      if (operation === "add_deposit") {
+        await prisma.depositRequest.create({
+          data: {
+            userId,
+            amount,
+            method: methodLabel || "CRYPTO",
+            coin: methodLabel || null,
+            network: null,
+            txHash: txId || null,
+            status: "CONFIRMED",
+            note: adminNote || null,
+            reviewedAt: new Date(),
+          },
+        });
+      }
+
       // Send email for deposits
       if (operation === "add_deposit") {
         const depositUser = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorizedResponse, errorResponse } from "@/lib/auth";
 import { z } from "zod";
 import { notifyTradeResult } from "@/lib/notifications";
-import { canReceiveTrade } from "@/lib/tiers";
+import { canReceiveTrade, getTotalDeposited } from "@/lib/tiers";
 
 const uploadTradeSchema = z.object({
   tradeName: z.string().min(1, "Trade name is required").max(100),
@@ -139,11 +139,10 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      // Determine the base amount for PnL calculation:
-      // Use allocatedBalance if > 0, otherwise fall back to totalBalance
-      const baseAmount = balance.allocatedBalance > 0
-        ? balance.allocatedBalance
-        : balance.totalBalance;
+      // Base amount = total deposited capital (not current balance which includes P&L)
+      // This ensures allocation is always calculated on deposited funds only
+      const totalDeposited = await getTotalDeposited(follower.userId);
+      const baseAmount = totalDeposited > 0 ? totalDeposited : balance.totalBalance;
 
       // Skip if the user has zero funds entirely
       if (baseAmount <= 0) continue;
@@ -157,14 +156,16 @@ export async function POST(req: NextRequest) {
       const commission = rawPnl > 0 ? rawPnl * tradeCheck.tier.commissionRate : 0;
       const followerPnl = rawPnl - commission;
 
-      // Calculate new balances
-      const newAllocated = Math.max(0, (balance.allocatedBalance > 0 ? balance.allocatedBalance : baseAmount) + followerPnl);
+      // Calculate new balances — PnL applies to actual balance, but was calculated on deposited capital
       const newTotal = Math.max(0, balance.totalBalance + followerPnl);
       const newProfit = balance.totalProfit + followerPnl;
-      // Keep availableBalance in sync: if no explicit allocation, it moves with total
+      // If user has explicit allocation, PnL goes to allocated; otherwise to available
+      const newAllocated = balance.allocatedBalance > 0
+        ? Math.max(0, balance.allocatedBalance + followerPnl)
+        : balance.allocatedBalance;
       const newAvailable = balance.allocatedBalance > 0
-        ? balance.availableBalance // allocated users: available stays same, allocated changes
-        : Math.max(0, balance.availableBalance + followerPnl); // unallocated: available moves with PnL
+        ? balance.availableBalance
+        : Math.max(0, balance.availableBalance + followerPnl);
 
       // Update follower balance atomically
       await prisma.balance.update({
