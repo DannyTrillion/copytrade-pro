@@ -18,12 +18,12 @@ interface AuditLog {
   id: string;
   adminId: string;
   action: string;
-  targetType: string;
-  targetId: string;
-  details: string;
-  ipAddress: string;
+  targetType: string | null;
+  targetId: string | null;
+  details: string | null;
+  ipAddress: string | null;
   createdAt: string;
-  admin: { name: string; email: string };
+  admin: { name: string; email: string } | null;
 }
 
 const ITEMS_PER_PAGE = 20;
@@ -51,7 +51,8 @@ function getActionColor(action: string): string {
   return DEFAULT_ACTION_COLOR;
 }
 
-function parseDetails(details: string): Record<string, unknown> | null {
+function parseDetails(details: string | null): Record<string, unknown> | null {
+  if (!details) return null;
   try {
     return JSON.parse(details);
   } catch {
@@ -59,9 +60,10 @@ function parseDetails(details: string): Record<string, unknown> | null {
   }
 }
 
-function renderDetails(details: string): string {
+function renderDetails(details: string | null): string {
+  if (!details) return "\u2014";
   const parsed = parseDetails(details);
-  if (!parsed || typeof parsed !== "object") return details || "\u2014";
+  if (!parsed || typeof parsed !== "object") return details;
   return Object.entries(parsed)
     .map(([k, v]) => `${k}: ${typeof v === "object" ? JSON.stringify(v) : String(v)}`)
     .join(" | ");
@@ -115,9 +117,9 @@ export default function AdminAuditLogPage() {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(
         (l) =>
-          l.admin.name.toLowerCase().includes(q) ||
-          l.admin.email.toLowerCase().includes(q) ||
-          l.targetId.toLowerCase().includes(q)
+          (l.admin?.name?.toLowerCase().includes(q) ?? false) ||
+          (l.admin?.email?.toLowerCase().includes(q) ?? false) ||
+          (l.targetId?.toLowerCase().includes(q) ?? false)
       );
     }
 
@@ -244,8 +246,8 @@ export default function AdminAuditLogPage() {
                     {formatDate(log.createdAt)}
                   </td>
                   <td className="table-cell">
-                    <p className="text-sm text-text-primary">{log.admin.name}</p>
-                    <p className="text-2xs text-text-tertiary">{log.admin.email}</p>
+                    <p className="text-sm text-text-primary">{log.admin?.name ?? "Unknown"}</p>
+                    <p className="text-2xs text-text-tertiary">{log.admin?.email ?? "\u2014"}</p>
                   </td>
                   <td className="table-cell">
                     <span
@@ -255,11 +257,13 @@ export default function AdminAuditLogPage() {
                     </span>
                   </td>
                   <td className="table-cell">
-                    <p className="text-xs text-text-secondary">{log.targetType}</p>
+                    <p className="text-xs text-text-secondary">{log.targetType ?? "\u2014"}</p>
                     <p className="text-2xs text-text-tertiary font-mono">
-                      {log.targetId.length > 16
-                        ? `${log.targetId.slice(0, 8)}...${log.targetId.slice(-6)}`
-                        : log.targetId}
+                      {log.targetId
+                        ? log.targetId.length > 16
+                          ? `${log.targetId.slice(0, 8)}...${log.targetId.slice(-6)}`
+                          : log.targetId
+                        : "\u2014"}
                     </p>
                   </td>
                   <td className="table-cell max-w-[280px]">
@@ -268,7 +272,7 @@ export default function AdminAuditLogPage() {
                     </p>
                   </td>
                   <td className="table-cell">
-                    <code className="text-2xs font-mono text-text-tertiary">{log.ipAddress}</code>
+                    <code className="text-2xs font-mono text-text-tertiary">{log.ipAddress ?? "\u2014"}</code>
                   </td>
                 </tr>
               ))}
