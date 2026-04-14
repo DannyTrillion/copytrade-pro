@@ -14,6 +14,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { AttachmentBubble, PendingAttachmentChip, type ChatAttachment } from "@/components/chat/attachments";
+import { AttachButton, VoiceRecorder, uploadChatFile } from "@/components/chat/composer-tools";
 
 /* ──────────────────────────── Types ──────────────────────────── */
 
@@ -39,6 +41,7 @@ interface Message {
   senderId: string;
   senderRole: "USER" | "ADMIN";
   message: string;
+  attachments?: ChatAttachment[] | null;
   read: boolean;
   createdAt: string;
 }
@@ -80,6 +83,38 @@ export default function AdminSupportPage() {
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<ChatAttachment[]>([]);
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFilesPicked = async (files: File[]) => {
+    setUploadError(null);
+    setUploadingCount((c) => c + files.length);
+    const uploaded: ChatAttachment[] = [];
+    for (const file of files) {
+      try {
+        uploaded.push(await uploadChatFile(file));
+      } catch (e) {
+        setUploadError(e instanceof Error ? e.message : "Upload failed");
+      } finally {
+        setUploadingCount((c) => Math.max(0, c - 1));
+      }
+    }
+    if (uploaded.length > 0) setPendingAttachments((prev) => [...prev, ...uploaded]);
+  };
+
+  const handleVoiceRecorded = async (file: File) => {
+    setUploadError(null);
+    setUploadingCount((c) => c + 1);
+    try {
+      const result = await uploadChatFile(file);
+      setPendingAttachments((prev) => [...prev, result]);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Voice upload failed");
+    } finally {
+      setUploadingCount((c) => Math.max(0, c - 1));
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -150,7 +185,9 @@ export default function AdminSupportPage() {
 
   /* ── Send reply ── */
   const handleSend = async () => {
-    if (!replyText.trim() || !selectedThreadId || sending) return;
+    const text = replyText.trim();
+    const attachments = pendingAttachments;
+    if ((!text && attachments.length === 0) || !selectedThreadId || sending) return;
     setSending(true);
     try {
       const res = await fetch("/api/support", {
@@ -159,11 +196,13 @@ export default function AdminSupportPage() {
         body: JSON.stringify({
           action: "sendMessage",
           threadId: selectedThreadId,
-          message: replyText.trim(),
+          message: text,
+          attachments: attachments.length > 0 ? attachments : undefined,
         }),
       });
       if (res.ok) {
         setReplyText("");
+        setPendingAttachments([]);
         await fetchMessages(selectedThreadId);
         await fetchThreads();
       }
@@ -494,15 +533,24 @@ export default function AdminSupportPage() {
                               className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}
                             >
                               <div
-                                className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                                className={`max-w-[75%] rounded-2xl text-sm leading-relaxed ${
                                   isAdmin
                                     ? "bg-brand text-white rounded-br-md"
                                     : "bg-surface-2 text-text-primary rounded-bl-md"
-                                }`}
+                                } ${msg.message ? "px-3.5 py-2.5" : "p-1.5"}`}
                               >
-                                <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                                {msg.attachments && msg.attachments.length > 0 && (
+                                  <div className={`flex flex-col gap-1.5 ${msg.message ? "mb-2" : ""}`}>
+                                    {msg.attachments.map((att, idx) => (
+                                      <AttachmentBubble key={idx} attachment={att} isOwn={isAdmin} />
+                                    ))}
+                                  </div>
+                                )}
+                                {msg.message && (
+                                  <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                                )}
                                 <p
-                                  className={`text-2xs mt-1 ${
+                                  className={`text-2xs mt-1 ${msg.message ? "" : "px-2 pb-1"} ${
                                     isAdmin ? "text-white/50" : "text-text-tertiary"
                                   }`}
                                 >
@@ -524,7 +572,33 @@ export default function AdminSupportPage() {
 
                 {/* Message Input */}
                 <div className="border-t border-border p-3 bg-surface-1/20">
+                  {(pendingAttachments.length > 0 || uploadingCount > 0 || uploadError) && (
+                    <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                      {pendingAttachments.map((att, i) => (
+                        <PendingAttachmentChip
+                          key={i}
+                          attachment={att}
+                          onRemove={() =>
+                            setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))
+                          }
+                        />
+                      ))}
+                      {uploadingCount > 0 && (
+                        <span className="inline-flex items-center gap-1.5 text-[11px] text-text-tertiary px-2">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Uploading {uploadingCount}…
+                        </span>
+                      )}
+                      {uploadError && (
+                        <span className="text-[11px] text-danger">{uploadError}</span>
+                      )}
+                    </div>
+                  )}
                   <div className="flex items-end gap-2">
+                    <div className="flex items-center gap-0.5 shrink-0 pb-1">
+                      <AttachButton onPicked={handleFilesPicked} disabled={sending} />
+                      <VoiceRecorder onRecorded={handleVoiceRecorded} disabled={sending} />
+                    </div>
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
@@ -544,7 +618,7 @@ export default function AdminSupportPage() {
                     />
                     <button
                       onClick={handleSend}
-                      disabled={!replyText.trim() || sending}
+                      disabled={(!replyText.trim() && pendingAttachments.length === 0) || sending || uploadingCount > 0}
                       className="btn-primary p-2.5 rounded-xl disabled:opacity-40 shrink-0"
                     >
                       {sending ? (

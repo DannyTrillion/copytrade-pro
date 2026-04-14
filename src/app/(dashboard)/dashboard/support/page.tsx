@@ -11,7 +11,6 @@ import {
   Loader2,
   Headphones,
   Smile,
-  Paperclip,
   Search,
   MoreHorizontal,
   Zap,
@@ -22,6 +21,8 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AttachmentBubble, PendingAttachmentChip, type ChatAttachment } from "@/components/chat/attachments";
+import { AttachButton, VoiceRecorder, uploadChatFile } from "@/components/chat/composer-tools";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -41,6 +42,7 @@ interface Message {
   senderId: string;
   senderRole: "USER" | "ADMIN";
   message: string;
+  attachments?: ChatAttachment[] | null;
   read: boolean;
   createdAt: string;
 }
@@ -231,13 +233,50 @@ export default function SupportPage() {
     return () => clearInterval(interval);
   }, [activeThreadId, fetchMessages]);
 
+  /* attachments staged for next send */
+  const [pendingAttachments, setPendingAttachments] = useState<ChatAttachment[]>([]);
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFilesPicked = async (files: File[]) => {
+    setUploadError(null);
+    setUploadingCount((c) => c + files.length);
+    const uploaded: ChatAttachment[] = [];
+    for (const file of files) {
+      try {
+        const result = await uploadChatFile(file);
+        uploaded.push(result);
+      } catch (e) {
+        setUploadError(e instanceof Error ? e.message : "Upload failed");
+      } finally {
+        setUploadingCount((c) => Math.max(0, c - 1));
+      }
+    }
+    if (uploaded.length > 0) setPendingAttachments((prev) => [...prev, ...uploaded]);
+  };
+
+  const handleVoiceRecorded = async (file: File) => {
+    setUploadError(null);
+    setUploadingCount((c) => c + 1);
+    try {
+      const result = await uploadChatFile(file);
+      setPendingAttachments((prev) => [...prev, result]);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Voice upload failed");
+    } finally {
+      setUploadingCount((c) => Math.max(0, c - 1));
+    }
+  };
+
   /* send message */
   const handleSend = async (text?: string) => {
     const msg = (text ?? messageInput).trim();
-    if (!msg || !activeThreadId || sending) return;
+    const attachments = pendingAttachments;
+    if ((!msg && attachments.length === 0) || !activeThreadId || sending) return;
 
     setSending(true);
     setMessageInput("");
+    setPendingAttachments([]);
     setShowQuickReplies(false);
 
     try {
@@ -248,6 +287,7 @@ export default function SupportPage() {
           action: "sendMessage",
           threadId: activeThreadId,
           message: msg,
+          attachments: attachments.length > 0 ? attachments : undefined,
         }),
       });
 
@@ -261,9 +301,12 @@ export default function SupportPage() {
           typingTimeoutRef.current = null;
         }, delay);
         requestAnimationFrame(() => scrollToBottom());
+      } else {
+        // Restore attachments on failure
+        setPendingAttachments(attachments);
       }
     } catch {
-      /* silent */
+      setPendingAttachments(attachments);
     } finally {
       setSending(false);
     }
@@ -544,13 +587,23 @@ export default function SupportPage() {
 
                           <div
                             className={cn(
-                              "relative px-4 py-2.5 text-sm leading-relaxed",
+                              "relative text-sm leading-relaxed rounded-2xl",
                               isUser
-                                ? "bg-brand text-white rounded-2xl rounded-br-md"
-                                : "bg-surface-2 text-text-primary border border-border rounded-2xl rounded-bl-md"
+                                ? "bg-brand text-white rounded-br-md"
+                                : "bg-surface-2 text-text-primary border border-border rounded-bl-md",
+                              msg.message ? "px-4 py-2.5" : "p-1.5"
                             )}
                           >
-                            <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                            {msg.attachments && msg.attachments.length > 0 && (
+                              <div className={cn("flex flex-col gap-1.5", msg.message && "mb-2")}>
+                                {msg.attachments.map((att, i) => (
+                                  <AttachmentBubble key={i} attachment={att} isOwn={isUser} />
+                                ))}
+                              </div>
+                            )}
+                            {msg.message && (
+                              <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                            )}
                           </div>
 
                           {/* Timestamp on hover */}
@@ -627,6 +680,29 @@ export default function SupportPage() {
 
             {/* ── Input bar ── */}
             <div className="pt-3 border-t border-border shrink-0">
+              {/* Pending attachments + upload errors */}
+              {(pendingAttachments.length > 0 || uploadingCount > 0 || uploadError) && (
+                <div className="flex flex-wrap items-center gap-1.5 mb-2 px-1">
+                  {pendingAttachments.map((att, i) => (
+                    <PendingAttachmentChip
+                      key={i}
+                      attachment={att}
+                      onRemove={() =>
+                        setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))
+                      }
+                    />
+                  ))}
+                  {uploadingCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] text-text-tertiary px-2">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Uploading {uploadingCount}…
+                    </span>
+                  )}
+                  {uploadError && (
+                    <span className="text-[11px] text-danger">{uploadError}</span>
+                  )}
+                </div>
+              )}
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -650,13 +726,8 @@ export default function SupportPage() {
                     >
                       <Zap className="w-4 h-4" />
                     </button>
-                    <button
-                      type="button"
-                      className="p-2 rounded-xl text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
-                      title="Attach file"
-                    >
-                      <Paperclip className="w-4 h-4" />
-                    </button>
+                    <AttachButton onPicked={handleFilesPicked} disabled={sending} />
+                    <VoiceRecorder onRecorded={handleVoiceRecorded} disabled={sending} />
                     <button
                       type="button"
                       className="p-2 rounded-xl text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
@@ -690,10 +761,10 @@ export default function SupportPage() {
                   {/* Send button */}
                   <button
                     type="submit"
-                    disabled={!messageInput.trim() || sending}
+                    disabled={(!messageInput.trim() && pendingAttachments.length === 0) || sending || uploadingCount > 0}
                     className={cn(
                       "p-2.5 rounded-xl shrink-0 transition-all duration-200",
-                      messageInput.trim()
+                      (messageInput.trim() || pendingAttachments.length > 0)
                         ? "bg-brand text-white hover:bg-brand-dark active:scale-95 shadow-sm shadow-brand/20"
                         : "bg-surface-3 text-text-tertiary cursor-not-allowed"
                     )}

@@ -35,6 +35,7 @@ model User {
   withdrawalRequests  WithdrawalRequest[]
   auditLogs           AuditLog[]     @relation("AuditLogs")
   supportThreads      SupportThread[]
+  depositAddresses    UserDepositAddress[]
   reviewsGiven        TraderReview[] @relation("ReviewAuthor")
   referralCode        String?        @unique
   referredBy          String?        // userId of referrer
@@ -387,6 +388,7 @@ model SupportMessage {
   senderId      String
   senderRole    String    // USER, ADMIN
   message       String
+  attachments   Json?     // [{ url, type, name, size, kind: "image"|"file"|"audio" }]
   read          Boolean   @default(false)
   createdAt     DateTime  @default(now())
 
@@ -394,6 +396,24 @@ model SupportMessage {
 
   @@index([threadId])
   @@index([createdAt])
+}
+
+// ─── Per-User Crypto Deposit Addresses ───
+// Admin-set addresses for direct crypto deposits — overrides global wallets per-coin
+model UserDepositAddress {
+  id            String    @id @default(uuid())
+  userId        String
+  coin          String    // BTC, ETH, USDT, USDC, SOL, etc.
+  network       String    // Bitcoin, ERC20, TRC20, BEP20, Solana, etc.
+  address       String
+  memo          String?   // optional tag/memo (XRP, XLM, etc.)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, coin, network])
+  @@index([userId])
 }
 
 // ─── Trader Reviews ───

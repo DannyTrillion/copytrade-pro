@@ -3,6 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, requireRole, errorResponse } from "@/lib/auth";
 import { z } from "zod";
 
+const attachmentSchema = z.object({
+  url: z.string().url(),
+  name: z.string().max(200),
+  type: z.string().max(100),
+  size: z.number().int().nonnegative(),
+  kind: z.enum(["image", "file", "audio"]),
+});
+
 /**
  * GET /api/support
  * - Users: get their own threads
@@ -100,10 +108,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     if (body.action === "createThread") {
-      const { subject, message } = z.object({
+      const { subject, message, attachments } = z.object({
         subject: z.string().min(1).max(200),
-        message: z.string().min(1).max(5000),
+        message: z.string().max(5000).default(""),
+        attachments: z.array(attachmentSchema).max(10).optional(),
       }).parse(body);
+
+      if (!message.trim() && (!attachments || attachments.length === 0)) {
+        return errorResponse("Message or attachment required", 400);
+      }
 
       const thread = await prisma.supportThread.create({
         data: {
@@ -115,6 +128,7 @@ export async function POST(req: NextRequest) {
               senderId: user.id,
               senderRole: user.role === "ADMIN" ? "ADMIN" : "USER",
               message,
+              attachments: attachments && attachments.length > 0 ? attachments : undefined,
             },
           },
         },
@@ -127,10 +141,15 @@ export async function POST(req: NextRequest) {
     }
 
     if (body.action === "sendMessage") {
-      const { threadId, message } = z.object({
+      const { threadId, message, attachments } = z.object({
         threadId: z.string(),
-        message: z.string().min(1).max(5000),
+        message: z.string().max(5000).default(""),
+        attachments: z.array(attachmentSchema).max(10).optional(),
       }).parse(body);
+
+      if (!message.trim() && (!attachments || attachments.length === 0)) {
+        return errorResponse("Message or attachment required", 400);
+      }
 
       const thread = await prisma.supportThread.findUnique({
         where: { id: threadId },
@@ -149,6 +168,7 @@ export async function POST(req: NextRequest) {
           senderId: user.id,
           senderRole,
           message,
+          attachments: attachments && attachments.length > 0 ? attachments : undefined,
         },
       });
 

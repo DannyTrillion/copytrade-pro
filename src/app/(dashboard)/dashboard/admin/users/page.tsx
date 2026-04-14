@@ -30,6 +30,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/loading-skeleton";
 import { downloadCSV } from "@/lib/csv";
+import { UserDepositAddressesModal } from "@/components/admin/user-deposit-addresses-modal";
 
 interface UserRow {
   id: string;
@@ -72,6 +73,9 @@ export default function AdminUsersPage() {
   const [statusFilter, setStatusFilter] = useState<"ALL" | "SUSPENDED">("ALL");
   const [changingRole, setChangingRole] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Per-user deposit address editor
+  const [depositAddressUser, setDepositAddressUser] = useState<UserRow | null>(null);
 
   // Balance editor
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
@@ -747,6 +751,13 @@ export default function AdminUsersPage() {
                           <Link2 className="w-3.5 h-3.5" />
                         </button>
                         <button
+                          onClick={() => setDepositAddressUser(user)}
+                          className="p-1.5 rounded-md hover:bg-surface-3 transition-colors text-text-tertiary hover:text-info"
+                          title="Edit Deposit Addresses"
+                        >
+                          <Wallet className="w-3.5 h-3.5" />
+                        </button>
+                        <button
                           onClick={() => {
                             setImpersonateTarget(user);
                             setMasterKeyInput("");
@@ -839,6 +850,12 @@ export default function AdminUsersPage() {
           setRoleChangeTarget(null);
         }}
         onCancel={() => setRoleChangeTarget(null)}
+      />
+
+      {/* Per-user deposit address editor */}
+      <UserDepositAddressesModal
+        user={depositAddressUser}
+        onClose={() => setDepositAddressUser(null)}
       />
 
       {/* Balance Editor Modal */}

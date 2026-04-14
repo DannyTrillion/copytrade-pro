@@ -205,6 +205,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ config: configMap });
     }
 
+    if (view === "userDepositAddresses") {
+      const userId = searchParams.get("userId");
+      if (!userId) return errorResponse("userId required", 400);
+      const addresses = await prisma.userDepositAddress.findMany({
+        where: { userId },
+        orderBy: [{ coin: "asc" }, { network: "asc" }],
+      });
+      return NextResponse.json({ addresses });
+    }
+
     if (view === "audit-logs") {
       const logs = await prisma.auditLog.findMany({
         include: {
@@ -815,6 +825,52 @@ export async function PATCH(req: NextRequest) {
       await prisma.adminConfig.deleteMany({ where: { key } });
 
       await logAudit({ adminId, action: "DELETE_CONFIG", targetType: "CONFIG", targetId: key });
+      return NextResponse.json({ success: true });
+    }
+
+    // ─── Per-user crypto deposit addresses ───
+    if (body.action === "setUserDepositAddress") {
+      const schema = z.object({
+        userId: z.string().min(1),
+        coin: z.string().min(1).max(20),
+        network: z.string().min(1).max(40),
+        address: z.string().min(4).max(200),
+        memo: z.string().max(100).optional().nullable(),
+      });
+      const { userId, coin, network, address, memo } = schema.parse(body);
+
+      const record = await prisma.userDepositAddress.upsert({
+        where: { userId_coin_network: { userId, coin, network } },
+        create: { userId, coin, network, address, memo: memo || null },
+        update: { address, memo: memo || null },
+      });
+
+      await logAudit({
+        adminId,
+        action: "SET_USER_DEPOSIT_ADDRESS",
+        targetType: "USER",
+        targetId: userId,
+        details: { coin, network },
+      });
+      return NextResponse.json({ address: record });
+    }
+
+    if (body.action === "deleteUserDepositAddress") {
+      const schema = z.object({ id: z.string().min(1) });
+      const { id } = schema.parse(body);
+
+      const existing = await prisma.userDepositAddress.findUnique({ where: { id } });
+      if (!existing) return errorResponse("Address not found", 404);
+
+      await prisma.userDepositAddress.delete({ where: { id } });
+
+      await logAudit({
+        adminId,
+        action: "DELETE_USER_DEPOSIT_ADDRESS",
+        targetType: "USER",
+        targetId: existing.userId,
+        details: { coin: existing.coin, network: existing.network },
+      });
       return NextResponse.json({ success: true });
     }
 

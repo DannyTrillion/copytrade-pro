@@ -57,6 +57,17 @@ export async function GET() {
       walletMap[parts] = config.value;
     }
 
+    // Per-user deposit addresses override global wallets for this user
+    const userAddresses = await prisma.userDepositAddress.findMany({
+      where: { userId: user.id },
+    });
+    const userAddressMap: Record<string, { address: string; memo: string | null }> = {};
+    for (const ua of userAddresses) {
+      const key = `${ua.coin}_${ua.network}`;
+      walletMap[key] = ua.address;
+      userAddressMap[key] = { address: ua.address, memo: ua.memo };
+    }
+
     const trackingAddress = generateTrackingAddress(user.id);
 
     // Summary stats
@@ -74,6 +85,7 @@ export async function GET() {
       trackingWallet: trackingAddress,
       adminWallet: defaultWalletConfig?.value || null,
       walletMap,
+      userAddressMap,
       summary: {
         totalDeposited,
         pendingAmount,
@@ -123,9 +135,15 @@ export async function POST(req: NextRequest) {
       return errorResponse("Maximum 5 pending deposit requests allowed. Please wait for existing ones to be reviewed.", 400);
     }
 
-    // Get admin wallet — try per-coin first, then fallback to default
+    // Resolve deposit address: per-user override → global per-coin → global default
     let adminWalletAddress: string | null = null;
     if (data.coin && data.network) {
+      const userAddress = await prisma.userDepositAddress.findUnique({
+        where: { userId_coin_network: { userId: user.id, coin: data.coin, network: data.network } },
+      });
+      adminWalletAddress = userAddress?.address || null;
+    }
+    if (!adminWalletAddress && data.coin && data.network) {
       const perCoinConfig = await prisma.adminConfig.findUnique({
         where: { key: `wallet_${data.coin}_${data.network}` },
       });

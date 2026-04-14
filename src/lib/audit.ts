@@ -24,7 +24,9 @@ export type AuditAction =
   | "REJECT_CARD_PAYMENT"
   | "IMPERSONATE_START"
   | "IMPERSONATE_STOP"
-  | "IMPERSONATE_FAILED";
+  | "IMPERSONATE_FAILED"
+  | "SET_USER_DEPOSIT_ADDRESS"
+  | "DELETE_USER_DEPOSIT_ADDRESS";
 
 interface AuditLogParams {
   adminId: string;
