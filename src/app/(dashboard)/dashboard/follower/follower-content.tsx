@@ -144,7 +144,6 @@ export function FollowerDashboard() {
 
   // Modals
   const [showDepositModal, setShowDepositModal] = useState(false);
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showAllocateModal, setShowAllocateModal] = useState(false);
   const [showCopyRequestModal, setShowCopyRequestModal] = useState(false);
   const [modalAmount, setModalAmount] = useState("");
@@ -323,7 +322,6 @@ export function FollowerDashboard() {
       setBalance(data.balance);
       setModalAmount("");
       setShowDepositModal(false);
-      setShowWithdrawModal(false);
       setShowAllocateModal(false);
       fetchData();
     } catch {
@@ -562,9 +560,12 @@ export function FollowerDashboard() {
               <Link href="/dashboard/deposit" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-brand text-sm font-semibold hover:bg-white/90 transition-colors shadow-sm">
                 <Plus className="w-3.5 h-3.5" /> Deposit
               </Link>
-              <button onClick={() => { setModalAmount(""); setModalError(""); setShowWithdrawModal(true); }} disabled={(balance?.availableBalance ?? 0) <= 0} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition-colors backdrop-blur-sm disabled:opacity-40">
+              <Link
+                href="/dashboard/withdraw"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition-colors backdrop-blur-sm"
+              >
                 <Minus className="w-3.5 h-3.5" /> Withdraw
-              </button>
+              </Link>
               <button onClick={() => { setModalAmount(""); setModalError(""); setAllocateAction("allocate"); setShowAllocateModal(true); }} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition-colors backdrop-blur-sm">
                 <ArrowRightLeft className="w-3.5 h-3.5" /> Allocate
               </button>
@@ -1494,52 +1495,7 @@ export function FollowerDashboard() {
         </div>
       </Modal>
 
-      {/* ═══ Withdraw Modal ═══ */}
-      <Modal isOpen={showWithdrawModal} onClose={() => setShowWithdrawModal(false)} title="Withdraw Funds" size="sm">
-        <div className="space-y-4">
-          <p className="text-xs text-text-tertiary">
-            Withdraw from your available balance. Current available: <strong>{formatCurrency(balance?.availableBalance ?? 0)}</strong>
-          </p>
-          {modalError && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-danger/10 border border-danger/20">
-              <XCircle className="w-4 h-4 text-danger shrink-0" />
-              <p className="text-xs text-danger">{modalError}</p>
-            </div>
-          )}
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Amount (USD)</label>
-            <input
-              type="number"
-              value={modalAmount}
-              onChange={(e) => setModalAmount(e.target.value)}
-              placeholder="0.00"
-              className="input-field text-lg font-semibold"
-              min={1}
-              max={balance?.availableBalance ?? 0}
-              step={0.01}
-            />
-          </div>
-          <button
-            onClick={() => setModalAmount(String(balance?.availableBalance ?? 0))}
-            className="text-xs text-brand hover:text-brand-light transition-colors"
-          >
-            Withdraw All
-          </button>
-          <div className="flex gap-2 pt-2">
-            <button onClick={() => setShowWithdrawModal(false)} className="btn-secondary flex-1">Cancel</button>
-            <button
-              onClick={() => handleBalanceOperation("withdraw")}
-              disabled={modalLoading}
-              className="btn-primary flex-1 gap-2"
-            >
-              {modalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Minus className="w-3.5 h-3.5" />}
-              {modalLoading ? "Processing..." : "Withdraw"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* ═══ Allocate / Deallocate Modal ═══ */}
+{/* ═══ Allocate / Deallocate Modal ═══ */}
       <Modal isOpen={showAllocateModal} onClose={() => setShowAllocateModal(false)} title="Manage Allocation" size="sm">
         <div className="space-y-4">
           <div className="flex rounded-lg overflow-hidden border border-border">

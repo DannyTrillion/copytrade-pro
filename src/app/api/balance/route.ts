@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorizedResponse, errorResponse } from "@/lib/auth";
-import { notifyDeposit, notifyWithdrawal } from "@/lib/notifications";
+import { notifyDeposit } from "@/lib/notifications";
 import { rateLimitRequest } from "@/lib/api-rate-limit";
 import { z } from "zod";
 
@@ -11,10 +11,6 @@ const depositSchema = z.object({
   signature: z.string().optional(),
   message: z.string().optional(),
   walletAddress: z.string().optional(),
-});
-
-const withdrawSchema = z.object({
-  amount: z.number().positive("Amount must be positive"),
 });
 
 const allocateSchema = z.object({
@@ -117,45 +113,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (operation === "withdraw") {
-      const { amount } = withdrawSchema.parse(body);
-
-      // Atomic transaction to prevent race conditions
-      const result = await prisma.$transaction(async (tx) => {
-        const currentBalance = await tx.balance.findUnique({
-          where: { userId: user.id },
-        });
-        if (!currentBalance || amount > currentBalance.availableBalance) {
-          throw new Error("INSUFFICIENT_BALANCE");
-        }
-
-        const updated = await tx.balance.update({
-          where: { userId: user.id },
-          data: {
-            totalBalance: { decrement: amount },
-            availableBalance: { decrement: amount },
-          },
-        });
-
-        await tx.balanceTransaction.create({
-          data: {
-            userId: user.id,
-            type: "WITHDRAWAL",
-            amount: -amount,
-            balanceBefore: currentBalance.totalBalance,
-            balanceAfter: updated.totalBalance,
-            description: "Funds withdrawn",
-          },
-        });
-
-        return updated;
-      });
-
-      if (!result) {
-        return errorResponse("Insufficient available balance", 400);
-      }
-
-      notifyWithdrawal(user.id, amount).catch(() => {});
-      return NextResponse.json({ balance: result });
+      // Direct withdrawals are disabled — all withdrawals must go through the
+      // /api/withdrawals review flow so admins can approve and audit them.
+      return errorResponse(
+        "Direct withdrawals are disabled. Submit a withdrawal request from the Withdraw page.",
+        410
+      );
     }
 
     if (operation === "allocate") {
