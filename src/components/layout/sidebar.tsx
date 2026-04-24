@@ -26,6 +26,7 @@ import {
   CreditCard,
   Shield,
   Heart,
+  Trophy,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -142,6 +143,7 @@ const USER_SECTIONS: NavSection[] = [
   {
     title: "Rewards",
     items: [
+      { label: "Tiers", href: "/dashboard/tiers", icon: Trophy },
       { label: "Referrals", href: "/dashboard/referrals", icon: Gift },
     ],
   },

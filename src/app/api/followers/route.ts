@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorizedResponse, errorResponse } from "@/lib/auth";
 import { rateLimitRequest } from "@/lib/api-rate-limit";
 import { followTraderSchema, riskSettingsSchema } from "@/lib/validators/webhook";
+import { recomputeAllocatedBalance } from "@/lib/allocation";
 
 export async function GET() {
   try {
@@ -82,6 +83,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    await recomputeAllocatedBalance(user.id);
+
     return NextResponse.json({ follower }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
@@ -135,6 +138,8 @@ export async function PATCH(req: NextRequest) {
       update: validated,
     });
 
+    await recomputeAllocatedBalance(user.id);
+
     return NextResponse.json({ follower });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
@@ -163,6 +168,8 @@ export async function DELETE(req: NextRequest) {
         },
       },
     });
+
+    await recomputeAllocatedBalance(user.id);
 
     return NextResponse.json({ success: true });
   } catch {

@@ -4,6 +4,7 @@ import { requireRole, unauthorizedResponse, forbiddenResponse, errorResponse } f
 import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 import { getTotalDeposited, getTierFromAmount } from "@/lib/tiers";
+import { recomputeAllocatedBalance } from "@/lib/allocation";
 import { notifyTierUpgrade, notifyDeposit } from "@/lib/notifications";
 import { sendDepositConfirmedEmail, sendWithdrawalStatusEmail, sendTierUpgradeEmail } from "@/lib/email";
 
@@ -429,6 +430,13 @@ export async function PATCH(req: NextRequest) {
             reviewedAt: new Date(),
           },
         });
+        // Rebalance allocated/available so allocation scales with the new deposit
+        await recomputeAllocatedBalance(userId);
+      }
+
+      // Subtract/loss/profit all affect totalBalance — keep buckets consistent
+      if (operation === "subtract" || operation === "add_loss" || operation === "add_profit") {
+        await recomputeAllocatedBalance(userId);
       }
 
       // Send email for deposits
@@ -700,6 +708,9 @@ export async function PATCH(req: NextRequest) {
             txHash: deposit.txHash || null,
           },
         });
+
+        // Rebalance allocated/available so allocation scales with the new deposit
+        await recomputeAllocatedBalance(deposit.userId);
 
         // Notify user of confirmed deposit (in-app + email)
         notifyDeposit(deposit.userId, deposit.amount).catch(() => {});

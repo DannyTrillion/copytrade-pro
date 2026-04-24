@@ -156,16 +156,13 @@ export async function POST(req: NextRequest) {
       const commission = rawPnl > 0 ? rawPnl * tradeCheck.tier.commissionRate : 0;
       const followerPnl = rawPnl - commission;
 
-      // Calculate new balances — PnL applies to actual balance, but was calculated on deposited capital
+      // PnL does NOT compound the allocation — allocation stays at
+      // (totalDeposits × allocationPercent). Any profit or loss flows into
+      // availableBalance so the next trade still sizes off deposited capital.
       const newTotal = Math.max(0, balance.totalBalance + followerPnl);
       const newProfit = balance.totalProfit + followerPnl;
-      // If user has explicit allocation, PnL goes to allocated; otherwise to available
-      const newAllocated = balance.allocatedBalance > 0
-        ? Math.max(0, balance.allocatedBalance + followerPnl)
-        : balance.allocatedBalance;
-      const newAvailable = balance.allocatedBalance > 0
-        ? balance.availableBalance
-        : Math.max(0, balance.availableBalance + followerPnl);
+      const newAllocated = balance.allocatedBalance;
+      const newAvailable = Math.max(0, balance.availableBalance + followerPnl);
 
       // Update follower balance atomically
       await prisma.balance.update({

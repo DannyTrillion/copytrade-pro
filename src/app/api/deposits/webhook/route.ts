@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createHmac } from "crypto";
 import { notifyDeposit } from "@/lib/notifications";
+import { recomputeAllocatedBalance } from "@/lib/allocation";
 
 /**
  * POST — Webhook from on-ramp providers (MoonPay, Transak, Coinbase)
@@ -131,6 +132,9 @@ export async function POST(req: NextRequest) {
           },
         });
       });
+
+      // Rebalance allocated/available so allocation scales with the new deposit
+      await recomputeAllocatedBalance(deposit.userId);
 
       // Notify user of successful deposit (non-blocking)
       notifyDeposit(deposit.userId, deposit.amount).catch(() => {});

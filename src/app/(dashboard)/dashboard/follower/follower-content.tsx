@@ -39,6 +39,7 @@ import {
   Star,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { AllocationCard } from "@/components/ui/allocation-card";
 import { AnimatedCounter, AnimatedCurrency } from "@/components/ui/animated-counter";
 import { PnlChart } from "@/components/charts/pnl-chart";
 import { Modal } from "@/components/ui/modal";
@@ -137,6 +138,9 @@ export function FollowerDashboard() {
 
 
 
+  // Bumped whenever allocation could have changed (deposit, allocate, follow/unfollow, PnL)
+  const [allocationRefreshKey, setAllocationRefreshKey] = useState(0);
+
   // Balance state
   const [balance, setBalance] = useState<Balance | null>(null);
   const [transactions, setTransactions] = useState<BalanceTransaction[]>([]);
@@ -228,6 +232,7 @@ export function FollowerDashboard() {
         const data = await requestsRes.json();
         setCopyRequests(data.requests || []);
       }
+      setAllocationRefreshKey((k) => k + 1);
     } catch (err) {
       console.error("Failed to fetch follower data:", err);
     } finally {
@@ -1017,6 +1022,15 @@ export function FollowerDashboard() {
                   </div>
                 </motion.div>
               </div>
+
+              {/* Allocation breakdown */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...pageTransition, delay: 0.25 }}
+              >
+                <AllocationCard refreshKey={allocationRefreshKey} />
+              </motion.div>
 
               {/* PnL Chart — Full Width */}
               <motion.div
