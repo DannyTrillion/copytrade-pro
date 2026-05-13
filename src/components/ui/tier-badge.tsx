@@ -19,6 +19,11 @@ const TIER_STYLES: Record<string, { bg: string; text: string; ring: string }> = 
     text: "text-amber-400",
     ring: "ring-amber-500/20",
   },
+  violet: {
+    bg: "bg-violet-500/10",
+    text: "text-violet-400",
+    ring: "ring-violet-500/20",
+  },
 };
 
 interface TierBadgeProps {

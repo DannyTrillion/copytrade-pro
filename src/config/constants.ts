@@ -49,6 +49,7 @@ export const TIERS = {
   TIER_1: "TIER_1",
   TIER_2: "TIER_2",
   TIER_3: "TIER_3",
+  TIER_4: "TIER_4",
 } as const;
 
 export type TierLevel = (typeof TIERS)[keyof typeof TIERS];
@@ -106,7 +107,24 @@ export const TIER_CONFIGS: Record<TierLevel, TierConfig> = {
       "Unlimited copy trades",
       "Full analytics suite",
       "Dedicated support",
-      "Lowest commission (2%)",
+      "Reduced commission (2%)",
+      "Early access to new features",
+    ],
+  },
+  TIER_4: {
+    level: "TIER_4",
+    name: "Diamond",
+    label: "Tier 4",
+    minDeposit: 25000,
+    maxDailyTrades: -1, // unlimited
+    commissionRate: 0.015, // 1.5%
+    color: "violet",
+    benefits: [
+      "Unlimited copy trades",
+      "Full analytics suite",
+      "Dedicated account manager",
+      "Lowest commission (1.5%)",
+      "Priority trade execution",
       "Early access to new features",
     ],
   },

@@ -15,6 +15,7 @@ export async function getUserTier(userId: string): Promise<TierConfig> {
  * Pure function: resolve tier from a deposit amount (no DB call).
  */
 export function getTierFromAmount(totalDeposited: number): TierConfig {
+  if (totalDeposited >= TIER_CONFIGS.TIER_4.minDeposit) return TIER_CONFIGS.TIER_4;
   if (totalDeposited >= TIER_CONFIGS.TIER_3.minDeposit) return TIER_CONFIGS.TIER_3;
   if (totalDeposited >= TIER_CONFIGS.TIER_2.minDeposit) return TIER_CONFIGS.TIER_2;
   return TIER_CONFIGS.TIER_1;
@@ -85,6 +86,7 @@ export async function canReceiveTrade(userId: string): Promise<{
 export function getNextTier(currentTier: TierLevel): TierConfig | null {
   if (currentTier === TIERS.TIER_1) return TIER_CONFIGS.TIER_2;
   if (currentTier === TIERS.TIER_2) return TIER_CONFIGS.TIER_3;
+  if (currentTier === TIERS.TIER_3) return TIER_CONFIGS.TIER_4;
   return null;
 }
 

@@ -37,7 +37,7 @@ interface UserTierResponse {
   progress: number;
 }
 
-const TIER_ORDER: TierLevel[] = [TIERS.TIER_1, TIERS.TIER_2, TIERS.TIER_3];
+const TIER_ORDER: TierLevel[] = [TIERS.TIER_1, TIERS.TIER_2, TIERS.TIER_3, TIERS.TIER_4];
 
 const ACCENTS: Record<TierLevel, {
   ring: string;
@@ -70,6 +70,14 @@ const ACCENTS: Record<TierLevel, {
     glow: "shadow-amber-400/20",
     icon: "text-amber-400",
     gradient: "from-amber-400/0 via-amber-400/5 to-amber-400/15",
+  },
+  TIER_4: {
+    ring: "ring-violet-400/50",
+    bg: "bg-violet-400/10",
+    text: "text-violet-400",
+    glow: "shadow-violet-400/20",
+    icon: "text-violet-400",
+    gradient: "from-violet-400/0 via-violet-400/5 to-violet-500/20",
   },
 };
 
@@ -211,19 +219,12 @@ export default function TiersPage() {
       )}
 
       {/* Tier grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {TIER_ORDER.map((level, i) => {
           const tier: TierConfig = TIER_CONFIGS[level];
           const isCurrent = currentLevel === level;
-          const isLocked =
-            currentLevel === TIERS.TIER_1 && level === TIERS.TIER_3
-              ? true
-              : currentLevel === TIERS.TIER_2 && level === TIERS.TIER_3
-              ? false
-              : false;
-          const isPast =
-            (currentLevel === TIERS.TIER_2 && level === TIERS.TIER_1) ||
-            (currentLevel === TIERS.TIER_3 && (level === TIERS.TIER_1 || level === TIERS.TIER_2));
+          const currentIdx = currentLevel ? TIER_ORDER.indexOf(currentLevel) : -1;
+          const isPast = currentIdx > i;
           const amountNeeded = Math.max(0, tier.minDeposit - totalDeposited);
 
           return (
