@@ -27,6 +27,8 @@ import {
   Shield,
   Heart,
   Trophy,
+  GraduationCap,
+  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -39,6 +41,7 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   roles?: string[];
+  badge?: "diamond";
 }
 
 interface NavSection {
@@ -145,6 +148,13 @@ const USER_SECTIONS: NavSection[] = [
     items: [
       { label: "Tiers", href: "/dashboard/tiers", icon: Trophy },
       { label: "Referrals", href: "/dashboard/referrals", icon: Gift },
+    ],
+  },
+  {
+    title: "Diamond",
+    items: [
+      { label: "Live Classes", href: "/dashboard/live-classes", icon: GraduationCap, badge: "diamond" },
+      { label: "PDT Access", href: "/dashboard/pdt", icon: Zap, badge: "diamond" },
     ],
   },
   {
@@ -259,16 +269,24 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
                       )}
                       title={!sidebarOpen && !isMobile ? item.label : undefined}
                     >
-                      <Icon className="w-4 h-4 flex-shrink-0 sidebar-icon" />
+                      <Icon className={cn(
+                        "w-4 h-4 flex-shrink-0 sidebar-icon",
+                        item.badge === "diamond" && "text-violet-400"
+                      )} />
                       <AnimatePresence>
                         {(sidebarOpen || isMobile) && (
                           <motion.span
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="text-sm whitespace-nowrap"
+                            className="text-sm whitespace-nowrap flex items-center gap-1.5 flex-1"
                           >
                             {item.label}
+                            {item.badge === "diamond" && (
+                              <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-400 ring-1 ring-violet-400/20">
+                                DIAMOND
+                              </span>
+                            )}
                           </motion.span>
                         )}
                       </AnimatePresence>

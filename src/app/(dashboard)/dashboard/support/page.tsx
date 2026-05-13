@@ -19,6 +19,8 @@ import {
   HelpCircle,
   ChevronRight,
   X,
+  Crown,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AttachmentBubble, PendingAttachmentChip, type ChatAttachment } from "@/components/chat/attachments";
@@ -139,6 +141,17 @@ export default function SupportPage() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
   const [agentStatus, setAgentStatus] = useState<"online" | "away" | "offline">(getAgentStatus);
+  const [isDiamond, setIsDiamond] = useState(false);
+
+  // Fetch tier — show Personal Manager CTA only for Diamond members
+  useEffect(() => {
+    fetch("/api/user/tier")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.tier?.level === "TIER_4") setIsDiamond(true);
+      })
+      .catch(() => {});
+  }, []);
 
   // Update agent status every minute
   useEffect(() => {
@@ -821,6 +834,36 @@ export default function SupportPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-5 scrollbar-thin">
+              {/* ── Personal Manager (Diamond only) ── */}
+              {isDiamond && (
+                <button
+                  onClick={() =>
+                    handleCreateThread(
+                      "Personal Account Manager",
+                      "Hi, I'd like to speak with my dedicated account manager."
+                    )
+                  }
+                  className="group relative overflow-hidden w-full p-4 rounded-2xl bg-gradient-to-br from-violet-500/15 via-violet-500/8 to-transparent ring-1 ring-violet-400/30 hover:ring-violet-400/60 transition-all text-left"
+                >
+                  <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-violet-500/15 blur-3xl pointer-events-none" />
+                  <div className="relative flex items-center gap-3">
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-violet-500/20 ring-1 ring-violet-400/30 flex items-center justify-center">
+                      <Crown className="w-5 h-5 text-violet-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <p className="text-sm font-bold text-text-primary">Talk to your personal manager</p>
+                        <Sparkles className="w-3 h-3 text-violet-400" />
+                      </div>
+                      <p className="text-xs text-text-secondary">
+                        Diamond exclusive · priority response within 1 hour
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-violet-400 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </button>
+              )}
+
               {/* ── Quick topic cards ── */}
               <div>
                 <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2.5 px-1">Start a conversation</p>
