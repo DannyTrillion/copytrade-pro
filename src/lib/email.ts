@@ -201,6 +201,52 @@ export async function sendTierUpgradeEmail(email: string, name: string, tierName
   `));
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+export async function sendSupportReplyEmail(
+  email: string,
+  name: string,
+  subject: string,
+  preview: string,
+  threadId: string,
+  hasAttachments = false,
+): Promise<SendEmailResult> {
+  const url = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard/support?thread=${threadId}`;
+  const trimmed = preview.length > 280 ? `${preview.slice(0, 280).trim()}…` : preview;
+  const previewBody = trimmed.trim()
+    ? `<p style="color:rgba(255,255,255,0.85);font-size:14px;line-height:1.6;margin:0;white-space:pre-wrap">${escapeHtml(trimmed)}</p>`
+    : `<p style="color:rgba(255,255,255,0.5);font-size:13px;font-style:italic;margin:0">${hasAttachments ? "Sent an attachment" : "Sent a message"}</p>`;
+  const attachmentBadge = hasAttachments
+    ? `<div style="display:inline-block;margin-top:14px;padding:4px 10px;border-radius:999px;background:rgba(13,113,255,0.12);color:#5BA1FF;font-size:11px;font-weight:600">📎 Attachment included</div>`
+    : "";
+
+  return sendEmail(email, `Support reply: ${subject} — CopyTradesPro`, baseTemplate(`
+    <div style="padding:40px 32px">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="width:56px;height:56px;margin:0 auto 16px;background:rgba(13,113,255,0.1);border-radius:50%;line-height:56px">
+          <span style="font-size:24px">💬</span>
+        </div>
+        <h1 style="color:#fff;font-size:22px;margin:0 0 8px;font-weight:700;letter-spacing:-0.4px">New reply from support</h1>
+        <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0">Hi ${escapeHtml(name)}, our team responded to your conversation.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;margin:0 0 24px">
+        <p style="color:rgba(255,255,255,0.35);font-size:10px;margin:0 0 12px;text-transform:uppercase;letter-spacing:1.5px">Re: ${escapeHtml(subject)}</p>
+        ${previewBody}
+        ${attachmentBadge}
+      </div>
+      ${ctaButton("Open conversation", url)}
+      <p style="color:rgba(255,255,255,0.25);font-size:11px;margin:28px 0 0;text-align:center;line-height:1.5">You're receiving this because you have an open conversation with CopyTradesPro support.</p>
+    </div>
+  `));
+}
+
 // ─── Admin Notifications ───
 
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "makindedaniel45@gmail.com";

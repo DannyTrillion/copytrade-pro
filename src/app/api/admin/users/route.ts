@@ -5,6 +5,42 @@ import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 
 /**
+ * GET /api/admin/users?q=search — Lightweight user search for admin pickers
+ * (e.g. starting a new support conversation). Returns minimal fields.
+ */
+export async function GET(req: NextRequest) {
+  try {
+    await requireRole("ADMIN");
+    const { searchParams } = new URL(req.url);
+    const q = (searchParams.get("q") || "").trim();
+
+    const where = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { email: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+
+    const users = await prisma.user.findMany({
+      where,
+      select: { id: true, name: true, email: true, role: true, suspended: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+      take: q ? 25 : 20,
+    });
+
+    return NextResponse.json({ users });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") return unauthorizedResponse();
+      if (error.message === "Forbidden") return forbiddenResponse();
+    }
+    return errorResponse("Failed to search users");
+  }
+}
+
+/**
  * POST — Create a new user (admin only)
  */
 export async function POST(req: NextRequest) {

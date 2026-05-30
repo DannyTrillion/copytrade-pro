@@ -12,7 +12,11 @@ import {
   ArrowLeft,
   Loader2,
   RotateCcw,
+  Plus,
+  X,
+  UserPlus,
 } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
 import { formatDate } from "@/lib/utils";
 import { AttachmentBubble, PendingAttachmentChip, type ChatAttachment } from "@/components/chat/attachments";
 import { AttachButton, VoiceRecorder, uploadChatFile } from "@/components/chat/composer-tools";
@@ -86,6 +90,111 @@ export default function AdminSupportPage() {
   const [pendingAttachments, setPendingAttachments] = useState<ChatAttachment[]>([]);
   const [uploadingCount, setUploadingCount] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // ── New conversation modal state ──
+  type PickerUser = { id: string; name: string; email: string; role: string; suspended: boolean };
+  const [newConvoOpen, setNewConvoOpen] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerResults, setPickerResults] = useState<PickerUser[]>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<PickerUser | null>(null);
+  const [newSubject, setNewSubject] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [newAttachments, setNewAttachments] = useState<ChatAttachment[]>([]);
+  const [newUploadingCount, setNewUploadingCount] = useState(0);
+  const [creatingThread, setCreatingThread] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  // Debounced user search
+  useEffect(() => {
+    if (!newConvoOpen) return;
+    const t = setTimeout(() => {
+      setPickerLoading(true);
+      fetch(`/api/admin/users?q=${encodeURIComponent(pickerQuery.trim())}`)
+        .then((r) => (r.ok ? r.json() : { users: [] }))
+        .then((d) => setPickerResults(d.users || []))
+        .catch(() => setPickerResults([]))
+        .finally(() => setPickerLoading(false));
+    }, 200);
+    return () => clearTimeout(t);
+  }, [pickerQuery, newConvoOpen]);
+
+  const resetNewConvo = () => {
+    setSelectedUser(null);
+    setNewSubject("");
+    setNewMessage("");
+    setNewAttachments([]);
+    setPickerQuery("");
+    setPickerResults([]);
+    setCreateError(null);
+  };
+
+  const handleNewConvoFiles = async (files: File[]) => {
+    setCreateError(null);
+    setNewUploadingCount((c) => c + files.length);
+    const uploaded: ChatAttachment[] = [];
+    for (const file of files) {
+      try {
+        uploaded.push(await uploadChatFile(file));
+      } catch (e) {
+        setCreateError(e instanceof Error ? e.message : "Upload failed");
+      } finally {
+        setNewUploadingCount((c) => Math.max(0, c - 1));
+      }
+    }
+    if (uploaded.length > 0) setNewAttachments((prev) => [...prev, ...uploaded]);
+  };
+
+  const handleNewConvoVoice = async (file: File) => {
+    setCreateError(null);
+    setNewUploadingCount((c) => c + 1);
+    try {
+      const uploaded = await uploadChatFile(file);
+      setNewAttachments((prev) => [...prev, uploaded]);
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : "Voice upload failed");
+    } finally {
+      setNewUploadingCount((c) => Math.max(0, c - 1));
+    }
+  };
+
+  const handleCreateThread = async () => {
+    if (!selectedUser || !newSubject.trim() || creatingThread) return;
+    if (!newMessage.trim() && newAttachments.length === 0) {
+      setCreateError("Add a message or attachment");
+      return;
+    }
+    setCreatingThread(true);
+    setCreateError(null);
+    try {
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "createThreadForUser",
+          userId: selectedUser.id,
+          subject: newSubject.trim(),
+          message: newMessage.trim(),
+          attachments: newAttachments.length > 0 ? newAttachments : undefined,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNewConvoOpen(false);
+        resetNewConvo();
+        await fetchThreads();
+        // Auto-open the new thread
+        if (data.thread?.id) setSelectedThreadId(data.thread.id);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setCreateError(d.error || "Failed to create conversation");
+      }
+    } catch {
+      setCreateError("Network error");
+    } finally {
+      setCreatingThread(false);
+    }
+  };
 
   const handleFilesPicked = async (files: File[]) => {
     setUploadError(null);
@@ -273,11 +382,27 @@ export default function AdminSupportPage() {
 
   return (
     <div className="dashboard-section">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-lg font-semibold text-text-primary">Support Inbox</h2>
-        <p className="text-sm text-text-tertiary mt-0.5">
-          {openCount > 0 ? `${openCount} open conversation${openCount !== 1 ? "s" : ""}` : "No open conversations"}
-        </p>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-start justify-between gap-3"
+      >
+        <div>
+          <h2 className="text-lg font-semibold text-text-primary">Support Inbox</h2>
+          <p className="text-sm text-text-tertiary mt-0.5">
+            {openCount > 0 ? `${openCount} open conversation${openCount !== 1 ? "s" : ""}` : "No open conversations"}
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            resetNewConvo();
+            setNewConvoOpen(true);
+          }}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand hover:bg-brand-dark text-white text-xs font-semibold transition-colors active:scale-95 shrink-0"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          New conversation
+        </button>
       </motion.div>
 
       {/* ═══ 2-Panel Layout ═══ */}
@@ -634,6 +759,203 @@ export default function AdminSupportPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* ═══ New conversation modal ═══ */}
+      <Modal
+        isOpen={newConvoOpen}
+        onClose={() => {
+          if (!creatingThread) {
+            setNewConvoOpen(false);
+            resetNewConvo();
+          }
+        }}
+        title="Start a new conversation"
+        size="lg"
+      >
+        <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+          {/* Step 1: select user */}
+          {!selectedUser ? (
+            <>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                  Search for a user
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+                  <input
+                    autoFocus
+                    type="text"
+                    value={pickerQuery}
+                    onChange={(e) => setPickerQuery(e.target.value)}
+                    placeholder="Name or email..."
+                    className="input-field pl-9 w-full text-sm"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1 max-h-[320px] overflow-y-auto -mx-1 px-1">
+                {pickerLoading ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="w-4 h-4 animate-spin text-text-tertiary" />
+                  </div>
+                ) : pickerResults.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-text-tertiary">
+                    {pickerQuery ? "No users match this search" : "No users found"}
+                  </div>
+                ) : (
+                  pickerResults.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => setSelectedUser(u)}
+                      className="w-full flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-surface-2 transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 shrink-0 rounded-full bg-brand/10 text-brand flex items-center justify-center text-xs font-semibold">
+                          {(u.name || "?").slice(0, 1).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-text-primary truncate">
+                            {u.name}
+                            {u.suspended && (
+                              <span className="ml-1.5 text-2xs px-1 py-0.5 rounded bg-danger/10 text-danger">
+                                Suspended
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-2xs text-text-tertiary truncate">{u.email}</p>
+                        </div>
+                      </div>
+                      <span className="text-2xs text-text-tertiary px-1.5 py-0.5 rounded bg-surface-3 shrink-0">
+                        {u.role}
+                      </span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Selected recipient chip */}
+              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-surface-1 border border-border">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 shrink-0 rounded-full bg-brand/10 text-brand flex items-center justify-center text-sm font-semibold">
+                    {(selectedUser.name || "?").slice(0, 1).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xs uppercase tracking-wider text-text-tertiary">To</p>
+                    <p className="text-sm font-semibold text-text-primary truncate">
+                      {selectedUser.name}
+                    </p>
+                    <p className="text-2xs text-text-tertiary truncate">{selectedUser.email}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedUser(null)}
+                  className="p-1.5 rounded-md hover:bg-surface-3 text-text-tertiary hover:text-text-primary transition-colors shrink-0"
+                  title="Change recipient"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={newSubject}
+                  onChange={(e) => setNewSubject(e.target.value)}
+                  placeholder="e.g. Account verification follow-up"
+                  className="input-field w-full text-sm"
+                  maxLength={200}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                  Message
+                </label>
+                <textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type the opening message..."
+                  rows={4}
+                  className="input-field w-full text-sm resize-none"
+                  maxLength={5000}
+                />
+              </div>
+
+              {(newAttachments.length > 0 || newUploadingCount > 0) && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {newAttachments.map((att, i) => (
+                    <PendingAttachmentChip
+                      key={i}
+                      attachment={att}
+                      onRemove={() =>
+                        setNewAttachments((prev) => prev.filter((_, idx) => idx !== i))
+                      }
+                    />
+                  ))}
+                  {newUploadingCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] text-text-tertiary px-2">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Uploading {newUploadingCount}…
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <div className="flex items-center gap-0.5">
+                  <AttachButton onPicked={handleNewConvoFiles} disabled={creatingThread} />
+                  <VoiceRecorder onRecorded={handleNewConvoVoice} disabled={creatingThread} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewConvoOpen(false);
+                      resetNewConvo();
+                    }}
+                    disabled={creatingThread}
+                    className="btn-secondary text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreateThread}
+                    disabled={
+                      creatingThread ||
+                      newUploadingCount > 0 ||
+                      !newSubject.trim() ||
+                      (!newMessage.trim() && newAttachments.length === 0)
+                    }
+                    className="btn-primary text-xs flex items-center gap-1.5"
+                  >
+                    {creatingThread ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <UserPlus className="w-3.5 h-3.5" />
+                    )}
+                    Send & open
+                  </button>
+                </div>
+              </div>
+
+              {createError && (
+                <p className="text-xs text-danger">{createError}</p>
+              )}
+
+              <p className="text-2xs text-text-tertiary text-center pt-1">
+                The user will get an email notification with a link to this conversation.
+              </p>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

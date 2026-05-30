@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, requireRole, errorResponse } from "@/lib/auth";
 import { z } from "zod";
+import { sendSupportReplyEmail } from "@/lib/email";
+
+/** How long after a user's last visit we still consider them "active" and skip emailing. */
+const USER_ACTIVE_WINDOW_MS = 5 * 60 * 1000;
+/** Don't email the same user about the same thread more often than this. */
+const EMAIL_COOLDOWN_MS = 10 * 60 * 1000;
 
 const attachmentSchema = z.object({
   url: z.string().url(),
@@ -51,6 +57,14 @@ export async function GET(req: NextRequest) {
         where: { threadId, senderRole: senderRoleToMark, read: false },
         data: { read: true },
       });
+
+      // Track when the user last viewed the thread (used to suppress redundant emails)
+      if (user.role !== "ADMIN" && thread.userId === user.id) {
+        await prisma.supportThread.update({
+          where: { id: threadId },
+          data: { lastUserReadAt: new Date() },
+        });
+      }
 
       return NextResponse.json({ thread, messages });
     }
@@ -173,12 +187,41 @@ export async function POST(req: NextRequest) {
       });
 
       // Update thread timestamp and reopen if resolved and user sends a message
-      const updateData: { lastMessageAt: Date; updatedAt: Date; status?: string } = {
+      const updateData: { lastMessageAt: Date; updatedAt: Date; status?: string; lastEmailedAt?: Date } = {
         lastMessageAt: new Date(),
         updatedAt: new Date(),
       };
       if (thread.status === "RESOLVED" && senderRole === "USER") {
         updateData.status = "OPEN";
+      }
+
+      // ── Smart email notification on admin replies ──
+      // Skip if: user is still actively viewing the thread (read in last 5 min),
+      // or we've already emailed them about this thread in the last 10 min.
+      if (senderRole === "ADMIN") {
+        const now = Date.now();
+        const userActive =
+          thread.lastUserReadAt && now - thread.lastUserReadAt.getTime() < USER_ACTIVE_WINDOW_MS;
+        const recentlyEmailed =
+          thread.lastEmailedAt && now - thread.lastEmailedAt.getTime() < EMAIL_COOLDOWN_MS;
+
+        if (!userActive && !recentlyEmailed) {
+          const target = await prisma.user.findUnique({
+            where: { id: thread.userId },
+            select: { email: true, name: true },
+          });
+          if (target?.email) {
+            sendSupportReplyEmail(
+              target.email,
+              target.name || "there",
+              thread.subject,
+              message,
+              thread.id,
+              !!attachments && attachments.length > 0,
+            ).catch(() => {});
+            updateData.lastEmailedAt = new Date();
+          }
+        }
       }
 
       await prisma.supportThread.update({
@@ -187,6 +230,63 @@ export async function POST(req: NextRequest) {
       });
 
       return NextResponse.json({ message: msg });
+    }
+
+    // ── Admin starts a new conversation with any user ──
+    if (body.action === "createThreadForUser") {
+      await requireRole("ADMIN");
+
+      const { userId, subject, message, attachments } = z.object({
+        userId: z.string().min(1),
+        subject: z.string().min(1).max(200),
+        message: z.string().max(5000).default(""),
+        attachments: z.array(attachmentSchema).max(10).optional(),
+      }).parse(body);
+
+      if (!message.trim() && (!attachments || attachments.length === 0)) {
+        return errorResponse("Message or attachment required", 400);
+      }
+
+      const target = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, email: true, name: true },
+      });
+      if (!target) return errorResponse("User not found", 404);
+
+      const thread = await prisma.supportThread.create({
+        data: {
+          userId: target.id,
+          subject,
+          updatedAt: new Date(),
+          messages: {
+            create: {
+              senderId: user.id,
+              senderRole: "ADMIN",
+              message,
+              attachments: attachments && attachments.length > 0 ? attachments : undefined,
+            },
+          },
+        },
+        include: { messages: true, user: { select: { name: true, email: true } } },
+      });
+
+      // Always email user on admin-initiated threads — they have no other signal it exists
+      if (target.email) {
+        sendSupportReplyEmail(
+          target.email,
+          target.name || "there",
+          subject,
+          message,
+          thread.id,
+          !!attachments && attachments.length > 0,
+        ).catch(() => {});
+        await prisma.supportThread.update({
+          where: { id: thread.id },
+          data: { lastEmailedAt: new Date() },
+        });
+      }
+
+      return NextResponse.json({ thread });
     }
 
     if (body.action === "resolveThread") {
