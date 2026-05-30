@@ -6,6 +6,20 @@ function getFrom(): string {
   return process.env.EMAIL_FROM || "CopyTradesPro <onboarding@resend.dev>";
 }
 
+/**
+ * Public-facing base URL used inside emails. EMAIL_BASE_URL overrides everything
+ * (set this on Vercel to https://webull.copytradespro.com), then NEXTAUTH_URL,
+ * then a hard production fallback so we NEVER emit localhost links from email.
+ */
+function publicBaseUrl(): string {
+  return (
+    process.env.EMAIL_BASE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    "https://webull.copytradespro.com"
+  ).replace(/\/$/, "");
+}
+
 // ─── Premium Email Template ───
 
 function baseTemplate(content: string): string {
@@ -89,7 +103,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<Sen
 // ─── Auth Emails ───
 
 export async function sendVerificationEmail(email: string, name: string, token: string): Promise<SendEmailResult> {
-  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const baseUrl = publicBaseUrl();
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
 
   return sendEmail(email, "Verify your email — CopyTradesPro", baseTemplate(`
@@ -122,7 +136,7 @@ export async function sendOtpEmail(email: string, code: string): Promise<SendEma
 }
 
 export async function sendPasswordResetEmail(email: string, name: string, token: string): Promise<SendEmailResult> {
-  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const baseUrl = publicBaseUrl();
   const resetUrl = `${baseUrl}/reset-password?token=${token}`;
 
   return sendEmail(email, "Reset your password — CopyTradesPro", baseTemplate(`
@@ -154,7 +168,7 @@ export async function sendDepositConfirmedEmail(email: string, name: string, amo
         <p style="color:rgba(255,255,255,0.3);font-size:10px;margin:0 0 8px;text-transform:uppercase;letter-spacing:1.5px">Amount Deposited</p>
         <p style="color:#26A69A;font-size:36px;font-weight:800;margin:0;font-variant-numeric:tabular-nums">$${formatted}</p>
       </div>
-      ${ctaButton("View Dashboard", process.env.NEXTAUTH_URL || "http://localhost:3000")}
+      ${ctaButton("View Dashboard", publicBaseUrl())}
     </div>
   `));
 }
@@ -178,7 +192,7 @@ export async function sendWithdrawalStatusEmail(email: string, name: string, amo
         <p style="color:${color};font-size:36px;font-weight:800;margin:0;font-variant-numeric:tabular-nums">$${formatted}</p>
       </div>
       ${reason ? `<div style="background:rgba(239,83,80,0.05);border:1px solid rgba(239,83,80,0.1);border-radius:12px;padding:16px;margin:0 0 28px;text-align:left"><p style="color:rgba(255,255,255,0.5);font-size:12px;margin:0"><strong style="color:rgba(255,255,255,0.7)">Reason:</strong> ${reason}</p></div>` : ""}
-      ${ctaButton("View Dashboard", process.env.NEXTAUTH_URL || "http://localhost:3000")}
+      ${ctaButton("View Dashboard", publicBaseUrl())}
     </div>
   `));
 }
@@ -196,7 +210,7 @@ export async function sendTierUpgradeEmail(email: string, name: string, tierName
         <p style="color:#D4AF37;font-size:32px;font-weight:800;margin:0">${tierName}</p>
         <p style="color:rgba(255,255,255,0.35);font-size:13px;margin:12px 0 0">Lower commissions &middot; More daily trades</p>
       </div>
-      ${ctaButton("View Dashboard", `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard`)}
+      ${ctaButton("View Dashboard", `${publicBaseUrl()}/dashboard`)}
     </div>
   `));
 }
@@ -218,7 +232,7 @@ export async function sendSupportReplyEmail(
   threadId: string,
   hasAttachments = false,
 ): Promise<SendEmailResult> {
-  const url = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard/support?thread=${threadId}`;
+  const url = `${publicBaseUrl()}/dashboard/support?thread=${threadId}`;
   const trimmed = preview.length > 280 ? `${preview.slice(0, 280).trim()}…` : preview;
   const previewBody = trimmed.trim()
     ? `<p style="color:rgba(255,255,255,0.85);font-size:14px;line-height:1.6;margin:0;white-space:pre-wrap">${escapeHtml(trimmed)}</p>`
@@ -281,7 +295,7 @@ export async function notifyAdminNewSignup(userName: string, userEmail: string):
         </table>
       </div>
       <div style="text-align:center">
-        ${ctaButton("View in Admin", `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/dashboard/admin/users`)}
+        ${ctaButton("View in Admin", `${publicBaseUrl()}/dashboard/admin/users`)}
       </div>
     </div>
   `));
