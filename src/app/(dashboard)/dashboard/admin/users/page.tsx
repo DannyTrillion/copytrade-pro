@@ -39,6 +39,10 @@ interface UserRow {
   role: string;
   suspended: boolean;
   createdAt: string;
+  experienceLevel: string | null;
+  tradingGoal: string | null;
+  riskTolerance: string | null;
+  capitalRange: string | null;
   wallet: { address: string; isConnected: boolean } | null;
   balance: {
     totalBalance: number;
@@ -48,6 +52,34 @@ interface UserRow {
   } | null;
   trader: { id: string; totalTrades: number; totalPnl: number; winRate: number; isActive: boolean } | null;
   _count: { following: number; copyResults: number };
+}
+
+const ONBOARDING_LABELS = {
+  experienceLevel: {
+    BEGINNER: { label: "Beginner", tone: "text-zinc-400 bg-zinc-500/10 ring-zinc-500/20" },
+    INTERMEDIATE: { label: "Intermediate", tone: "text-info bg-info/10 ring-info/20" },
+    ADVANCED: { label: "Advanced", tone: "text-amber-400 bg-amber-500/10 ring-amber-500/20" },
+  } as Record<string, { label: string; tone: string }>,
+  tradingGoal: {
+    PASSIVE: { label: "Passive income", tone: "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20" },
+    GROWTH: { label: "Aggressive growth", tone: "text-brand bg-brand/10 ring-brand/20" },
+    LEARNING: { label: "Learning", tone: "text-violet-400 bg-violet-500/10 ring-violet-500/20" },
+  } as Record<string, { label: string; tone: string }>,
+  riskTolerance: {
+    LOW: { label: "Low risk", tone: "text-emerald-400 bg-emerald-500/10 ring-emerald-500/20" },
+    MEDIUM: { label: "Medium risk", tone: "text-amber-400 bg-amber-500/10 ring-amber-500/20" },
+    HIGH: { label: "High risk", tone: "text-danger bg-danger/10 ring-danger/20" },
+  } as Record<string, { label: string; tone: string }>,
+  capitalRange: {
+    UNDER_500: { label: "Under $500", tone: "text-zinc-400 bg-zinc-500/10 ring-zinc-500/20" },
+    "500_5000": { label: "$500 – $5,000", tone: "text-brand bg-brand/10 ring-brand/20" },
+    OVER_5000: { label: "$5,000+", tone: "text-amber-400 bg-amber-500/10 ring-amber-500/20" },
+  } as Record<string, { label: string; tone: string }>,
+};
+
+function onboardingLabel(group: keyof typeof ONBOARDING_LABELS, value: string | null) {
+  if (!value) return null;
+  return ONBOARDING_LABELS[group][value] || { label: value, tone: "text-text-tertiary bg-surface-3 ring-border" };
 }
 
 interface AdminStats {
@@ -448,7 +480,18 @@ export default function AdminUsersPage() {
   }, [searchQuery, roleFilter, statusFilter]);
 
   const handleExportCSV = () => {
-    const headers = ["Name", "Email", "Role", "Status", "Joined", "Balance"];
+    const headers = [
+      "Name",
+      "Email",
+      "Role",
+      "Status",
+      "Joined",
+      "Balance",
+      "Capital Range",
+      "Experience",
+      "Trading Goal",
+      "Risk Tolerance",
+    ];
     const rows = filtered.map((u) => [
       u.name,
       u.email,
@@ -456,6 +499,10 @@ export default function AdminUsersPage() {
       u.suspended ? "Suspended" : "Active",
       new Date(u.createdAt).toLocaleDateString(),
       String(u.balance?.totalBalance || 0),
+      onboardingLabel("capitalRange", u.capitalRange)?.label || "",
+      onboardingLabel("experienceLevel", u.experienceLevel)?.label || "",
+      onboardingLabel("tradingGoal", u.tradingGoal)?.label || "",
+      onboardingLabel("riskTolerance", u.riskTolerance)?.label || "",
     ]);
     downloadCSV("users", headers, rows);
   };
@@ -622,6 +669,7 @@ export default function AdminUsersPage() {
                 <th className="table-header px-4 py-2.5 text-center">Wallet</th>
                 <th className="table-header px-4 py-2.5 text-right">Balance</th>
                 <th className="table-header px-4 py-2.5 text-right">Profit</th>
+                <th className="table-header px-4 py-2.5 text-center" title="Onboarding capital range">Capital Range</th>
                 <th className="table-header px-4 py-2.5 text-right">Activity</th>
                 <th className="table-header px-4 py-2.5 text-right">Joined</th>
                 <th className="table-header px-4 py-2.5 text-center">Actions</th>
@@ -711,6 +759,20 @@ export default function AdminUsersPage() {
                         {formatCurrency(user.balance?.totalProfit ?? 0)}
                       </span>
                     </td>
+                    <td className="table-cell text-center">
+                      {(() => {
+                        const meta = onboardingLabel("capitalRange", user.capitalRange);
+                        return meta ? (
+                          <span
+                            className={`inline-flex items-center text-2xs font-semibold px-2 py-0.5 rounded-full ring-1 ring-inset ${meta.tone}`}
+                          >
+                            {meta.label}
+                          </span>
+                        ) : (
+                          <span className="text-2xs text-text-tertiary">—</span>
+                        );
+                      })()}
+                    </td>
                     <td className="table-cell text-right">
                       {user.role === "MASTER_TRADER" && user.trader ? (
                         <div className="text-right">
@@ -789,7 +851,7 @@ export default function AdminUsersPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-sm text-text-tertiary">
+                  <td colSpan={9} className="text-center py-8 text-sm text-text-tertiary">
                     No users found
                   </td>
                 </tr>
@@ -1250,6 +1312,45 @@ export default function AdminUsersPage() {
                 ) : (
                   <p className="text-xs text-text-tertiary">No wallet connected</p>
                 )}
+              </div>
+            </div>
+
+            {/* Onboarding Answers Section */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider flex items-center gap-2">
+                Onboarding Profile
+                {!viewingUser.experienceLevel &&
+                  !viewingUser.tradingGoal &&
+                  !viewingUser.riskTolerance &&
+                  !viewingUser.capitalRange && (
+                    <span className="text-[10px] normal-case font-normal text-text-tertiary">
+                      (user hasn&apos;t completed onboarding)
+                    </span>
+                  )}
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { key: "capitalRange" as const, value: viewingUser.capitalRange, title: "Capital Range" },
+                  { key: "experienceLevel" as const, value: viewingUser.experienceLevel, title: "Experience" },
+                  { key: "tradingGoal" as const, value: viewingUser.tradingGoal, title: "Trading Goal" },
+                  { key: "riskTolerance" as const, value: viewingUser.riskTolerance, title: "Risk Tolerance" },
+                ].map((field) => {
+                  const meta = onboardingLabel(field.key, field.value);
+                  return (
+                    <div key={field.key} className="bg-surface-1 rounded-lg p-3">
+                      <p className="text-2xs text-text-tertiary mb-1">{field.title}</p>
+                      {meta ? (
+                        <span
+                          className={`inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full ring-1 ring-inset ${meta.tone}`}
+                        >
+                          {meta.label}
+                        </span>
+                      ) : (
+                        <p className="text-xs text-text-tertiary italic">Not provided</p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
