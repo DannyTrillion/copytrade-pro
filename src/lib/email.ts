@@ -8,15 +8,15 @@ function getFrom(): string {
 
 /**
  * Public-facing base URL used inside emails. EMAIL_BASE_URL overrides everything
- * (set this on Vercel to https://webull.copytradespro.com), then NEXTAUTH_URL,
- * then a hard production fallback so we NEVER emit localhost links from email.
+ * (set this on Vercel if you ever want to point users at a different host), then
+ * NEXTAUTH_URL, then a hard production fallback so we NEVER emit localhost links.
  */
 function publicBaseUrl(): string {
   return (
     process.env.EMAIL_BASE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXTAUTH_URL ||
-    "https://webull.copytradespro.com"
+    "https://copytradespro.com"
   ).replace(/\/$/, "");
 }
 
