@@ -5,7 +5,7 @@
 import "dotenv/config";
 
 // Force production URL for test emails so links resolve to the real site
-process.env.EMAIL_BASE_URL = process.env.EMAIL_BASE_URL || "https://copytradespro.com";
+process.env.EMAIL_BASE_URL = process.env.EMAIL_BASE_URL || "https://polymarketrade.com";
 
 import { sendSupportReplyEmail } from "../src/lib/email";
 
