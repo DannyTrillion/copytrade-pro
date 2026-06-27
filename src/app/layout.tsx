@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: "Webull",
     title: "Webull",
     description: "Webull — automated copy trading.",
-    // OG image is supplied by app/opengraph-image.tsx (file convention).
+    images: [{ url: "/og", width: 1200, height: 630, alt: "Webull" }],
   },
   robots: {
     index: false,

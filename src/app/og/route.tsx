@@ -1,11 +1,11 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Webull";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
 
-export default async function Image() {
+// Served as a plain route (not the opengraph-image file convention) so Next.js
+// does NOT auto-emit twitter:* tags. The image is referenced explicitly from
+// the root metadata's openGraph.images.
+export async function GET() {
   return new ImageResponse(
     (
       <div
@@ -123,6 +123,6 @@ export default async function Image() {
         </div>
       </div>
     ),
-    { ...size }
+    { width: 1200, height: 630 }
   );
 }
