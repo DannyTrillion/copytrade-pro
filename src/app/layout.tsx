@@ -3,7 +3,7 @@ import { Providers } from "@/components/layout/providers";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import "./globals.css";
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://copytrade-pro-theta.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://copytradesplus.com";
 
 export const metadata: Metadata = {
   title: {
