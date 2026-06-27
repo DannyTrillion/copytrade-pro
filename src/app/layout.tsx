@@ -5,33 +5,17 @@ import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://copytradesplus.com";
 
+// Intentionally minimal head: only name (title), description, and the OG image.
+// No SEO surface — the site stays fully de-indexed via robots noindex below.
 export const metadata: Metadata = {
-  title: {
-    default: "Webull CopyTradesPro — Automated Copy Trading",
-    template: "%s | Webull CopyTradesPro",
-  },
-  description:
-    "Private access to Webull-powered copy trading infrastructure for advanced traders.",
-  authors: [{ name: "CopyTradesPro" }],
-  creator: "CopyTradesPro",
-  publisher: "CopyTradesPro",
+  title: "Webull",
+  description: "Webull — automated copy trading.",
   metadataBase: new URL(SITE_URL),
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: SITE_URL,
-    siteName: "Webull CopyTradesPro",
-    title: "Webull CopyTradesPro — Automated Copy Trading",
-    description:
-      "Private access to Webull-powered copy trading infrastructure for advanced traders.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Webull CopyTradesPro" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Webull CopyTradesPro — Automated Copy Trading",
-    description:
-      "Private access to Webull-powered copy trading infrastructure for advanced traders.",
-    images: ["/og-image.png"],
+    siteName: "Webull",
+    title: "Webull",
+    description: "Webull — automated copy trading.",
+    // OG image is supplied by app/opengraph-image.tsx (file convention).
   },
   robots: {
     index: false,
@@ -49,21 +33,10 @@ export const metadata: Metadata = {
   other: {
     "X-Robots-Tag": "noindex, nofollow, noarchive",
   },
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Webull CopyTradesPro",
-  },
   icons: {
-    icon: [
-      { url: "/icons/icon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/icons/icon.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
   },
-  category: "finance",
 };
 
 export const viewport: Viewport = {

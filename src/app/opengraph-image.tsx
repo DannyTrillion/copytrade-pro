@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Webull CopyTradesPro — Automated Copy Trading";
+export const alt = "Webull";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -83,7 +83,7 @@ export default async function Image() {
         {/* Title */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
           <span style={{ fontSize: 68, fontWeight: 800, color: "white", letterSpacing: "-0.03em", lineHeight: 1.05 }}>
-            CopyTradesPro
+            Webull
           </span>
           <span style={{ fontSize: 26, fontWeight: 400, color: "rgba(255,255,255,0.35)", marginTop: 16, maxWidth: 600, textAlign: "center" as const, lineHeight: 1.5 }}>
             Copy elite traders. Automate your edge. Powered by Webull infrastructure.
