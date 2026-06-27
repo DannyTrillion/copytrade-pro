@@ -164,40 +164,56 @@ export async function POST(req: NextRequest) {
       const newAllocated = balance.allocatedBalance;
       const newAvailable = Math.max(0, balance.availableBalance + followerPnl);
 
-      // Update follower balance atomically
-      await prisma.balance.update({
-        where: { userId: follower.userId },
-        data: {
-          allocatedBalance: newAllocated,
-          totalBalance: newTotal,
-          availableBalance: newAvailable,
-          totalProfit: newProfit,
-        },
-      });
+      // Apply the trade atomically. The CopyResult is created FIRST: its
+      // @@unique([userId, traderTradeId]) constraint makes a retry / double-fire
+      // of the same TraderTrade throw P2002 BEFORE any balance is mutated, so a
+      // follower can never be double-credited for one trade.
+      try {
+        await prisma.$transaction(async (tx) => {
+          await tx.copyResult.create({
+            data: {
+              userId: follower.userId,
+              traderTradeId: traderTrade.id,
+              balanceBefore: baseAmount,
+              balanceAfter: newAllocated,
+              profitLoss: followerPnl,
+              resultPercent: data.resultPercent,
+            },
+          });
 
-      // Record copy result — one entry per follower per trade
-      await prisma.copyResult.create({
-        data: {
-          userId: follower.userId,
-          traderTradeId: traderTrade.id,
-          balanceBefore: baseAmount,
-          balanceAfter: newAllocated,
-          profitLoss: followerPnl,
-          resultPercent: data.resultPercent,
-        },
-      });
+          await tx.balance.update({
+            where: { userId: follower.userId },
+            data: {
+              allocatedBalance: newAllocated,
+              totalBalance: newTotal,
+              availableBalance: newAvailable,
+              totalProfit: newProfit,
+            },
+          });
 
-      // Record balance transaction for history
-      await prisma.balanceTransaction.create({
-        data: {
-          userId: follower.userId,
-          type: followerPnl >= 0 ? "COPY_PROFIT" : "COPY_LOSS",
-          amount: followerPnl,
-          balanceBefore: balance.totalBalance,
-          balanceAfter: newTotal,
-          description: `Copy trade: ${data.tradeName} (${data.resultPercent > 0 ? "+" : ""}${data.resultPercent}%)`,
-        },
-      });
+          await tx.balanceTransaction.create({
+            data: {
+              userId: follower.userId,
+              type: followerPnl >= 0 ? "COPY_PROFIT" : "COPY_LOSS",
+              amount: followerPnl,
+              balanceBefore: balance.totalBalance,
+              balanceAfter: newTotal,
+              description: `Copy trade: ${data.tradeName} (${data.resultPercent > 0 ? "+" : ""}${data.resultPercent}%)`,
+            },
+          });
+        });
+      } catch (copyErr) {
+        // P2002 = this trade was already applied to this follower — skip idempotently.
+        if (
+          typeof copyErr === "object" &&
+          copyErr !== null &&
+          "code" in copyErr &&
+          (copyErr as { code?: string }).code === "P2002"
+        ) {
+          continue;
+        }
+        throw copyErr;
+      }
 
       // Notify follower of trade result
       notifyTradeResult(follower.userId, data.tradeName, followerPnl).catch(() => {});

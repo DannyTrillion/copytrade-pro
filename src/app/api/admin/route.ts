@@ -750,38 +750,57 @@ export async function PATCH(req: NextRequest) {
       const withdrawal = await prisma.withdrawalRequest.findUnique({ where: { id: withdrawalId } });
       if (!withdrawal) return errorResponse("Withdrawal not found", 404);
 
-      await prisma.withdrawalRequest.update({
-        where: { id: withdrawalId },
-        data: { status, reviewedAt: new Date() },
-      });
+      // Terminal-state guard: only PENDING requests can be reviewed. Prevents
+      // re-approving an already-processed withdrawal (double debit).
+      if (withdrawal.status !== "PENDING") {
+        return errorResponse(`Withdrawal already ${withdrawal.status.toLowerCase()}`, 409);
+      }
 
-      // If approved, debit user balance
-      if (status === "APPROVED") {
-        const balance = await prisma.balance.findUnique({ where: { userId: withdrawal.userId } });
-        if (!balance) return errorResponse("No balance found", 400);
+      // Perform the status flip + balance debit atomically so two concurrent
+      // approvals can't both read the same balance and double-spend. The status
+      // transition and the balance check both happen inside the transaction.
+      try {
+        await prisma.$transaction(async (tx) => {
+          const claimed = await tx.withdrawalRequest.updateMany({
+            where: { id: withdrawalId, status: "PENDING" },
+            data: { status, reviewedAt: new Date() },
+          });
+          // Another request already moved it out of PENDING — abort.
+          if (claimed.count === 0) {
+            throw new Error("ALREADY_REVIEWED");
+          }
 
-        if (balance.availableBalance < withdrawal.amount) {
-          return errorResponse("Insufficient balance", 400);
-        }
+          if (status === "APPROVED") {
+            const balance = await tx.balance.findUnique({ where: { userId: withdrawal.userId } });
+            if (!balance) throw new Error("NO_BALANCE");
+            if (balance.availableBalance < withdrawal.amount) throw new Error("INSUFFICIENT");
 
-        const updated = await prisma.balance.update({
-          where: { userId: withdrawal.userId },
-          data: {
-            totalBalance: { decrement: withdrawal.amount },
-            availableBalance: { decrement: withdrawal.amount },
-          },
+            const updated = await tx.balance.update({
+              where: { userId: withdrawal.userId },
+              data: {
+                totalBalance: { decrement: withdrawal.amount },
+                availableBalance: { decrement: withdrawal.amount },
+              },
+            });
+
+            await tx.balanceTransaction.create({
+              data: {
+                userId: withdrawal.userId,
+                type: "WITHDRAWAL",
+                amount: -withdrawal.amount,
+                balanceBefore: balance.totalBalance,
+                balanceAfter: updated.totalBalance,
+                description: `Withdrawal approved — ${withdrawal.network}`,
+              },
+            });
+          }
         });
-
-        await prisma.balanceTransaction.create({
-          data: {
-            userId: withdrawal.userId,
-            type: "WITHDRAWAL",
-            amount: -withdrawal.amount,
-            balanceBefore: balance.totalBalance,
-            balanceAfter: updated.totalBalance,
-            description: `Withdrawal approved — ${withdrawal.network}`,
-          },
-        });
+      } catch (txErr) {
+        const msg = txErr instanceof Error ? txErr.message : "";
+        if (msg === "ALREADY_REVIEWED") return errorResponse("Withdrawal already reviewed", 409);
+        if (msg === "NO_BALANCE") return errorResponse("No balance found", 400);
+        if (msg === "INSUFFICIENT") return errorResponse("Insufficient balance", 400);
+        throw txErr;
       }
 
       // Email user about withdrawal status

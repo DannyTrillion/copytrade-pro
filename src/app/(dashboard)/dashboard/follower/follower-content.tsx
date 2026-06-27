@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useAccount, useSignMessage } from "wagmi";
+import { toast } from "@/components/ui/toast";
 import {
   Copy,
   TrendingUp,
@@ -295,7 +296,9 @@ export function FollowerDashboard() {
           setModalError(data.error || "Deposit failed");
           return;
         }
-        setBalance(data.balance);
+        // Deposits are credited only after admin/webhook confirmation —
+        // do not optimistically update the balance here.
+        toast.success(data.message || "Deposit submitted and pending confirmation.");
         setModalAmount("");
         setShowDepositModal(false);
         fetchData();

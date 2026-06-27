@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, unauthorizedResponse, errorResponse } from "@/lib/auth";
-import { notifyDeposit } from "@/lib/notifications";
 import { rateLimitRequest } from "@/lib/api-rate-limit";
 import { z } from "zod";
 
@@ -74,42 +73,54 @@ export async function POST(req: NextRequest) {
     if (operation === "deposit") {
       const { amount, txHash, signature, message, walletAddress } = depositSchema.parse(body);
 
-      // Verify wallet signature if provided
-      if (signature && message && walletAddress) {
-        const { recoverMessageAddress } = await import("viem");
-        const recoveredAddress = await recoverMessageAddress({
-          message,
-          signature: signature as `0x${string}`,
-        });
-        if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
-          return errorResponse("Deposit signature verification failed", 400);
-        }
+      // A wallet signature proves wallet ownership, NOT that funds actually moved
+      // on-chain. Crediting balance directly here would let any caller mint free
+      // balance. Instead, record a PENDING deposit request that an admin (or a
+      // signature-verified on-ramp webhook) must confirm before any credit.
+      if (!signature || !message || !walletAddress) {
+        return errorResponse("Wallet signature is required to submit a deposit", 400);
       }
 
-      const updated = await prisma.balance.update({
-        where: { userId: user.id },
-        data: {
-          totalBalance: { increment: amount },
-          availableBalance: { increment: amount },
-        },
+      const { recoverMessageAddress } = await import("viem");
+      const recoveredAddress = await recoverMessageAddress({
+        message,
+        signature: signature as `0x${string}`,
       });
+      if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+        return errorResponse("Deposit signature verification failed", 400);
+      }
 
-      await prisma.balanceTransaction.create({
+      // Cap concurrent pending requests to mirror /api/deposits
+      const pendingCount = await prisma.depositRequest.count({
+        where: { userId: user.id, status: "PENDING" },
+      });
+      if (pendingCount >= 5) {
+        return errorResponse(
+          "Maximum 5 pending deposit requests allowed. Please wait for existing ones to be reviewed.",
+          400
+        );
+      }
+
+      const deposit = await prisma.depositRequest.create({
         data: {
           userId: user.id,
-          type: "DEPOSIT",
           amount,
-          balanceBefore: balance.totalBalance,
-          balanceAfter: updated.totalBalance,
-          description: signature ? "Funds deposited (wallet-signed)" : "Funds deposited",
+          method: "CRYPTO",
           txHash: txHash || null,
+          userWallet: walletAddress,
+          proofUrl: signature, // wallet-signed authorization kept as proof
+          status: "PENDING",
         },
       });
 
-      // Fire notification (non-blocking)
-      notifyDeposit(user.id, amount).catch(() => {});
-
-      return NextResponse.json({ balance: updated }, { status: 201 });
+      return NextResponse.json(
+        {
+          deposit,
+          pending: true,
+          message: "Deposit submitted and pending confirmation.",
+        },
+        { status: 201 }
+      );
     }
 
     if (operation === "withdraw") {

@@ -132,7 +132,10 @@ export const authOptions: AuthOptions = {
 
       // Handle admin impersonation session update
       if (trigger === "update" && session) {
-        if (session.impersonate) {
+        // Only an ADMIN token may start impersonating. Without this gate any
+        // authenticated user could call session.update({ impersonate: {...} })
+        // and assume an arbitrary account or escalate to ADMIN.
+        if (session.impersonate && token.role === "ADMIN") {
           // Start impersonation
           token.impersonatorId = token.id as string;
           token.originalRole = token.role as Role;
