@@ -10,13 +10,8 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://copytradesplus.com"
 export const metadata: Metadata = {
   title: "Webull",
   description: "Webull — automated copy trading.",
-  metadataBase: new URL(SITE_URL),
-  openGraph: {
-    siteName: "Webull",
-    title: "Webull",
-    description: "Webull — automated copy trading.",
-    images: [{ url: "/og", width: 1200, height: 630, alt: "Webull" }],
-  },
+  // OG tags are emitted manually in <head> below so Next.js does not
+  // auto-mirror them into twitter:* tags. Head = title + description + OG only.
   robots: {
     index: false,
     follow: false,
@@ -56,6 +51,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning style={{ colorScheme: "dark", backgroundColor: "#000000" }}>
       <head>
+        {/* OG tags only — no twitter. Emitted manually to avoid Next auto-mirroring. */}
+        <meta property="og:title" content="Webull" />
+        <meta property="og:description" content="Webull — automated copy trading." />
+        <meta property="og:site_name" content="Webull" />
+        <meta property="og:image" content={`${SITE_URL}/og`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         {process.env.NODE_ENV === "production" && (
           <script dangerouslySetInnerHTML={{ __html: `
             document.addEventListener('contextmenu',function(e){e.preventDefault()});
