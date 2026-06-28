@@ -1,4 +1,4 @@
-export const APP_NAME = "CopyTrade Pro";
+export const APP_NAME = "Webull";
 export const APP_DESCRIPTION = "Professional Copy Trading Platform";
 
 export const ROLES = {

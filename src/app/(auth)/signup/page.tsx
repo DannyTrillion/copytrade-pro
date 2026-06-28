@@ -145,7 +145,7 @@ export default function SignupPage() {
                 <div className="w-8 h-8 rounded-[10px] bg-white flex items-center justify-center shadow-[0_0_12px_rgba(255,255,255,0.05)]">
                   <TrendingUp className="w-4 h-4 text-[#08080d]" />
                 </div>
-                <span className="text-white/80 font-semibold text-[15px] tracking-tight">CopyTrade Pro</span>
+                <span className="text-white/80 font-semibold text-[15px] tracking-tight">Webull</span>
               </motion.div>
 
               <div className="my-auto hidden md:block">
@@ -174,7 +174,7 @@ export default function SignupPage() {
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-xl font-bold text-white mb-1">Create Account</h1>
-                <p className="text-xs text-white/30">Join CopyTrade Pro for free</p>
+                <p className="text-xs text-white/30">Join Webull for free</p>
               </motion.div>
 
               <AnimatePresence mode="wait">

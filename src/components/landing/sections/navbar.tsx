@@ -44,8 +44,6 @@ export function Navbar() {
             className="h-5 w-auto brightness-0 invert opacity-90"
             priority
           />
-          <div className="w-px h-4 bg-white/10" />
-          <span className="text-white/50 text-xs font-medium tracking-wide">CopyTrade</span>
         </Link>
 
         {/* Desktop nav */}

@@ -187,7 +187,7 @@ export function TwoFactorSetup() {
 
   const handleDownloadBackupCodes = () => {
     const content = [
-      "CopyTrade Pro — Two-Factor Authentication Backup Codes",
+      "Webull — Two-Factor Authentication Backup Codes",
       "=" .repeat(55),
       "",
       "Each code can only be used once.",

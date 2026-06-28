@@ -1,6 +1,6 @@
 {
-  "name": "CopyTrade Pro",
-  "short_name": "CopyTrade",
+  "name": "Webull",
+  "short_name": "Webull",
   "description": "Professional Copy Trading Platform",
   "start_url": "/dashboard",
   "display": "standalone",

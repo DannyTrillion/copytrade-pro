@@ -3,7 +3,7 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 function getFrom(): string {
-  return process.env.EMAIL_FROM || "CopyTradesPro <onboarding@resend.dev>";
+  return process.env.EMAIL_FROM || "Webull <onboarding@resend.dev>";
 }
 
 /**
@@ -40,7 +40,7 @@ function baseTemplate(content: string): string {
       <div style="display:inline-block;background:#0D71FF;width:40px;height:40px;border-radius:12px;line-height:40px;text-align:center">
         <span style="color:#fff;font-size:16px;font-weight:800">W</span>
       </div>
-      <p style="color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin:12px 0 0">CopyTradesPro</p>
+      <p style="color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin:12px 0 0">Webull</p>
     </div>
 
     <!-- Main card -->
@@ -51,7 +51,7 @@ function baseTemplate(content: string): string {
     <!-- Footer -->
     <div style="text-align:center;margin-top:32px">
       <p style="color:rgba(255,255,255,0.15);font-size:11px;margin:0 0 8px;line-height:1.5">
-        &copy; ${year} CopyTradesPro &middot; Powered by Webull
+        &copy; ${year} Webull
       </p>
       <p style="color:rgba(255,255,255,0.1);font-size:10px;margin:0">
         copytradesplus.com
@@ -106,13 +106,13 @@ export async function sendVerificationEmail(email: string, name: string, token: 
   const baseUrl = publicBaseUrl();
   const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`;
 
-  return sendEmail(email, "Verify your email — CopyTradesPro", baseTemplate(`
+  return sendEmail(email, "Verify your email — Webull", baseTemplate(`
     <div style="padding:40px 32px;text-align:center">
       <div style="width:56px;height:56px;margin:0 auto 20px;background:rgba(13,113,255,0.1);border-radius:50%;line-height:56px">
         <span style="font-size:24px">✉️</span>
       </div>
       <h1 style="color:#fff;font-size:24px;margin:0 0 8px;font-weight:700;letter-spacing:-0.5px">Verify Your Email</h1>
-      <p style="color:rgba(255,255,255,0.45);font-size:14px;margin:0 0 32px;line-height:1.6">Hi ${name}, confirm your email to start trading with CopyTradesPro.</p>
+      <p style="color:rgba(255,255,255,0.45);font-size:14px;margin:0 0 32px;line-height:1.6">Hi ${name}, confirm your email to start trading with Webull.</p>
       ${ctaButton("Verify Email", verifyUrl)}
       <p style="color:rgba(255,255,255,0.2);font-size:11px;margin:28px 0 0;line-height:1.5">This link expires in 24 hours. If you didn't create an account, ignore this email.</p>
     </div>
@@ -120,7 +120,7 @@ export async function sendVerificationEmail(email: string, name: string, token: 
 }
 
 export async function sendOtpEmail(email: string, code: string): Promise<SendEmailResult> {
-  return sendEmail(email, `${code} — Your CopyTradesPro verification code`, baseTemplate(`
+  return sendEmail(email, `${code} — Your Webull verification code`, baseTemplate(`
     <div style="padding:40px 32px;text-align:center">
       <div style="width:56px;height:56px;margin:0 auto 20px;background:rgba(13,113,255,0.1);border-radius:50%;line-height:56px">
         <span style="font-size:24px">🔐</span>
@@ -139,7 +139,7 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
   const baseUrl = publicBaseUrl();
   const resetUrl = `${baseUrl}/reset-password?token=${token}`;
 
-  return sendEmail(email, "Reset your password — CopyTradesPro", baseTemplate(`
+  return sendEmail(email, "Reset your password — Webull", baseTemplate(`
     <div style="padding:40px 32px;text-align:center">
       <div style="width:56px;height:56px;margin:0 auto 20px;background:rgba(255,152,0,0.1);border-radius:50%;line-height:56px">
         <span style="font-size:24px">🔑</span>
@@ -157,7 +157,7 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
 export async function sendDepositConfirmedEmail(email: string, name: string, amount: number): Promise<SendEmailResult> {
   const formatted = amount.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-  return sendEmail(email, `Deposit confirmed: $${formatted} — CopyTradesPro`, baseTemplate(`
+  return sendEmail(email, `Deposit confirmed: $${formatted} — Webull`, baseTemplate(`
     <div style="padding:40px 32px;text-align:center">
       <div style="width:56px;height:56px;margin:0 auto 20px;background:rgba(38,166,154,0.1);border-radius:50%;line-height:56px">
         <span style="font-size:24px">✅</span>
@@ -180,7 +180,7 @@ export async function sendWithdrawalStatusEmail(email: string, name: string, amo
   const statusText = isApproved ? "Approved" : "Rejected";
   const formatted = amount.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-  return sendEmail(email, `Withdrawal ${statusText}: $${formatted} — CopyTradesPro`, baseTemplate(`
+  return sendEmail(email, `Withdrawal ${statusText}: $${formatted} — Webull`, baseTemplate(`
     <div style="padding:40px 32px;text-align:center">
       <div style="width:56px;height:56px;margin:0 auto 20px;background:${isApproved ? "rgba(38,166,154,0.1)" : "rgba(239,83,80,0.1)"};border-radius:50%;line-height:56px">
         <span style="font-size:24px">${emoji}</span>
@@ -198,7 +198,7 @@ export async function sendWithdrawalStatusEmail(email: string, name: string, amo
 }
 
 export async function sendTierUpgradeEmail(email: string, name: string, tierName: string): Promise<SendEmailResult> {
-  return sendEmail(email, `Upgraded to ${tierName}! — CopyTradesPro`, baseTemplate(`
+  return sendEmail(email, `Upgraded to ${tierName}! — Webull`, baseTemplate(`
     <div style="padding:40px 32px;text-align:center">
       <div style="width:56px;height:56px;margin:0 auto 20px;background:rgba(212,175,55,0.1);border-radius:50%;line-height:56px">
         <span style="font-size:24px">⭐</span>
@@ -241,7 +241,7 @@ export async function sendSupportReplyEmail(
     ? `<div style="display:inline-block;margin-top:14px;padding:4px 10px;border-radius:999px;background:rgba(13,113,255,0.12);color:#5BA1FF;font-size:11px;font-weight:600">📎 Attachment included</div>`
     : "";
 
-  return sendEmail(email, `Support reply: ${subject} — CopyTradesPro`, baseTemplate(`
+  return sendEmail(email, `Support reply: ${subject} — Webull`, baseTemplate(`
     <div style="padding:40px 32px">
       <div style="text-align:center;margin-bottom:24px">
         <div style="width:56px;height:56px;margin:0 auto 16px;background:rgba(13,113,255,0.1);border-radius:50%;line-height:56px">
@@ -256,7 +256,7 @@ export async function sendSupportReplyEmail(
         ${attachmentBadge}
       </div>
       ${ctaButton("Open conversation", url)}
-      <p style="color:rgba(255,255,255,0.25);font-size:11px;margin:28px 0 0;text-align:center;line-height:1.5">You're receiving this because you have an open conversation with CopyTradesPro support.</p>
+      <p style="color:rgba(255,255,255,0.25);font-size:11px;margin:28px 0 0;text-align:center;line-height:1.5">You're receiving this because you have an open conversation with Webull support.</p>
     </div>
   `));
 }
@@ -268,14 +268,14 @@ const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || "makindedaniel45@gma
 export async function notifyAdminNewSignup(userName: string, userEmail: string): Promise<SendEmailResult> {
   const time = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 
-  return sendEmail(ADMIN_EMAIL, `New Signup: ${userName} — CopyTradesPro`, baseTemplate(`
+  return sendEmail(ADMIN_EMAIL, `New Signup: ${userName} — Webull`, baseTemplate(`
     <div style="padding:40px 32px">
       <div style="text-align:center;margin-bottom:24px">
         <div style="width:56px;height:56px;margin:0 auto 16px;background:rgba(13,113,255,0.1);border-radius:50%;line-height:56px">
           <span style="font-size:24px">👤</span>
         </div>
         <h1 style="color:#fff;font-size:24px;margin:0 0 4px;font-weight:700;letter-spacing:-0.5px">New User Signup</h1>
-        <p style="color:rgba(255,255,255,0.4);font-size:13px;margin:0">A new user just joined CopyTradesPro</p>
+        <p style="color:rgba(255,255,255,0.4);font-size:13px;margin:0">A new user just joined Webull</p>
       </div>
       ${divider()}
       <div style="padding:24px 0">

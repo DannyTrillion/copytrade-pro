@@ -45,8 +45,8 @@ export function SolanaPayForm({ adminWallet, walletMap, onSubmit, submitting }: 
     if (!solWallet || !amount) return null;
     const amt = parseFloat(amount);
     if (!amt || amt < 10) return null;
-    // solana:<recipient>?amount=<amount>&label=CopyTrade+Pro&message=Deposit
-    return `solana:${solWallet}?label=CopyTrade+Pro&message=Deposit+${amt}+USD`;
+    // solana:<recipient>?amount=<amount>&label=Webull&message=Deposit
+    return `solana:${solWallet}?label=Webull&message=Deposit+${amt}+USD`;
   }, [solWallet, amount]);
 
   const handleCopy = (text: string) => {

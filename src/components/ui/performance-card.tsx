@@ -100,7 +100,7 @@ function CardContent({ data, type, theme }: { data: PnlCardData; type: CardType;
             <TrendingUp style={{ width: 16, height: 16, color: "#fff" }} />
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: t.text }}>CopyTrade Pro</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: t.text }}>Webull</div>
             <div style={{ fontSize: 10, color: t.sub }}>{type === "pnl" ? "Performance Report" : "Portfolio Overview"}</div>
           </div>
         </div>
@@ -206,7 +206,7 @@ export function PerformanceCardModal({ isOpen, onClose, data }: PerformanceCardM
       if (navigator.share && navigator.canShare({ files: [new File([blob], "performance.png", { type: "image/png" })] })) {
         await navigator.share({
           title: "My Trading Performance",
-          text: `Check out my trading performance on CopyTrade Pro! P&L: ${data.totalPnl >= 0 ? "+" : ""}${formatCurrency(data.totalPnl)}`,
+          text: `Check out my trading performance on Webull! P&L: ${data.totalPnl >= 0 ? "+" : ""}${formatCurrency(data.totalPnl)}`,
           files: [new File([blob], "performance.png", { type: "image/png" })],
         });
       } else {

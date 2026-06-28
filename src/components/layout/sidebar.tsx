@@ -201,7 +201,7 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
           {(sidebarOpen || isMobile) ? (
             <Image
               src={theme === "dark" ? "/logo-light.svg" : "/logo-dark.svg"}
-              alt="CopyTrade Pro"
+              alt="Webull"
               width={150}
               height={28}
               className="h-6 w-auto"
@@ -210,7 +210,7 @@ export function Sidebar({ userRole, userName }: SidebarProps) {
           ) : (
             <Image
               src="/logo-icon.svg"
-              alt="CopyTrade Pro"
+              alt="Webull"
               width={32}
               height={32}
               className="w-8 h-8 flex-shrink-0"

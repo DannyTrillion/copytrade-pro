@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       metadata: {
         userId: user.id,
         userEmail: user.email,
-        platform: "CopyTrade Pro",
+        platform: "Webull",
       },
       description: `Deposit for ${user.email}`,
     });

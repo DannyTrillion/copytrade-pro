@@ -270,7 +270,7 @@ export function LeaderboardSection() {
             </svg>
           </Link>
           <p className="mt-4 text-white/40 text-sm">
-            Join <span className="text-white/60 font-medium">1,000+</span> traders on CopyTrade Pro
+            Join <span className="text-white/60 font-medium">1,000+</span> traders on Webull
           </p>
         </motion.div>
       </div>

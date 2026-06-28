@@ -15,10 +15,10 @@ export default function TermsPage() {
 
         <div className="prose prose-sm max-w-none text-text-secondary space-y-6 [&_h2]:text-text-primary [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-10 [&_h2]:mb-3 [&_p]:leading-relaxed [&_ul]:space-y-1 [&_li]:text-text-secondary">
           <h2>1. Acceptance of Terms</h2>
-          <p>By accessing or using CopyTrade Pro (&ldquo;the Platform&rdquo;), you agree to be bound by these Terms of Service. If you do not agree, do not use the Platform.</p>
+          <p>By accessing or using Webull (&ldquo;the Platform&rdquo;), you agree to be bound by these Terms of Service. If you do not agree, do not use the Platform.</p>
 
           <h2>2. Description of Service</h2>
-          <p>CopyTrade Pro provides a copy trading platform that allows users to follow and automatically replicate the trading signals of master traders on supported markets including Polymarket. The Platform facilitates signal distribution, not financial advice.</p>
+          <p>Webull provides a copy trading platform that allows users to follow and automatically replicate the trading signals of master traders on supported markets including Polymarket. The Platform facilitates signal distribution, not financial advice.</p>
 
           <h2>3. Eligibility</h2>
           <p>You must be at least 18 years old and legally capable of entering into binding agreements in your jurisdiction. You are responsible for ensuring your use of the Platform complies with all applicable laws.</p>
@@ -44,10 +44,10 @@ export default function TermsPage() {
           <p>You may not: manipulate trading signals, create multiple accounts, engage in money laundering, attempt to exploit platform vulnerabilities, or use the Platform for any illegal purpose.</p>
 
           <h2>9. Intellectual Property</h2>
-          <p>All content, design, and technology on the Platform are owned by CopyTrade Pro. You may not copy, modify, or distribute any part of the Platform without written permission.</p>
+          <p>All content, design, and technology on the Platform are owned by Webull. You may not copy, modify, or distribute any part of the Platform without written permission.</p>
 
           <h2>10. Limitation of Liability</h2>
-          <p>To the maximum extent permitted by law, CopyTrade Pro shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Platform, including trading losses.</p>
+          <p>To the maximum extent permitted by law, Webull shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Platform, including trading losses.</p>
 
           <h2>11. Termination</h2>
           <p>We may suspend or terminate your account at our discretion for violations of these terms. You may close your account at any time by contacting support, subject to pending transaction settlement.</p>

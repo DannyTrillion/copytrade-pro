@@ -277,7 +277,7 @@ export function FollowerDashboard() {
 
       setModalLoading(true);
       try {
-        const message = `CopyTrade Pro — Authorize Deposit\n\nAmount: $${amount.toFixed(2)}\nAddress: ${wagmiAddress}\nTimestamp: ${Date.now()}`;
+        const message = `Webull — Authorize Deposit\n\nAmount: $${amount.toFixed(2)}\nAddress: ${wagmiAddress}\nTimestamp: ${Date.now()}`;
         const signature = await signMessageAsync({ message });
 
         const res = await fetch("/api/balance", {

@@ -31,7 +31,7 @@ export function VideoShowcaseSection() {
             Your Dashboard, Real-Time
           </h2>
           <p className="text-base text-white/50 max-w-[460px] mx-auto leading-relaxed">
-            Watch how CopyTrade Pro executes trades in real-time, mirroring top performers automatically.
+            Watch how Webull executes trades in real-time, mirroring top performers automatically.
           </p>
         </motion.div>
 

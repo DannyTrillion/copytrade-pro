@@ -213,7 +213,7 @@ function ResetPasswordContent() {
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <span className="text-2xl font-bold text-white">
-                CopyTrade Pro
+                Webull
               </span>
             </div>
             <h1 className="text-4xl font-bold text-white leading-tight mb-4">
@@ -253,7 +253,7 @@ function ResetPasswordContent() {
               <TrendingUp className="w-7 h-7 text-white" />
             </div>
             <span className="text-xl font-bold text-white">
-              CopyTrade Pro
+              Webull
             </span>
             <span className="text-xs text-[#888] mt-1">
               Professional Copy Trading Platform

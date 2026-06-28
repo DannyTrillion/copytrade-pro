@@ -171,7 +171,7 @@ export function verifyBackupCode(
  * @param email - User's email address (used as the account label)
  */
 export function generateOTPAuthURL(secret: string, email: string): string {
-  const issuer = "CopyTrade Pro";
+  const issuer = "Webull";
   const encodedIssuer = encodeURIComponent(issuer);
   const encodedEmail = encodeURIComponent(email);
 

@@ -11,7 +11,7 @@ const TRADERS = [
     name: "Alexander Whitfield",
     role: "Chief Investment Officer, Apex Capital",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
-    quote: "CopyTrade Pro fundamentally changed how we distribute alpha. Our followers receive the same entries in real time, and the commission model is the most transparent I've seen in 15 years of institutional trading.",
+    quote: "Webull fundamentally changed how we distribute alpha. Our followers receive the same entries in real time, and the commission model is the most transparent I've seen in 15 years of institutional trading.",
     stats: { experience: "15+ years", trades: "4,200+", winRate: "73%", followers: "1.2K" },
     pnl: "+847%",
   },
@@ -35,7 +35,7 @@ const TRADERS = [
     name: "Catherine Harrington",
     role: "Director of Trading, Blackstone Macro",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
-    quote: "We migrated our entire signal distribution to CopyTrade Pro. The tier system is equitable, commissions are fully transparent, and the analytics dashboard rivals Bloomberg terminal functionality.",
+    quote: "We migrated our entire signal distribution to Webull. The tier system is equitable, commissions are fully transparent, and the analytics dashboard rivals Bloomberg terminal functionality.",
     stats: { experience: "18+ years", trades: "5,100+", winRate: "76%", followers: "2.1K" },
     pnl: "+1,240%",
   },
@@ -158,7 +158,7 @@ export function TestimonialsSection() {
             Trusted by <span className="text-white/30 italic">Elite Traders</span>
           </h2>
           <p className="text-sm text-white/30 max-w-[460px] mx-auto leading-relaxed">
-            Real performance from verified professionals who share their strategies on CopyTrade Pro.
+            Real performance from verified professionals who share their strategies on Webull.
           </p>
         </motion.div>
 

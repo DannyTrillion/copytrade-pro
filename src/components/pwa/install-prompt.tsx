@@ -63,7 +63,7 @@ export function InstallPrompt() {
         {/* Text */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-white">
-            Install CopyTrade Pro
+            Install Webull
           </p>
           <p className="text-xs text-white/50 truncate">
             Add to home screen for the best experience

@@ -47,7 +47,7 @@ export default function DashboardLayout({
       <DashboardParticles />
       <ImpersonationBanner />
       <Sidebar userRole={session.user.role} userName={session.user.name || "User"} />
-      <TopBar title="CopyTrade Pro" />
+      <TopBar title="Webull" />
       <main
         className={cn(
           "min-h-screen transition-all duration-200",

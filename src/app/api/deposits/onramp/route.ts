@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
           : "https://app.demo.ramp.network";
         const params = new URLSearchParams({
           hostApiKey: apiKey || "demo_key",
-          hostAppName: "CopyTrade Pro",
+          hostAppName: "Webull",
           userAddress: walletAddress,
           swapAsset: data.cryptoCurrency.toUpperCase(),
           fiatValue: String(data.amount),

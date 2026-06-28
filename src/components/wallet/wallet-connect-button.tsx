@@ -96,7 +96,7 @@ export function WalletConnectButton({
     setVerifying(true);
     setError("");
 
-    const message = `CopyTrade Pro — Verify wallet ownership\n\nAddress: ${address}\nTimestamp: ${Date.now()}`;
+    const message = `Webull — Verify wallet ownership\n\nAddress: ${address}\nTimestamp: ${Date.now()}`;
 
     try {
       const signature = await signMessageAsync({ message });

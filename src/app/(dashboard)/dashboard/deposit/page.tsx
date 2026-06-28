@@ -716,7 +716,7 @@ export default function DepositPage() {
                     <Shield className="w-4 h-4 text-info shrink-0 mt-0.5" />
                     <p className="text-2xs text-text-tertiary">
                       You will be redirected to the provider&apos;s platform to sign up and purchase crypto.
-                      Once integrated, payments will be routed directly to your CopyTrade Pro account.
+                      Once integrated, payments will be routed directly to your Webull account.
                     </p>
                   </div>
                 </motion.div>

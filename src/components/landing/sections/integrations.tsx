@@ -19,7 +19,7 @@ export function IntegrationSection() {
     },
     {
       icon: Webhook,
-      platform: "CopyTrade Pro",
+      platform: "Webull",
       label: "Copy Engine",
       desc: "Webhook receives signal, validates auth, and calculates positions per follower.",
     },

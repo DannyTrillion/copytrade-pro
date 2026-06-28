@@ -71,7 +71,7 @@ export function Footer() {
 
         <div className="pt-6 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-[12px] text-white/25">
-            &copy; {new Date().getFullYear()} CopyTradesPro. All rights reserved.
+            &copy; {new Date().getFullYear()} Webull. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             {["Discord", "Twitter", "GitHub"].map((social) => (

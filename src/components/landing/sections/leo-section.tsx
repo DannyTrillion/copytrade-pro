@@ -45,7 +45,7 @@ export function LeoSection() {
                 {/* Name badge */}
                 <div className="absolute bottom-5 left-5 right-5">
                   <p className="text-white font-semibold text-sm">Leo Ashford</p>
-                  <p className="text-white/40 text-xs mt-0.5">Product Lead, CopyTrade Pro</p>
+                  <p className="text-white/40 text-xs mt-0.5">Product Lead, Webull</p>
                 </div>
               </div>
 
@@ -85,7 +85,7 @@ export function LeoSection() {
             >
               <Quote className="w-8 h-8 text-[#0D71FF]/20 mb-3" />
               <p className="text-[15px] text-white/45 leading-[1.8] max-w-[520px]">
-                For years, successful trading was reserved for those with decades of experience, expensive tools, and hours of daily screen time. We built CopyTrade Pro to change that.
+                For years, successful trading was reserved for those with decades of experience, expensive tools, and hours of daily screen time. We built Webull to change that.
               </p>
               <p className="text-[15px] text-white/45 leading-[1.8] max-w-[520px] mt-4">
                 By connecting directly to Webull&apos;s infrastructure, we enable anyone — regardless of experience — to mirror the exact strategies of verified, top-performing traders. Every signal, every entry, every exit — executed automatically in under 200 milliseconds.

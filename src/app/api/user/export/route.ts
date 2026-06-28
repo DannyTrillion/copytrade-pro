@@ -73,7 +73,7 @@ export async function GET() {
 
     const exportData = {
       exportedAt: new Date().toISOString(),
-      platform: "CopyTrade Pro",
+      platform: "Webull",
       userData: {
         profile: {
           id: user.id,
