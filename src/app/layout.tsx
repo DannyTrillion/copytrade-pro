@@ -3,7 +3,7 @@ import { Providers } from "@/components/layout/providers";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import "./globals.css";
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://copytradesplus.com";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://copytradesultra.com";
 
 // Intentionally minimal head: only name (title), description, and the OG image.
 // No SEO surface — the site stays fully de-indexed via robots noindex below.

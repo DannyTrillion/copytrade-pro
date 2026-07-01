@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Deliver via Resend (verified copytradesplus.com sending domain)
+    // Deliver via Resend (verified copytradesultra.com sending domain)
     const sent = await sendOtpEmail(normalizedEmail, code);
     if (!sent.success) {
       console.error("[send-otp] Resend send failed:", sent.error);

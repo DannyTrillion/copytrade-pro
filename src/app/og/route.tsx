@@ -118,7 +118,7 @@ export async function GET() {
         {/* Domain */}
         <div style={{ position: "absolute", bottom: 28, display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 14, color: "rgba(255,255,255,0.2)", fontWeight: 500, letterSpacing: "0.05em" }}>
-            copytradesplus.com
+            copytradesultra.com
           </span>
         </div>
       </div>

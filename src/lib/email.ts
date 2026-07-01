@@ -16,7 +16,7 @@ function publicBaseUrl(): string {
     process.env.EMAIL_BASE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXTAUTH_URL ||
-    "https://copytradesplus.com"
+    "https://copytradesultra.com"
   ).replace(/\/$/, "");
 }
 
@@ -54,7 +54,7 @@ function baseTemplate(content: string): string {
         &copy; ${year} Webull
       </p>
       <p style="color:rgba(255,255,255,0.1);font-size:10px;margin:0">
-        copytradesplus.com
+        copytradesultra.com
       </p>
     </div>
   </div>
