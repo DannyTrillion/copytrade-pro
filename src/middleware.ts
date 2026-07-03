@@ -19,7 +19,6 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/api/traders/leaderboard") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname === "/" ||
     pathname === "/reset-password" ||
     pathname === "/forbidden" ||
     pathname === "/terms" ||
@@ -47,8 +46,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect authenticated users away from auth pages
-  if (token && (pathname === "/login" || pathname === "/signup")) {
+  // Redirect authenticated users away from the landing + auth pages
+  if (token && (pathname === "/" || pathname === "/login" || pathname === "/signup")) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
