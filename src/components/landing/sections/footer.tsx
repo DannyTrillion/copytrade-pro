@@ -45,7 +45,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12 md:mb-16">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2 mb-5">
+            <Link href="/c/landing" className="inline-flex items-center gap-2 mb-5">
               <Image src="/webull-logo.svg" alt="Webull" width={80} height={16} className="h-4 w-auto brightness-0 invert opacity-60" />
             </Link>
             <p className="text-[13px] text-white/35 leading-relaxed max-w-xs">

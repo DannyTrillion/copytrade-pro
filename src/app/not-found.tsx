@@ -31,7 +31,7 @@ export default function NotFound() {
             Go to Dashboard
           </Link>
           <Link
-            href="/"
+            href="/c/landing"
             className="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-secondary text-sm font-medium rounded-xl transition-colors"
           >
             Home

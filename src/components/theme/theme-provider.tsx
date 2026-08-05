@@ -46,7 +46,7 @@ function resolveTheme(mode: ThemeMode, pathname: string): Theme {
 
   // System mode: use route-aware defaults with system preference as tiebreaker
   const isDashboard = pathname.startsWith("/dashboard");
-  const isLanding = pathname === "/" || pathname.startsWith("/pricing") || pathname.startsWith("/about");
+  const isLanding = pathname === "/" || pathname.startsWith("/c/landing") || pathname.startsWith("/pricing") || pathname.startsWith("/about");
   const isAuth = pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/reset-password");
 
   if (isLanding || isAuth) return "dark";

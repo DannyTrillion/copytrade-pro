@@ -34,7 +34,7 @@ export default function RootError({
             Try Again
           </button>
           <Link
-            href="/"
+            href="/c/landing"
             className="px-6 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-white/70 text-sm font-medium rounded-xl transition-colors"
           >
             Go Home

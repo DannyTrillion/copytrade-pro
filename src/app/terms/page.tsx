@@ -8,7 +8,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-surface-0">
       <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
-        <Link href="/" className="text-sm text-text-tertiary hover:text-text-primary transition-colors mb-8 inline-block">&larr; Back to Home</Link>
+        <Link href="/c/landing" className="text-sm text-text-tertiary hover:text-text-primary transition-colors mb-8 inline-block">&larr; Back to Home</Link>
 
         <h1 className="text-3xl font-bold text-text-primary mb-2">Terms of Service</h1>
         <p className="text-sm text-text-tertiary mb-10">Last updated: April 2026</p>
