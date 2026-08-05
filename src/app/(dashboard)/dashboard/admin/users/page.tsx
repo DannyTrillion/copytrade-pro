@@ -16,6 +16,7 @@ import {
   Link2,
   Ban,
   ShieldOff,
+  ShieldAlert,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -27,6 +28,7 @@ import {
 import { StatCard } from "@/components/ui/stat-card";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { UserSecurityPanel } from "@/components/admin/security/user-security-panel";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/loading-skeleton";
 import { downloadCSV } from "@/lib/csv";
@@ -125,6 +127,9 @@ export default function AdminUsersPage() {
   const [traderId, setTraderId] = useState("");
   const [assignSaving, setAssignSaving] = useState(false);
   const [assignMsg, setAssignMsg] = useState("");
+
+  // Per-account security panel — full admin authority over one account
+  const [securityUserId, setSecurityUserId] = useState<string | null>(null);
 
   // Suspend confirmation
   const [suspendTarget, setSuspendTarget] = useState<UserRow | null>(null);
@@ -831,6 +836,13 @@ export default function AdminUsersPage() {
                           <KeyRound className="w-3.5 h-3.5" />
                         </button>
                         <button
+                          onClick={() => setSecurityUserId(user.id)}
+                          className="p-1.5 rounded-md hover:bg-surface-3 transition-colors text-text-tertiary hover:text-brand"
+                          title="Security — ban, suspend, force logout, risk & device history"
+                        >
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                        </button>
+                        <button
                           onClick={() => setSuspendTarget(user)}
                           className={`p-1.5 rounded-md hover:bg-surface-3 transition-colors ${
                             user.suspended
@@ -885,6 +897,13 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Per-account security panel */}
+      <UserSecurityPanel
+        userId={securityUserId}
+        onClose={() => setSecurityUserId(null)}
+        onChanged={fetchData}
+      />
 
       {/* Suspend / Unsuspend Confirmation */}
       <ConfirmDialog

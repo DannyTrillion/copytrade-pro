@@ -7,11 +7,22 @@ export async function getSession() {
   return getServerSession(authOptions);
 }
 
+/**
+ * The authoritative auth boundary for API routes and server components.
+ *
+ * `getSession()` runs the `jwt` callback, which revalidates the token's
+ * session version against the database — so a banned or force-logged-out user
+ * is rejected here even though their cookie is still cryptographically valid.
+ * Middleware cannot do this (it only decrypts the cookie), which is why every
+ * protected route must call this rather than trusting the middleware redirect.
+ */
 export async function requireAuth() {
   const session = await getSession();
-  if (!session?.user) {
+
+  if (session?.revoked || !session?.user) {
     throw new Error("Unauthorized");
   }
+
   return session.user;
 }
 

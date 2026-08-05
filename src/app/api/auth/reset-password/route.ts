@@ -5,6 +5,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { enforceAccess } from "@/lib/security/enforcement";
+import { getRequestContext } from "@/lib/security/events";
+import { invalidateUserSecurityState } from "@/lib/security/session";
 
 /* ─── Validation Schemas ─── */
 
@@ -65,7 +68,7 @@ export async function POST(req: NextRequest) {
     if (hasToken) {
       return handlePasswordReset(body);
     }
-    return handleResetRequest(body);
+    return handleResetRequest(body, req);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
 
 /* ─── Step 1: Request a password reset link ─── */
 
-async function handleResetRequest(body: unknown) {
+async function handleResetRequest(body: unknown, req: NextRequest) {
   const { email } = requestResetSchema.parse(body);
   const normalizedEmail = email.toLowerCase().trim();
 
@@ -102,12 +105,33 @@ async function handleResetRequest(body: unknown) {
     return successResponse;
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: normalizedEmail },
-    select: { id: true, email: true, name: true, suspended: true },
+  // Password reset is an account-recovery path, so it must respect the same
+  // blacklists as login — otherwise a banned user could reset their way back
+  // in. Denials return the same opaque success response as everything else
+  // here, preserving the endpoint's non-enumerable behaviour.
+  const permitted = await enforceAccess({
+    surface: "PASSWORD_RESET",
+    email: normalizedEmail,
+    context: getRequestContext(req.headers),
   });
 
-  if (!user || user.suspended) {
+  if (!permitted) {
+    return successResponse;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      suspended: true,
+      bannedAt: true,
+      deletedAt: true,
+    },
+  });
+
+  if (!user || user.suspended || user.bannedAt || user.deletedAt) {
     return successResponse;
   }
 
@@ -149,7 +173,11 @@ async function handlePasswordReset(body: unknown) {
 
   const resetRecord = await prisma.passwordReset.findUnique({
     where: { token },
-    include: { user: { select: { id: true, suspended: true } } },
+    include: {
+      user: {
+        select: { id: true, suspended: true, bannedAt: true, deletedAt: true },
+      },
+    },
   });
 
   if (!resetRecord) {
@@ -168,20 +196,31 @@ async function handlePasswordReset(body: unknown) {
     );
   }
 
-  if (resetRecord.user.suspended) {
+  // A token issued before the account was moderated must not still work.
+  // The generic message avoids confirming which state applies.
+  if (
+    resetRecord.user.suspended ||
+    resetRecord.user.bannedAt ||
+    resetRecord.user.deletedAt
+  ) {
     return NextResponse.json(
-      { error: "This account has been suspended. Contact support." },
-      { status: 403 },
+      { error: "Invalid or expired reset token" },
+      { status: 400 },
     );
   }
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
-  // Update password and delete the used token in a transaction
+  // Update password and delete the used token in a transaction.
+  //
+  // `sessionVersion` is incremented in the same statement so completing a reset
+  // logs out every existing session. This matters most in the case the feature
+  // exists for: if an attacker holds a live session on a compromised account,
+  // changing the password alone would not evict them.
   await prisma.$transaction([
     prisma.user.update({
       where: { id: resetRecord.userId },
-      data: { passwordHash },
+      data: { passwordHash, sessionVersion: { increment: 1 } },
     }),
     prisma.passwordReset.delete({
       where: { id: resetRecord.id },
@@ -191,6 +230,11 @@ async function handlePasswordReset(body: unknown) {
       where: { userId: resetRecord.userId },
     }),
   ]);
+
+  // Drop the cached session state so the bump above is visible immediately
+  // rather than after the cache TTL elapses. Deliberately not
+  // `revokeUserSessions` — that would increment a second time.
+  await invalidateUserSecurityState(resetRecord.userId);
 
   return NextResponse.json(
     { message: "Password has been reset successfully." },

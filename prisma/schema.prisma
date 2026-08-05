@@ -9,97 +9,120 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  name          String
-  passwordHash  String
-  role          String    @default("FOLLOWER") // ADMIN, MASTER_TRADER, FOLLOWER
-  suspended     Boolean   @default(false)
-  emailVerified Boolean   @default(false)
-  emailVerificationToken  String?  @unique
+  id                      String    @id @default(uuid())
+  email                   String    @unique
+  name                    String
+  passwordHash            String
+  role                    String    @default("FOLLOWER") // ADMIN, MASTER_TRADER, FOLLOWER
+  suspended               Boolean   @default(false)
+  emailVerified           Boolean   @default(false)
+  emailVerificationToken  String?   @unique
   emailVerificationExpiry DateTime?
-  avatar        String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  avatar                  String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
-  wallet        Wallet?
-  balance       Balance?
-  trader        Trader?
-  following     Follower[]
-  trades        Trade[]
-  transactions  BalanceTransaction[]
-  copyRequests  CopyRequest[]
-  copyResults         CopyResult[]
-  notifications       Notification[]
-  depositRequests     DepositRequest[]
-  withdrawalRequests  WithdrawalRequest[]
-  auditLogs           AuditLog[]     @relation("AuditLogs")
-  supportThreads      SupportThread[]
-  depositAddresses    UserDepositAddress[]
-  reviewsGiven        TraderReview[] @relation("ReviewAuthor")
-  referralCode        String?        @unique
-  referredBy          String?        // userId of referrer
-  referralRewards     ReferralReward[] @relation("ReferralEarner")
-  sentMessages        DirectMessage[] @relation("MessageSender")
-  receivedMessages    DirectMessage[] @relation("MessageReceiver")
-  passwordResets      PasswordReset[]
-  nextOfKin           NextOfKin?
-  paymentMethods      PaymentMethod[]
-  cardPayments        CardPayment[]
-  onboardingComplete  Boolean        @default(false)
-  experienceLevel     String?        // BEGINNER, INTERMEDIATE, ADVANCED
-  tradingGoal         String?        // PASSIVE, GROWTH, LEARNING
-  riskTolerance       String?        // LOW, MEDIUM, HIGH
-  capitalRange        String?        // UNDER_500, 500_5000, OVER_5000
-  theme               String         @default("dark") // dark, light
-  twoFactorSecret     String?
-  twoFactorEnabled    Boolean        @default(false)
-  twoFactorBackupCodes String?       // JSON array of hashed backup codes
+  wallet               Wallet?
+  balance              Balance?
+  trader               Trader?
+  following            Follower[]
+  trades               Trade[]
+  transactions         BalanceTransaction[]
+  copyRequests         CopyRequest[]
+  copyResults          CopyResult[]
+  notifications        Notification[]
+  depositRequests      DepositRequest[]
+  withdrawalRequests   WithdrawalRequest[]
+  auditLogs            AuditLog[]           @relation("AuditLogs")
+  supportThreads       SupportThread[]
+  depositAddresses     UserDepositAddress[]
+  reviewsGiven         TraderReview[]       @relation("ReviewAuthor")
+  referralCode         String?              @unique
+  referredBy           String? // userId of referrer
+  referralRewards      ReferralReward[]     @relation("ReferralEarner")
+  sentMessages         DirectMessage[]      @relation("MessageSender")
+  receivedMessages     DirectMessage[]      @relation("MessageReceiver")
+  passwordResets       PasswordReset[]
+  nextOfKin            NextOfKin?
+  paymentMethods       PaymentMethod[]
+  cardPayments         CardPayment[]
+  onboardingComplete   Boolean              @default(false)
+  experienceLevel      String? // BEGINNER, INTERMEDIATE, ADVANCED
+  tradingGoal          String? // PASSIVE, GROWTH, LEARNING
+  riskTolerance        String? // LOW, MEDIUM, HIGH
+  capitalRange         String? // UNDER_500, 500_5000, OVER_5000
+  theme                String               @default("dark") // dark, light
+  twoFactorSecret      String?
+  twoFactorEnabled     Boolean              @default(false)
+  twoFactorBackupCodes String? // JSON array of hashed backup codes
+
+  // ─── Security & moderation ───
+  // Bumped on ban, forced logout, or password change. Any JWT presenting a
+  // stale version is rejected, which is what makes revocation immediate.
+  sessionVersion   Int       @default(0)
+  bannedAt         DateTime? // denormalised for O(1) enforcement checks
+  deletedAt        DateTime? // soft delete — preserves financial records
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  lastLoginCountry String?
+  phone            String?
+  phoneVerified    Boolean   @default(false)
+
+  enforcements   BannedUser[]    @relation("UserEnforcements")
+  devices        UserDevice[]    @relation("UserDevices")
+  loginAttempts  LoginAttempt[]  @relation("UserLoginAttempts")
+  securityEvents SecurityEvent[] @relation("UserSecurityEvents")
+  riskScore      RiskScore?      @relation("UserRiskScore")
+
+  // Enforcement hot path and admin moderation queues
+  @@index([bannedAt])
+  @@index([deletedAt])
+  @@index([suspended])
 }
 
 model Wallet {
-  id              String    @id @default(uuid())
-  userId          String    @unique
-  address         String    // checksummed public address (0x...)
-  addressHash     String?   // SHA-256 hash of the address for lookups
-  chainId         Int       @default(1) // connected chain ID
-  connector       String?   // wallet provider name (MetaMask, WalletConnect, etc.)
-  verifiedAt      DateTime? // when ownership was verified via signature
-  isConnected     Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  address     String // checksummed public address (0x...)
+  addressHash String? // SHA-256 hash of the address for lookups
+  chainId     Int       @default(1) // connected chain ID
+  connector   String? // wallet provider name (MetaMask, WalletConnect, etc.)
+  verifiedAt  DateTime? // when ownership was verified via signature
+  isConnected Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([addressHash])
 }
 
 // ─── Internal Balance System ───
 model Balance {
-  id              String    @id @default(uuid())
-  userId          String    @unique
-  totalBalance    Float     @default(0)   // total funds deposited
-  availableBalance Float   @default(0)   // available for allocation
-  allocatedBalance Float   @default(0)   // allocated to copy trading
-  totalProfit     Float     @default(0)   // cumulative profit/loss
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  totalBalance     Float    @default(0) // total funds deposited
+  availableBalance Float    @default(0) // available for allocation
+  allocatedBalance Float    @default(0) // allocated to copy trading
+  totalProfit      Float    @default(0) // cumulative profit/loss
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BalanceTransaction {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   userId        String
-  type          String    // DEPOSIT, WITHDRAWAL, COPY_PROFIT, COPY_LOSS, ALLOCATION, DEALLOCATION
+  type          String // DEPOSIT, WITHDRAWAL, COPY_PROFIT, COPY_LOSS, ALLOCATION, DEALLOCATION
   amount        Float
   balanceBefore Float
   balanceAfter  Float
   description   String?
-  txHash        String?   // blockchain tx hash for deposits/withdrawals
-  createdAt     DateTime  @default(now())
+  txHash        String? // blockchain tx hash for deposits/withdrawals
+  createdAt     DateTime @default(now())
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([type])
@@ -108,48 +131,48 @@ model BalanceTransaction {
 
 // ─── Trader System ───
 model Trader {
-  id            String    @id @default(uuid())
-  userId        String    @unique
-  displayName   String
-  bio           String?
-  description   String?
-  performancePct Float    @default(0)   // advertised performance %
-  totalPnl      Float     @default(0)
-  winRate       Float     @default(0)
-  totalTrades   Int       @default(0)
-  followerCount Int       @default(0)   // admin-editable display count
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  displayName    String
+  bio            String?
+  description    String?
+  performancePct Float    @default(0) // advertised performance %
+  totalPnl       Float    @default(0)
+  winRate        Float    @default(0)
+  totalTrades    Int      @default(0)
+  followerCount  Int      @default(0) // admin-editable display count
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  followers     Follower[]
-  signals       Signal[]
-  copyRequests  CopyRequest[]
-  traderTrades  TraderTrade[]
-  reviews       TraderReview[]
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  followers    Follower[]
+  signals      Signal[]
+  copyRequests CopyRequest[]
+  traderTrades TraderTrade[]
+  reviews      TraderReview[]
 }
 
 // ─── Master Trader Uploaded Trades ───
 model TraderTrade {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   traderId      String
-  tradeName     String    // e.g. "BTC Long"
-  market        String    // e.g. "Crypto", "Forex", "Polymarket"
-  tradeType     String?   // BUY, SELL (optional)
-  resultPercent Float     // +10 = +10%, -5 = -5%
-  profitLoss    Float     // absolute $ P&L for the trader
-  tradeAmount   Float?    // optional trade size
-  targetMode    String    @default("ALL") // ALL or SELECTED
-  targetUserIds String?   // comma-separated user IDs when targetMode=SELECTED
+  tradeName     String // e.g. "BTC Long"
+  market        String // e.g. "Crypto", "Forex", "Polymarket"
+  tradeType     String? // BUY, SELL (optional)
+  resultPercent Float // +10 = +10%, -5 = -5%
+  profitLoss    Float // absolute $ P&L for the trader
+  tradeAmount   Float? // optional trade size
+  targetMode    String   @default("ALL") // ALL or SELECTED
+  targetUserIds String? // comma-separated user IDs when targetMode=SELECTED
   notes         String?
   screenshotUrl String?
-  tradeDate     DateTime  @default(now())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  tradeDate     DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
-  copyResults   CopyResult[]
+  trader      Trader       @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  copyResults CopyResult[]
 
   @@index([traderId])
   @@index([tradeDate])
@@ -157,17 +180,17 @@ model TraderTrade {
 
 // ─── Copy Results — tracks how each follower was affected by a trader trade ───
 model CopyResult {
-  id              String    @id @default(uuid())
-  userId          String
-  traderTradeId   String
-  balanceBefore   Float
-  balanceAfter    Float
-  profitLoss      Float     // the actual $ change for this follower
-  resultPercent   Float     // the % applied
-  createdAt       DateTime  @default(now())
+  id            String   @id @default(uuid())
+  userId        String
+  traderTradeId String
+  balanceBefore Float
+  balanceAfter  Float
+  profitLoss    Float // the actual $ change for this follower
+  resultPercent Float // the % applied
+  createdAt     DateTime @default(now())
 
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  traderTrade     TraderTrade @relation(fields: [traderTradeId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  traderTrade TraderTrade @relation(fields: [traderTradeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, traderTradeId])
   @@index([userId])
@@ -176,17 +199,17 @@ model CopyResult {
 
 // ─── Follower Link ───
 model Follower {
-  id            String    @id @default(uuid())
-  userId        String
-  traderId      String
-  allocationPercent Float @default(100) // % of allocated balance used for this trader
-  copyEnabled   Boolean   @default(true)
-  approved      Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String   @id @default(uuid())
+  userId            String
+  traderId          String
+  allocationPercent Float    @default(100) // % of allocated balance used for this trader
+  copyEnabled       Boolean  @default(true)
+  approved          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trader Trader @relation(fields: [traderId], references: [id], onDelete: Cascade)
 
   @@unique([userId, traderId])
   @@index([traderId])
@@ -194,19 +217,19 @@ model Follower {
 
 // ─── Copy Request Approval ───
 model CopyRequest {
-  id            String    @id @default(uuid())
-  userId        String
-  traderId      String
-  traderName    String
-  riskPercent   Float     @default(2)
-  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  message       String?
-  reviewedAt    DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String    @id @default(uuid())
+  userId      String
+  traderId    String
+  traderName  String
+  riskPercent Float     @default(2)
+  status      String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  message     String?
+  reviewedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trader Trader @relation(fields: [traderId], references: [id], onDelete: Cascade)
 
   @@unique([userId, traderId])
   @@index([traderId])
@@ -215,19 +238,19 @@ model CopyRequest {
 
 // ─── Legacy: Signal + Trade (kept for webhook-based flow) ───
 model Signal {
-  id            String    @id @default(uuid())
-  traderId      String
-  action        String
-  symbol        String
-  price         Float
-  riskPercent   Float
-  status        String    @default("PENDING")
-  metadata      String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id          String   @id @default(uuid())
+  traderId    String
+  action      String
+  symbol      String
+  price       Float
+  riskPercent Float
+  status      String   @default("PENDING")
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
-  trades        Trade[]
+  trader Trader  @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  trades Trade[]
 
   @@index([traderId])
   @@index([status])
@@ -235,23 +258,23 @@ model Signal {
 }
 
 model Trade {
-  id            String    @id @default(uuid())
-  userId        String
-  signalId      String
-  action        String
-  symbol        String
-  amount        Float
-  price         Float
-  status        String    @default("PENDING")
-  txHash        String?
-  error         String?
-  pnl           Float?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  signalId  String
+  action    String
+  symbol    String
+  amount    Float
+  price     Float
+  status    String   @default("PENDING")
+  txHash    String?
+  error     String?
+  pnl       Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  signal        Signal    @relation(fields: [signalId], references: [id], onDelete: Cascade)
-  commission    Commission?
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  signal     Signal      @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  commission Commission?
 
   @@index([userId])
   @@index([signalId])
@@ -259,40 +282,40 @@ model Trade {
 }
 
 model Commission {
-  id            String    @id @default(uuid())
-  tradeId       String    @unique
-  amount        Float
-  rate          Float
-  status        String    @default("PENDING")
-  createdAt     DateTime  @default(now())
+  id        String   @id @default(uuid())
+  tradeId   String   @unique
+  amount    Float
+  rate      Float
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
 
-  trade         Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 
   @@index([status])
 }
 
 // ─── Deposit Requests ───
 model DepositRequest {
-  id            String    @id @default(uuid())
-  userId        String
-  amount        Float
-  method        String    // CRYPTO, CARD, CHEQUE
-  coin          String?   // BTC, ETH, USDT, etc. (for crypto)
-  network       String?   // e.g. ERC20, TRC20, BEP20
-  txHash        String?   // user-submitted tx hash
-  status        String    @default("PENDING") // PENDING, CONFIRMED, REJECTED
-  userWallet    String?   // the generated tracking wallet address shown to user
-  adminWallet   String?   // the admin wallet funds should be sent to
-  proofUrl      String?   // proof of payment file path
-  cardRef       String?   // card payment reference number
-  bankName      String?   // bank name for cheque deposits
-  chequeNumber  String?   // cheque number
-  note          String?
-  reviewedAt    DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String    @id @default(uuid())
+  userId       String
+  amount       Float
+  method       String // CRYPTO, CARD, CHEQUE
+  coin         String? // BTC, ETH, USDT, etc. (for crypto)
+  network      String? // e.g. ERC20, TRC20, BEP20
+  txHash       String? // user-submitted tx hash
+  status       String    @default("PENDING") // PENDING, CONFIRMED, REJECTED
+  userWallet   String? // the generated tracking wallet address shown to user
+  adminWallet  String? // the admin wallet funds should be sent to
+  proofUrl     String? // proof of payment file path
+  cardRef      String? // card payment reference number
+  bankName     String? // bank name for cheque deposits
+  chequeNumber String? // cheque number
+  note         String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -304,16 +327,16 @@ model WithdrawalRequest {
   id            String    @id @default(uuid())
   userId        String
   amount        Float
-  walletAddress String    // destination wallet address
-  network       String    // e.g. ERC20, TRC20, BEP20
+  walletAddress String // destination wallet address
+  network       String // e.g. ERC20, TRC20, BEP20
   status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  txHash        String?   // payout transaction hash (set by admin after sending)
+  txHash        String? // payout transaction hash (set by admin after sending)
   note          String?
   reviewedAt    DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -322,16 +345,16 @@ model WithdrawalRequest {
 
 // ─── Admin Audit Log ───
 model AuditLog {
-  id            String    @id @default(uuid())
-  adminId       String
-  action        String    // e.g. REVIEW_DEPOSIT, EDIT_BALANCE, UPDATE_ROLE, etc.
-  targetType    String?   // e.g. USER, DEPOSIT, WITHDRAWAL, TRADER, CONFIG
-  targetId      String?   // ID of the affected record
-  details       String?   // JSON string with before/after or extra context
-  ipAddress     String?
-  createdAt     DateTime  @default(now())
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String // e.g. REVIEW_DEPOSIT, EDIT_BALANCE, UPDATE_ROLE, etc.
+  targetType String? // e.g. USER, DEPOSIT, WITHDRAWAL, TRADER, CONFIG
+  targetId   String? // ID of the affected record
+  details    String? // JSON string with before/after or extra context
+  ipAddress  String?
+  createdAt  DateTime @default(now())
 
-  admin         User      @relation("AuditLogs", fields: [adminId], references: [id], onDelete: Cascade)
+  admin User @relation("AuditLogs", fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId])
   @@index([action])
@@ -340,24 +363,24 @@ model AuditLog {
 
 // ─── Admin Platform Config ───
 model AdminConfig {
-  id            String    @id @default(uuid())
-  key           String    @unique
-  value         String
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 // ─── Notifications ───
 model Notification {
-  id            String    @id @default(uuid())
-  userId        String
-  type          String    // COPY_REQUEST, COPY_APPROVED, COPY_REJECTED, TRADE_RESULT, DEPOSIT, WITHDRAWAL, SYSTEM
-  title         String
-  message       String
-  read          Boolean   @default(false)
-  actionUrl     String?   // optional link to navigate on click
-  createdAt     DateTime  @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  type      String // COPY_REQUEST, COPY_APPROVED, COPY_REJECTED, TRADE_RESULT, DEPOSIT, WITHDRAWAL, SYSTEM
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  actionUrl String? // optional link to navigate on click
+  createdAt DateTime @default(now())
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([read])
@@ -366,18 +389,18 @@ model Notification {
 
 // ─── Support Chat ───
 model SupportThread {
-  id              String    @id @default(uuid())
-  userId          String
-  subject         String
-  status          String    @default("OPEN") // OPEN, RESOLVED
-  lastMessageAt   DateTime  @default(now())
-  lastUserReadAt  DateTime? // bumped whenever the user fetches messages
-  lastEmailedAt   DateTime? // bumped whenever we email the user about an admin reply
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  userId         String
+  subject        String
+  status         String    @default("OPEN") // OPEN, RESOLVED
+  lastMessageAt  DateTime  @default(now())
+  lastUserReadAt DateTime? // bumped whenever the user fetches messages
+  lastEmailedAt  DateTime? // bumped whenever we email the user about an admin reply
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages        SupportMessage[]
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages SupportMessage[]
 
   @@index([userId])
   @@index([status])
@@ -385,16 +408,16 @@ model SupportThread {
 }
 
 model SupportMessage {
-  id            String    @id @default(uuid())
-  threadId      String
-  senderId      String
-  senderRole    String    // USER, ADMIN
-  message       String
-  attachments   Json?     // [{ url, type, name, size, kind: "image"|"file"|"audio" }]
-  read          Boolean   @default(false)
-  createdAt     DateTime  @default(now())
+  id          String   @id @default(uuid())
+  threadId    String
+  senderId    String
+  senderRole  String // USER, ADMIN
+  message     String
+  attachments Json? // [{ url, type, name, size, kind: "image"|"file"|"audio" }]
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
 
-  thread        SupportThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  thread SupportThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@index([threadId])
   @@index([createdAt])
@@ -403,16 +426,16 @@ model SupportMessage {
 // ─── Per-User Crypto Deposit Addresses ───
 // Admin-set addresses for direct crypto deposits — overrides global wallets per-coin
 model UserDepositAddress {
-  id            String    @id @default(uuid())
-  userId        String
-  coin          String    // BTC, ETH, USDT, USDC, SOL, etc.
-  network       String    // Bitcoin, ERC20, TRC20, BEP20, Solana, etc.
-  address       String
-  memo          String?   // optional tag/memo (XRP, XLM, etc.)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  coin      String // BTC, ETH, USDT, USDC, SOL, etc.
+  network   String // Bitcoin, ERC20, TRC20, BEP20, Solana, etc.
+  address   String
+  memo      String? // optional tag/memo (XRP, XLM, etc.)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, coin, network])
   @@index([userId])
@@ -420,16 +443,16 @@ model UserDepositAddress {
 
 // ─── Trader Reviews ───
 model TraderReview {
-  id            String    @id @default(uuid())
-  userId        String
-  traderId      String
-  rating        Int       // 1-5 stars
-  comment       String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  traderId  String
+  rating    Int // 1-5 stars
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user          User      @relation("ReviewAuthor", fields: [userId], references: [id], onDelete: Cascade)
-  trader        Trader    @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  user   User   @relation("ReviewAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  trader Trader @relation(fields: [traderId], references: [id], onDelete: Cascade)
 
   @@unique([userId, traderId])
   @@index([traderId])
@@ -438,15 +461,15 @@ model TraderReview {
 
 // ─── Referral Rewards ───
 model ReferralReward {
-  id            String    @id @default(uuid())
-  earnerId      String    // user who referred
-  referredId    String    // user who signed up
-  amount        Float     @default(0) // reward amount
-  status        String    @default("PENDING") // PENDING, CREDITED
-  creditedAt    DateTime?
-  createdAt     DateTime  @default(now())
+  id         String    @id @default(uuid())
+  earnerId   String // user who referred
+  referredId String // user who signed up
+  amount     Float     @default(0) // reward amount
+  status     String    @default("PENDING") // PENDING, CREDITED
+  creditedAt DateTime?
+  createdAt  DateTime  @default(now())
 
-  earner        User      @relation("ReferralEarner", fields: [earnerId], references: [id], onDelete: Cascade)
+  earner User @relation("ReferralEarner", fields: [earnerId], references: [id], onDelete: Cascade)
 
   @@index([earnerId])
   @@index([status])
@@ -454,45 +477,45 @@ model ReferralReward {
 
 // ─── Next of Kin ───
 model NextOfKin {
-  id              String    @id @default(uuid())
-  userId          String    @unique
-  fullName        String
-  relationship    String    // e.g. Spouse, Sibling, Parent, Child
-  email           String
-  phone           String?
-  beneficiaryId   String?   // another user on platform to receive funds
-  documentUrl     String?   // uploaded verification document
-  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  adminNote       String?
-  reviewedAt      DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  fullName      String
+  relationship  String // e.g. Spouse, Sibling, Parent, Child
+  email         String
+  phone         String?
+  beneficiaryId String? // another user on platform to receive funds
+  documentUrl   String? // uploaded verification document
+  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  adminNote     String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status])
 }
 
 // ─── Saved Payment Methods ───
 model PaymentMethod {
-  id              String    @id @default(uuid())
-  userId          String
-  type            String    // WALLET, CARD
-  label           String    // e.g. "Main ETH Wallet", "Visa ending 4242"
+  id                    String   @id @default(uuid())
+  userId                String
+  type                  String // WALLET, CARD
+  label                 String // e.g. "Main ETH Wallet", "Visa ending 4242"
   // Wallet fields
-  walletAddress   String?
-  network         String?   // ERC20, TRC20, BEP20, SOL, etc.
-  walletType      String?   // DEPOSIT, WITHDRAWAL, BOTH
+  walletAddress         String?
+  network               String? // ERC20, TRC20, BEP20, SOL, etc.
+  walletType            String? // DEPOSIT, WITHDRAWAL, BOTH
   // Card fields (tokenized — no raw card data)
-  cardLast4       String?
-  cardBrand       String?   // Visa, Mastercard, etc.
-  cardExpiry      String?   // MM/YY
+  cardLast4             String?
+  cardBrand             String? // Visa, Mastercard, etc.
+  cardExpiry            String? // MM/YY
   stripePaymentMethodId String? // Stripe token reference
-  isDefault       Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  isDefault             Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([type])
@@ -500,20 +523,20 @@ model PaymentMethod {
 
 // ─── Card Payments ───
 model CardPayment {
-  id              String    @id @default(uuid())
-  userId          String
-  amount          Float
-  currency        String    @default("USD")
-  cardLast4       String?
-  cardBrand       String?
+  id                    String    @id @default(uuid())
+  userId                String
+  amount                Float
+  currency              String    @default("USD")
+  cardLast4             String?
+  cardBrand             String?
   stripePaymentIntentId String?
-  status          String    @default("PENDING") // PENDING, ADMIN_REVIEW, CONFIRMED, REJECTED
-  adminNote       String?
-  reviewedAt      DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  status                String    @default("PENDING") // PENDING, ADMIN_REVIEW, CONFIRMED, REJECTED
+  adminNote             String?
+  reviewedAt            DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -528,7 +551,7 @@ model PasswordReset {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
@@ -561,17 +584,338 @@ model EmailOtp {
 
 // ─── Direct Messaging ───
 model DirectMessage {
-  id            String    @id @default(uuid())
-  senderId      String
-  receiverId    String
-  message       String
-  read          Boolean   @default(false)
-  createdAt     DateTime  @default(now())
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  message    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  sender        User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver      User      @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([receiverId])
   @@index([createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  SECURITY & MODERATION
+//  Layered enforcement: identity bans, network bans, device bans, risk scoring.
+//  All lookup values are stored as SHA-256 hashes so a DB leak does not expose
+//  the PII of moderated users; `*Hint` columns hold a redacted display form.
+// ════════════════════════════════════════════════════════════════════════════
+
+enum ModerationStatus {
+  ACTIVE // enforcement in effect
+  LIFTED // manually reversed by an admin
+  EXPIRED // passed its expiresAt boundary
+}
+
+enum EnforcementType {
+  BAN // permanent, blocks re-registration
+  SUSPENSION // temporary, account preserved
+  DELETION // soft-deleted + anonymised, tombstone retained
+}
+
+enum IdentifierKind {
+  EMAIL
+  PHONE
+  DEVICE
+  KYC
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGIN_BLOCKED
+  SIGNUP_BLOCKED
+  PASSWORD_RESET_BLOCKED
+  SESSION_REVOKED
+  RATE_LIMITED
+  BAN_APPLIED
+  BAN_LIFTED
+  IP_BLOCKED
+  DEVICE_BLOCKED
+  DEVICE_TRUSTED
+  RISK_FLAGGED
+  ADMIN_ACTION
+}
+
+enum SecuritySeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ─── Account-level enforcement ───
+// One row per moderation action against a user. History is append-only:
+// lifting a ban sets status=LIFTED rather than deleting the row.
+model BannedUser {
+  id           String           @id @default(uuid())
+  userId       String
+  type         EnforcementType
+  status       ModerationStatus @default(ACTIVE)
+  reason       String // mandatory — enforced at the service layer
+  internalNote String?
+  expiresAt    DateTime? // null = permanent
+  createdAt    DateTime         @default(now())
+  createdBy    String // admin userId
+
+  liftedAt   DateTime?
+  liftedBy   String?
+  liftReason String?
+
+  user User @relation("UserEnforcements", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Hot path: "is this user currently banned?"
+  @@index([userId, status])
+  @@index([status, expiresAt])
+  @@index([createdAt])
+  @@index([createdBy])
+}
+
+// ─── Identity blacklist ───
+// Blocks re-registration by email, phone, device fingerprint or KYC document.
+// Survives account deletion — this is the tombstone that makes bans stick.
+model BannedIdentifier {
+  id           String           @id @default(uuid())
+  kind         IdentifierKind
+  valueHash    String // sha256(normalised value + pepper)
+  valueHint    String? // redacted display form, e.g. "j***@gmail.com"
+  status       ModerationStatus @default(ACTIVE)
+  reason       String
+  expiresAt    DateTime?
+  sourceUserId String? // account this identifier came from, if any
+  createdAt    DateTime         @default(now())
+  createdBy    String
+
+  liftedAt   DateTime?
+  liftedBy   String?
+  liftReason String?
+
+  // Single composite lookup covers the registration/login check
+  @@unique([kind, valueHash])
+  @@index([kind, valueHash, status])
+  @@index([status, expiresAt])
+  @@index([sourceUserId])
+}
+
+// ─── Network blacklist ───
+// Handles both IPv4 and IPv6. Single addresses are matched by exact hash
+// lookup; CIDR ranges are few and admin-curated, so they are evaluated
+// in-process against a cached range set.
+model BannedIp {
+  id           String           @id @default(uuid())
+  ip           String // normalised address, or CIDR when isRange
+  ipHash       String // sha256(normalised ip) — exact-match index
+  isRange      Boolean          @default(false)
+  prefixLength Int? // set when isRange
+  isIpv6       Boolean          @default(false)
+  status       ModerationStatus @default(ACTIVE)
+  reason       String
+  expiresAt    DateTime?
+  hitCount     Int              @default(0)
+  lastHitAt    DateTime?
+  createdAt    DateTime         @default(now())
+  createdBy    String
+
+  liftedAt   DateTime?
+  liftedBy   String?
+  liftReason String?
+
+  @@unique([ipHash])
+  @@index([status, isRange])
+  @@index([status, expiresAt])
+  @@index([createdAt])
+}
+
+// ─── Trusted allowlist ───
+// Evaluated before every blacklist so support/ops staff and known-good
+// infrastructure cannot lock themselves out.
+model SecurityAllowlist {
+  id        String         @id @default(uuid())
+  kind      IdentifierKind // DEVICE, or EMAIL for staff accounts
+  valueHash String
+  valueHint String?
+  ipHash    String? // set when allowlisting a network address
+  ip        String?
+  reason    String
+  createdAt DateTime       @default(now())
+  createdBy String
+
+  @@unique([kind, valueHash])
+  @@index([ipHash])
+}
+
+// ─── Device fingerprinting ───
+// deviceId is a client-supplied fingerprint hash. Treated as a risk signal,
+// not proof of identity — it is defeatable and must never be a sole hard gate.
+model UserDevice {
+  id       String  @id @default(uuid())
+  userId   String
+  deviceId String // sha256 of the composite fingerprint
+  trusted  Boolean @default(false)
+  blocked  Boolean @default(false)
+  label    String? // admin-assigned, e.g. "Ops laptop"
+
+  browser        String?
+  browserVersion String?
+  os             String?
+  osVersion      String?
+  deviceType     String? // desktop, mobile, tablet
+  userAgent      String?
+
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  lastIp      String?
+  lastCountry String?
+  loginCount  Int      @default(0)
+
+  user User @relation("UserDevices", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId])
+  // Multi-account detection: "how many users share this fingerprint?"
+  @@index([deviceId])
+  @@index([userId, lastSeenAt])
+  @@index([blocked])
+}
+
+// ─── Login history ───
+// Append-only record of every authentication attempt, successful or not.
+// Feeds the risk engine (failed-login bursts, impossible travel, IP churn).
+model LoginAttempt {
+  id            String  @id @default(uuid())
+  userId        String? // null when the email matched no account
+  email         String // always recorded, lowercased
+  success       Boolean
+  failureReason String? // internal only — never surfaced to the client
+
+  ip        String?
+  ipHash    String?
+  isIpv6    Boolean @default(false)
+  deviceId  String?
+  userAgent String?
+  browser   String?
+  os        String?
+
+  country   String? // ISO-3166 alpha-2
+  city      String?
+  region    String?
+  latitude  Float?
+  longitude Float?
+  isVpn     Boolean @default(false)
+  isProxy   Boolean @default(false)
+  isTor     Boolean @default(false)
+
+  riskScore Int? // score computed at attempt time, if evaluated
+  createdAt DateTime @default(now())
+
+  user User? @relation("UserLoginAttempts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([email, createdAt])
+  @@index([ipHash, createdAt])
+  @@index([deviceId, createdAt])
+  @@index([success, createdAt])
+  @@index([createdAt])
+}
+
+// ─── Security audit trail ───
+// Distinct from AuditLog: AuditLog records admin intent, SecurityEvent records
+// what the enforcement layer actually did, including automated decisions.
+model SecurityEvent {
+  id       String            @id @default(uuid())
+  type     SecurityEventType
+  severity SecuritySeverity  @default(INFO)
+  userId   String?
+  actorId  String? // admin who triggered it, when applicable
+  email    String?
+
+  ip        String?
+  ipHash    String?
+  deviceId  String?
+  userAgent String?
+  country   String?
+  city      String?
+
+  reason    String?
+  metadata  String? // JSON blob of decision context
+  createdAt DateTime @default(now())
+
+  user User? @relation("UserSecurityEvents", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@index([severity, createdAt])
+  @@index([ipHash, createdAt])
+  @@index([createdAt])
+}
+
+// ─── Risk scoring ───
+// Current denormalised score per user, recomputed by the risk engine.
+// Individual contributing signals live in RiskSignal for explainability.
+model RiskScore {
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  score      Int       @default(0) // 0-100
+  level      RiskLevel @default(LOW)
+  flagged    Boolean   @default(false)
+  reviewedAt DateTime?
+  reviewedBy String?
+  reviewNote String?
+  computedAt DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user    User         @relation("UserRiskScore", fields: [userId], references: [id], onDelete: Cascade)
+  signals RiskSignal[]
+
+  // Admin review queue: highest-risk unreviewed accounts first
+  @@index([flagged, score])
+  @@index([level, computedAt])
+  @@index([score])
+}
+
+// ─── Individual risk signals ───
+// One row per triggered rule so every score is fully explainable and auditable.
+model RiskSignal {
+  id          String    @id @default(uuid())
+  riskScoreId String
+  userId      String
+  rule        String // rule key, e.g. FAILED_LOGIN_BURST
+  weight      Int // points this signal contributed
+  detail      String? // JSON context for the admin UI
+  expiresAt   DateTime? // signals decay so scores recover over time
+  createdAt   DateTime  @default(now())
+
+  riskScore RiskScore @relation(fields: [riskScoreId], references: [id], onDelete: Cascade)
+
+  @@index([riskScoreId])
+  @@index([userId, createdAt])
+  @@index([rule, createdAt])
+  @@index([expiresAt])
+}
+
+// ─── Risk engine configuration ───
+// Rule weights and thresholds are DB-driven so tuning does not need a deploy.
+model RiskRuleConfig {
+  id            String   @id @default(uuid())
+  rule          String   @unique
+  enabled       Boolean  @default(true)
+  weight        Int
+  threshold     Int? // rule-specific trigger count, where applicable
+  windowSeconds Int? // evaluation window, where applicable
+  decaySeconds  Int? // how long a triggered signal persists
+  description   String?
+  updatedAt     DateTime @updatedAt
+  updatedBy     String?
 }

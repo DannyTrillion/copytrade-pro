@@ -26,7 +26,22 @@ export type AuditAction =
   | "IMPERSONATE_STOP"
   | "IMPERSONATE_FAILED"
   | "SET_USER_DEPOSIT_ADDRESS"
-  | "DELETE_USER_DEPOSIT_ADDRESS";
+  | "DELETE_USER_DEPOSIT_ADDRESS"
+  // ─── Security Center ───
+  | "BAN_USER"
+  | "UNBAN_USER"
+  | "DELETE_USER_ACCOUNT"
+  | "REVOKE_SESSIONS"
+  | "BAN_IP"
+  | "UNBAN_IP"
+  | "BAN_IDENTIFIER"
+  | "UNBAN_IDENTIFIER"
+  | "ALLOWLIST_ADD"
+  | "ALLOWLIST_REMOVE"
+  | "TRUST_DEVICE"
+  | "BLOCK_DEVICE"
+  | "REVIEW_RISK_SCORE"
+  | "EXPORT_SECURITY_LOGS";
 
 interface AuditLogParams {
   adminId: string;

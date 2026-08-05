@@ -23,6 +23,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { SecurityAlerts } from "@/components/admin/security/security-alerts";
 import { Skeleton } from "@/components/ui/loading-skeleton";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -291,6 +292,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8 pb-12">
+      {/* Security alerts — renders only when something needs attention */}
+      <SecurityAlerts />
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}

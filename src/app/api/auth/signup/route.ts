@@ -4,6 +4,18 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { notifyAdminNewSignup } from "@/lib/email";
+import { enforceAccess } from "@/lib/security/enforcement";
+import { getRequestContext } from "@/lib/security/events";
+import { recordDeviceSighting } from "@/lib/security/devices";
+import { parseUserAgent } from "@/lib/security/user-agent";
+
+/**
+ * Returned for every security denial. Identical to the "already registered"
+ * response below by design — a distinct message would tell someone probing the
+ * endpoint whether they were blocked by a rule or merely collided with an
+ * existing account, which is exactly the signal a ban evader is looking for.
+ */
+const GENERIC_SIGNUP_DENIAL = "Unable to create an account with these details";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -63,7 +75,29 @@ export async function POST(req: NextRequest) {
     });
 
     if (existing) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      return NextResponse.json({ error: GENERIC_SIGNUP_DENIAL }, { status: 409 });
+    }
+
+    /**
+     * Layered ban-evasion check: IP and range blacklists, blacklisted email /
+     * phone / device identifiers (including tombstones left behind by deleted
+     * accounts), and device fingerprints previously seen on a banned account.
+     *
+     * Runs after OTP verification so an attacker cannot use this endpoint to
+     * probe which identifiers are blacklisted without first controlling the
+     * mailbox — and the response is indistinguishable from a duplicate-email
+     * collision either way.
+     */
+    const securityContext = getRequestContext(req.headers);
+
+    const permitted = await enforceAccess({
+      surface: "SIGNUP",
+      email: normalizedEmail,
+      context: securityContext,
+    });
+
+    if (!permitted) {
+      return NextResponse.json({ error: GENERIC_SIGNUP_DENIAL }, { status: 409 });
     }
 
     // Resolve referrer if a referral code was provided
@@ -108,6 +142,16 @@ export async function POST(req: NextRequest) {
         },
       });
     }
+
+    // Bind the device fingerprint to the new account immediately, so a later
+    // ban on this account can correlate back to the machine that created it.
+    void recordDeviceSighting({
+      userId: user.id,
+      context: securityContext,
+      ua: parseUserAgent(securityContext.userAgent),
+    }).catch((error) =>
+      console.error("[security] Signup device sighting failed:", error)
+    );
 
     // Clean up used OTPs for this email
     await prisma.emailOtp.deleteMany({

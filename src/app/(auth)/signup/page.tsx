@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { FloatingParticles } from "@/components/ui/floating-particles";
 import { toast } from "@/components/ui/toast";
+import { deviceHeader } from "@/lib/security/fingerprint";
 import { FormField, PasswordStrengthMeter } from "@/components/ui/form-field";
 import { validateField, emailSchema, passwordSchema, nameSchema } from "@/lib/validation";
 
@@ -113,7 +114,7 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim(), name: form.name, password: form.password }) });
+      const res = await fetch("/api/auth/signup", { method: "POST", headers: { "Content-Type": "application/json", ...deviceHeader() }, body: JSON.stringify({ email: email.trim(), name: form.name, password: form.password }) });
       if (!res.ok) { const d = await res.json(); throw new Error(typeof d.error === "string" ? d.error : "Signup failed"); }
       const r = await signIn("credentials", { email: email.trim(), password: form.password, redirect: false });
       if (r?.error) { router.push("/login"); return; }
@@ -127,7 +128,7 @@ export default function SignupPage() {
       <GradientBlob parentRef={containerRef} />
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="absolute top-5 left-5 z-20 hidden md:block">
-        <Link href="/" className="flex items-center gap-1.5 text-[11px] text-white/25 hover:text-white/50 transition-colors"><ArrowLeft className="w-3 h-3" /> Home</Link>
+        <Link href="/c/landing" className="flex items-center gap-1.5 text-[11px] text-white/25 hover:text-white/50 transition-colors"><ArrowLeft className="w-3 h-3" /> Home</Link>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, scale: 0.97, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.7, ease }}

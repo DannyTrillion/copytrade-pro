@@ -9,6 +9,7 @@ export async function middleware(req: NextRequest) {
   if (
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
+    pathname.startsWith("/c/landing") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/health") ||
     pathname.startsWith("/api/stripe/webhook") ||
@@ -27,16 +28,41 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  /**
+   * NOTE ON TRUST: `getToken` only decrypts the session cookie — it does not
+   * run NextAuth's `jwt` callback, so it cannot see database state and its
+   * view of `suspended`/`revoked` is as stale as the last token refresh.
+   *
+   * Everything below is therefore a UX fast path, not a security boundary.
+   * The real enforcement is `requireAuth()` (see lib/auth.ts), which
+   * revalidates against the DB on every request. Never add a check here and
+   * assume it protects data.
+   */
   const token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  // Block suspended users — force sign out
-  if (token?.suspended === true && pathname.startsWith("/dashboard")) {
+  // Revoked or suspended — bounce to login and clear the dead cookie so the
+  // client stops replaying a session the server will keep rejecting.
+  if (
+    (token?.revoked === true || token?.suspended === true) &&
+    pathname.startsWith("/dashboard")
+  ) {
     const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("error", "suspended");
-    return NextResponse.redirect(loginUrl);
+    loginUrl.searchParams.set(
+      "error",
+      token?.revoked === true ? "session_revoked" : "suspended"
+    );
+
+    const response = NextResponse.redirect(loginUrl);
+
+    // Cookie name is prefixed with __Secure- when NextAuth issues it over
+    // HTTPS, so clear both spellings rather than guessing the environment.
+    response.cookies.delete("next-auth.session-token");
+    response.cookies.delete("__Secure-next-auth.session-token");
+
+    return response;
   }
 
   // Redirect unauthenticated users to login
@@ -46,8 +72,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect authenticated users away from the landing + auth pages
-  if (token && (pathname === "/" || pathname === "/login" || pathname === "/signup")) {
+  // Redirect authenticated users away from auth pages
+  if (token && (pathname === "/login" || pathname === "/signup")) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 

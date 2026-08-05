@@ -10,6 +10,7 @@ import { FloatingParticles } from "@/components/ui/floating-particles";
 import { toast } from "@/components/ui/toast";
 import { FormField } from "@/components/ui/form-field";
 import { validateField, emailSchema } from "@/lib/validation";
+import { getDeviceId } from "@/lib/security/fingerprint";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -169,7 +170,9 @@ function LoginPageInner() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const result = await signIn("credentials", { email, password, twoFactorCode: requires2FA ? twoFactorCode : undefined, redirect: false });
+    // Passed as a credential rather than a header: next-auth's signIn() builds
+    // its own request and offers no way to attach one.
+    const result = await signIn("credentials", { email, password, twoFactorCode: requires2FA ? twoFactorCode : undefined, deviceId: getDeviceId(), redirect: false });
     if (result?.error) {
       if (result.error.includes("2FA_REQUIRED")) { setRequires2FA(true); setTwoFactorCode(""); setIsLoading(false); return; }
       toast.error(result.error.includes("Invalid 2FA") ? "Invalid 2FA code." : "Invalid email or password");
@@ -190,7 +193,7 @@ function LoginPageInner() {
 
       {/* Back — desktop only */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="absolute top-5 left-5 z-20 hidden md:block">
-        <Link href="/" className="flex items-center gap-1.5 text-[11px] text-white/25 hover:text-white/50 transition-colors">
+        <Link href="/c/landing" className="flex items-center gap-1.5 text-[11px] text-white/25 hover:text-white/50 transition-colors">
           <ArrowLeft className="w-3 h-3" /> Home
         </Link>
       </motion.div>

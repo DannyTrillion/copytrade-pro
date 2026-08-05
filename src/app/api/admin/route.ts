@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole, unauthorizedResponse, forbiddenResponse, errorResponse } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { invalidateUserSecurityState } from "@/lib/security/session";
 import { z } from "zod";
 import { getTotalDeposited, getTierFromAmount } from "@/lib/tiers";
 import { recomputeAllocatedBalance } from "@/lib/allocation";
@@ -302,10 +303,19 @@ export async function PATCH(req: NextRequest) {
         suspended: z.boolean(),
       }).parse(body);
 
+      // Suspending must also end the user's active sessions. Setting the flag
+      // alone left them holding a valid JWT and still able to use the platform
+      // until it expired. Incrementing sessionVersion invalidates every token
+      // already issued — see lib/security/session.ts.
       await prisma.user.update({
         where: { id: userId },
-        data: { suspended },
+        data: {
+          suspended,
+          ...(suspended ? { sessionVersion: { increment: 1 } } : {}),
+        },
       });
+
+      await invalidateUserSecurityState(userId);
 
       await logAudit({ adminId, action: suspended ? "SUSPEND_USER" : "UNSUSPEND_USER", targetType: "USER", targetId: userId });
       return NextResponse.json({ success: true });

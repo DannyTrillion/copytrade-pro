@@ -80,6 +80,12 @@ const ADMIN_SECTIONS: NavSection[] = [
     ],
   },
   {
+    title: "Security",
+    items: [
+      { label: "Security Center", href: "/dashboard/admin/security", icon: Shield },
+    ],
+  },
+  {
     items: [
       { label: "Support Chat", href: "/dashboard/admin/support", icon: MessageSquare },
       { label: "Platform Settings", href: "/dashboard/admin/settings", icon: Settings },
