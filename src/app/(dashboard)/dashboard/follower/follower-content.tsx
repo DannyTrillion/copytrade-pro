@@ -43,6 +43,8 @@ import { StatCard } from "@/components/ui/stat-card";
 import { AllocationCard } from "@/components/ui/allocation-card";
 import { AnimatedCounter, AnimatedCurrency } from "@/components/ui/animated-counter";
 import { PnlChart } from "@/components/charts/pnl-chart";
+import { PortfolioInsights } from "@/components/dashboard/portfolio-insights";
+import { LiveMarketPill } from "@/components/markets/market-status";
 import { Modal } from "@/components/ui/modal";
 import { WalletConnectButton } from "@/components/wallet/wallet-connect-button";
 import { TraderProfilePanel } from "@/components/trader/trader-profile-panel";
@@ -551,7 +553,11 @@ export function FollowerDashboard() {
         <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <p className="text-white/70 text-xs font-medium tracking-wide uppercase mb-1">Total Balance</p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-white/70 text-xs font-medium tracking-wide uppercase">Total Balance</p>
+                {/* Lit only while a market is actually open. */}
+                <LiveMarketPill variant="onDark" />
+              </div>
               <AnimatedCurrency
                 value={balance?.totalBalance ?? 0}
                 className="text-3xl md:text-4xl font-bold tabular-nums tracking-tight block"
@@ -755,33 +761,11 @@ export function FollowerDashboard() {
             />
           </div>
 
-          {/* PnL Chart */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...pageTransition, delay: 0.2 }}
-            className="glass-panel overflow-hidden"
-          >
-            <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-brand/10">
-                  <BarChart3 className="w-4 h-4 text-brand" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-text-primary">Copy Trading Performance</h3>
-                  <p className="text-2xs text-text-tertiary mt-0.5">Cumulative P&L from copied trades</p>
-                </div>
-              </div>
-              {pnlChartData.length > 0 && (
-                <span className={`text-sm font-bold tabular-nums ${(pnlChartData[pnlChartData.length - 1]?.pnl ?? 0) >= 0 ? "text-success" : "text-danger"}`}>
-                  {(pnlChartData[pnlChartData.length - 1]?.pnl ?? 0) >= 0 ? "+" : ""}{formatCurrency(pnlChartData[pnlChartData.length - 1]?.pnl ?? 0)}
-                </span>
-              )}
-            </div>
-            <div className="px-4 pb-4">
-              <PnlChart data={pnlChartData} height={260} showGrid />
-            </div>
-          </motion.div>
+          {/* Portfolio insights — equity curve, per-instrument P&L,
+              market exposure, live sessions and prices. Replaces the
+              standalone PnL chart that previously sat here; it is now
+              the 'P&L' metric inside the consolidated equity curve. */}
+          <PortfolioInsights />
 
           {/* Recent Copied Trades (compact) */}
           {copyResults.length > 0 && (

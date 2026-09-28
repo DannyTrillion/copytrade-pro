@@ -26,6 +26,8 @@ import {
   Signal,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { MarketPulse } from "@/components/markets/market-pulse";
+import { LiveMarketPill } from "@/components/markets/market-status";
 import { DashboardHeader } from "@/components/ui/dashboard-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AnimatedCurrency } from "@/components/ui/animated-counter";
@@ -408,6 +410,8 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Total Balance</p>
+                    {/* Lit only while a market is actually open. */}
+                    <LiveMarketPill variant="onDark" />
                     {lastUpdated && (
                       <span className="text-white/25 text-[10px] tabular-nums">
                         Updated {timeAgo(lastUpdated.toISOString())}
@@ -733,7 +737,12 @@ export default function DashboardPage() {
             <StatCard title="Win Rate" value={`${traderStats?.winRate ?? 0}%`} numericValue={traderStats?.winRate ?? 0} icon={Target} iconColor="text-info" delay={0.12} />
           </motion.div>
 
-          {/* Chart + Summary */}
+          {/* Live market context — real prices and session states */}
+          <motion.div variants={staggerItem}>
+            <MarketPulse />
+          </motion.div>
+
+      {/* Chart + Summary */}
           <motion.div variants={staggerItem} className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6">
             <div className="md:col-span-8 glass-panel p-5 md:p-6">
               <div className="flex items-start justify-between mb-5">
