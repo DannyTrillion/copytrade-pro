@@ -10,10 +10,15 @@ const config: Config = {
     extend: {
       colors: {
         // TradingView-inspired dark theme system
+        // Theme-driven. `brand` resolves from CSS variables so a theme can
+        // redefine the accent without touching the ~370 component classes
+        // that reference it. Blue in light/dark, gold in luxury.
         brand: {
-          DEFAULT: "#2962FF",
-          light: "#5B8DEF",
-          dark: "#1E4FCC",
+          DEFAULT: "rgb(var(--brand) / <alpha-value>)",
+          light: "rgb(var(--brand-light) / <alpha-value>)",
+          dark: "rgb(var(--brand-dark) / <alpha-value>)",
+          // Numeric scale stays fixed — used only on marketing/auth surfaces,
+          // which are always blue regardless of the dashboard theme.
           50: "#EBF0FF",
           100: "#D6E1FF",
           200: "#ADC3FF",
@@ -36,7 +41,7 @@ const config: Config = {
         border: {
           DEFAULT: "rgb(var(--border-default) / <alpha-value>)",
           light: "rgb(var(--border-light) / <alpha-value>)",
-          focus: "#2962FF",
+          focus: "rgb(var(--brand) / <alpha-value>)",
         },
         text: {
           primary: "rgb(var(--text-primary) / <alpha-value>)",

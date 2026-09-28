@@ -5,6 +5,13 @@
 @layer base {
   :root, [data-theme="light"] {
     --color-auth-bg: #131722;
+    /* Accent. Consumed by the `brand` Tailwind colour, so redefining these
+       three retints every accent surface in the app at once. */
+    --brand: 41 98 255;
+    --brand-light: 91 141 239;
+    --brand-dark: 30 79 204;
+    /* Foreground for solid accent fills — must stay legible on --brand. */
+    --brand-foreground: 255 255 255;
     --surface-0: 248 249 251;
     --surface-1: 255 255 255;
     --surface-2: 243 244 246;
@@ -34,6 +41,10 @@
   }
 
   [data-theme="dark"] {
+    --brand: 41 98 255;
+    --brand-light: 91 141 239;
+    --brand-dark: 30 79 204;
+    --brand-foreground: 255 255 255;
     --surface-0: 10 10 15;
     --surface-1: 15 15 26;
     --surface-2: 22 22 35;
@@ -63,18 +74,30 @@
   }
 
   [data-theme="luxury"] {
-    --surface-0: 5 5 5;
-    --surface-1: 10 10 10;
-    --surface-2: 17 17 17;
-    --surface-3: 24 24 24;
-    --surface-4: 32 32 32;
-    --surface-5: 42 42 42;
-    --text-primary: 234 234 234;
-    --text-secondary: 160 160 160;
-    --text-tertiary: 110 110 110;
-    --text-inverse: 5 5 5;
-    --border-default: 28 25 20;
-    --border-light: 42 38 28;
+    /* Champagne gold replaces the blue accent throughout. Solid gold fills
+       take near-black text: white on #D4AF37 is ~1.9:1 and unreadable. */
+    --brand: 212 175 55;
+    --brand-light: 226 195 92;
+    --brand-dark: 168 136 38;
+    --brand-foreground: 8 7 4;
+    /* Warm-biased near-blacks (R>G>B). Pure neutral grey under a gold accent
+       reads cold and flat; a few points of warmth makes the gold sit in the
+       palette rather than on top of it. */
+    --surface-0: 8 7 5;
+    --surface-1: 14 13 10;
+    --surface-2: 21 19 15;
+    --surface-3: 29 27 21;
+    --surface-4: 38 35 28;
+    --surface-5: 50 46 36;
+    /* Ivory rather than pure white — warm text on warm ground. */
+    --text-primary: 240 237 230;
+    --text-secondary: 170 164 151;
+    /* Raised from the previous 110 110 110, which sat at 3.9:1 on surface-1
+       and failed WCAG AA for body text. This is 5.0:1. */
+    --text-tertiary: 132 126 113;
+    --text-inverse: 8 7 5;
+    --border-default: 32 29 22;
+    --border-light: 48 43 32;
     --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.04);
     --shadow-elevated: 0 8px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.06);
     --glass-bg: rgba(10, 10, 10, 0.9);
@@ -105,7 +128,7 @@
   }
   *:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(13, 113, 255, 0.4);
+    box-shadow: 0 0 0 2px rgb(var(--brand) / 0.45);
     border-radius: inherit;
   }
   input:focus-visible, textarea:focus-visible, select:focus-visible {
@@ -240,7 +263,7 @@
     @apply bg-surface-2/50 border-white/[0.06];
   }
   [data-theme="dark"] .input-field:focus {
-    box-shadow: 0 0 0 2px rgba(13, 113, 255, 0.12);
+    box-shadow: 0 0 0 2px rgb(var(--brand) / 0.14);
     @apply border-brand/40;
   }
   [data-theme="luxury"] .input-field {
@@ -677,4 +700,92 @@
       opacity: 0;
     }
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LUXURY THEME — accent contrast guard and finishing details
+
+   Loaded outside @layer so these win on source order, and written with
+   `html[data-theme="luxury"]` (0,2,1) so they also outrank Tailwind's
+   `hover:` utilities (0,2,0) without needing !important.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Solid accent fills carry near-black text.
+   ~30 elements in the app pair `bg-brand` with a hardcoded `text-white`,
+   which is 1.9:1 on gold — illegible. This overrides the utility rather
+   than editing every call site, and colour inherits so nested labels and
+   currentColor icons follow. */
+html[data-theme="luxury"] .bg-brand,
+html[data-theme="luxury"] .bg-brand-light,
+html[data-theme="luxury"] .bg-brand-dark {
+  color: rgb(var(--brand-foreground));
+}
+
+/* Same problem on gradient CTAs built from the accent. */
+html[data-theme="luxury"] .from-brand.to-brand-light,
+html[data-theme="luxury"] .from-brand-light.to-brand,
+html[data-theme="luxury"] .bg-gradient-to-r.from-brand,
+html[data-theme="luxury"] .bg-gradient-to-br.from-brand {
+  color: rgb(var(--brand-foreground));
+}
+
+/* Keep white-on-accent SVG strokes from disappearing into the gold. */
+html[data-theme="luxury"] .bg-brand svg,
+html[data-theme="luxury"] .bg-brand-light svg,
+html[data-theme="luxury"] .bg-brand-dark svg {
+  color: rgb(var(--brand-foreground));
+}
+
+/* ─── Finishing details ─── */
+
+/* Informational accents track the theme accent instead of staying blue —
+   `info` and `brand` are the same hue in the base palette, so a blue chip
+   among gold ones reads as a bug rather than a distinction. */
+html[data-theme="luxury"] .badge-info {
+  background: rgb(var(--brand) / 0.1);
+  color: rgb(var(--brand));
+}
+html[data-theme="luxury"] .badge-info:hover {
+  box-shadow: 0 2px 8px rgb(var(--brand) / 0.15);
+}
+
+/* Table headers: wider tracking and a warm hairline. Small-caps spacing is
+   the cheapest signal of editorial quality in a data-dense table. */
+html[data-theme="luxury"] .table-header {
+  letter-spacing: 0.08em;
+  color: rgb(var(--brand) / 0.75);
+  border-bottom-color: rgb(var(--brand) / 0.12);
+}
+
+/* Zebra striping warms very slightly rather than lightening neutrally. */
+html[data-theme="luxury"] .table-row:nth-child(even) {
+  background: rgb(var(--brand) / 0.015);
+}
+html[data-theme="luxury"] .table-row:hover {
+  background: rgb(var(--brand) / 0.05);
+}
+
+/* Selection picks up gold at low alpha; the default 30% is too hot on ivory. */
+html[data-theme="luxury"] ::selection {
+  background: rgb(var(--brand) / 0.22);
+  color: rgb(var(--text-primary));
+}
+
+/* Dividers and hairlines gain a trace of warmth. */
+html[data-theme="luxury"] hr {
+  border-color: rgb(var(--brand) / 0.1);
+}
+
+/* Loading skeletons shimmer warm, not blue-grey. */
+html[data-theme="luxury"] .skeleton,
+html[data-theme="luxury"] .animate-pulse {
+  background-color: rgb(var(--surface-3));
+}
+
+/* Disabled accent controls: dim the gold instead of greying it out, so the
+   control still reads as part of the palette. */
+html[data-theme="luxury"] .btn-primary:disabled {
+  background: linear-gradient(180deg, rgb(var(--brand) / 0.35) 0%, rgb(var(--brand-dark) / 0.35) 100%);
+  color: rgb(var(--brand-foreground) / 0.7);
+  box-shadow: none;
 }
