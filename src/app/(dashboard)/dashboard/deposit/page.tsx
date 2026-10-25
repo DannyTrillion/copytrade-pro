@@ -29,6 +29,8 @@ import {
   Lock,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
+import { CardDeposit } from "@/components/payment/card-deposit";
+import { DepositReturn } from "@/components/payment/deposit-return";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { SolanaPayForm } from "@/components/payment/solana-pay-form";
 import { SuiSlushForm } from "@/components/payment/sui-slush-form";
@@ -196,6 +198,13 @@ export default function DepositPage() {
   const [copied, setCopied] = useState(false);
   // msg kept for inline display in some areas; toast used for action feedback
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  /**
+   * Set once from `?payment=<id>` when the gateway returns the user. The query
+   * string is stripped immediately so a refresh (or a shared link) does not
+   * re-open the confirmation banner for an already-settled deposit.
+   */
+  const [returnedPaymentId, setReturnedPaymentId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   // Tier data
@@ -217,6 +226,14 @@ export default function DepositPage() {
     if (saved !== null) {
       setHasExperience(saved === "true");
     }
+  }, []);
+
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("payment");
+    if (!id) return;
+
+    setReturnedPaymentId(id);
+    window.history.replaceState({}, "", window.location.pathname);
   }, []);
 
   const fetchDeposits = useCallback(async () => {
@@ -442,6 +459,15 @@ export default function DepositPage() {
           )}
         </AnimatePresence>
 
+        {/* Return from hosted checkout — verifies and credits while the user watches */}
+        {returnedPaymentId && (
+          <DepositReturn
+            paymentId={returnedPaymentId}
+            onClose={() => setReturnedPaymentId(null)}
+            onCredited={fetchDeposits}
+          />
+        )}
+
         {/* ═══ Hero Deposit Summary ═══ */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -518,32 +544,9 @@ export default function DepositPage() {
                   transition={{ duration: 0.3 }}
                   className="space-y-5"
                 >
-                  <button
-                    type="button"
-                    onClick={() => router.push("/dashboard/pay/thirdweb")}
-                    className="w-full p-5 rounded-xl border border-brand/20 bg-gradient-to-br from-brand/10 to-brand/5 hover:border-brand/40 hover:scale-[1.005] active:scale-[0.995] transition-all flex items-center gap-4 text-left cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-brand/15 flex items-center justify-center shrink-0">
-                      <CreditCard className="w-5 h-5 text-brand" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-sm font-semibold text-text-primary block">Pay with Card</span>
-                      <span className="text-2xs text-text-tertiary">Visa, Mastercard, Apple Pay — instant settlement</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-text-quaternary" />
-                  </button>
-
-                  {/* MoonPay — disabled (test keys only, re-enable when production keys are set) */}
-                  <div className="w-full p-4 rounded-xl border border-white/[0.04] bg-surface-2/30 flex items-center gap-3 text-left opacity-50 cursor-not-allowed">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                      <CreditCard className="w-4 h-4 text-purple-400/50" />
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-sm font-medium text-text-tertiary block">MoonPay</span>
-                      <span className="text-2xs text-text-quaternary">Coming soon — under maintenance</span>
-                    </div>
-                    <Lock className="w-4 h-4 text-text-quaternary" />
-                  </div>
+                  {/* Hosted checkout: the user is redirected to the gateway,
+                      so no card field is rendered anywhere in this app. */}
+                  <CardDeposit onError={(text) => setMsg({ type: "error", text })} />
                 </motion.div>
               )}
 

@@ -12,7 +12,9 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/c/landing") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/health") ||
-    pathname.startsWith("/api/stripe/webhook") ||
+    // Gateway callback: PayMeGate posts here unauthenticated, so it must stay
+    // public. The handler trusts nothing in the body — see its header comment.
+    pathname.startsWith("/api/payments/paymegate/webhook") ||
     pathname.startsWith("/api/webhook") ||
     pathname.startsWith("/api/auth/verify-email") ||
     pathname.startsWith("/api/auth/resend-verification") ||

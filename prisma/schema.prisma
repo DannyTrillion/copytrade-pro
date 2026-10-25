@@ -529,18 +529,31 @@ model CardPayment {
   currency              String    @default("USD")
   cardLast4             String?
   cardBrand             String?
-  stripePaymentIntentId String?
-  status                String    @default("PENDING") // PENDING, ADMIN_REVIEW, CONFIRMED, REJECTED
+  stripePaymentIntentId String? // legacy, retained for historical rows
+  status                String    @default("PENDING") // PENDING, ADMIN_REVIEW, CONFIRMED, REJECTED, FAILED, EXPIRED
   adminNote             String?
   reviewedAt            DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+
+  // ─── Gateway (PayMeGate) ───
+  // The gateway's order id is the reconciliation key: a webhook is only ever
+  // a hint, and the server re-reads the order by this id before crediting.
+  provider        String    @default("PAYMEGATE")
+  providerOrderId String?   @unique
+  providerTxId    String? // transactionUUID, set once paid
+  providerTxRef   String? // human-facing reference for support
+  paymentMethod   String? // e.g. stripe, paypal, crypto
+  checkoutUrl     String? // hosted checkout the user was sent to
+  paidAt          DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  // Reconciliation sweep: unpaid orders older than N minutes.
+  @@index([provider, status, createdAt])
 }
 
 // ─── Password Reset Tokens ───
@@ -918,4 +931,23 @@ model RiskRuleConfig {
   description   String?
   updatedAt     DateTime @updatedAt
   updatedBy     String?
+}
+
+/// Delivery ledger for inbound gateway webhooks.
+///
+/// The provider instructs integrators to store each `X-Paymegate-Event-Id`
+/// and process it once. Settlement is already idempotent, so this is defence
+/// in depth — it also stops a redelivery storm issuing redundant upstream
+/// verification calls, and gives support a record of what actually arrived.
+model WebhookEvent {
+  id         String   @id @default(uuid())
+  provider   String   @default("PAYMEGATE")
+  eventId    String
+  eventType  String?
+  orderRef   String?
+  receivedAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([receivedAt])
+  @@index([orderRef])
 }
