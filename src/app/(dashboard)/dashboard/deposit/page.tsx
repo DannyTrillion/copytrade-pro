@@ -6,7 +6,6 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   Bitcoin,
   CreditCard,
-  FileText,
   Copy,
   Check,
   Loader2,
@@ -32,8 +31,6 @@ import { Modal } from "@/components/ui/modal";
 import { CardDeposit } from "@/components/payment/card-deposit";
 import { DepositReturn } from "@/components/payment/deposit-return";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { SolanaPayForm } from "@/components/payment/solana-pay-form";
-import { SuiSlushForm } from "@/components/payment/sui-slush-form";
 import { toast } from "@/components/ui/toast";
 import { ScrollableTable } from "@/components/ui/scrollable-table";
 import { useRouter } from "next/navigation";
@@ -89,13 +86,12 @@ const COINS: CoinOption[] = [
   { id: "SUI", name: "SUI", symbol: "SUI", networks: [{ network: "SUI", label: "SUI" }] },
 ];
 
+// Card leads: it is the lowest-friction route for most users and the only
+// one that settles automatically end to end.
 const METHOD_TABS = [
-  { id: "CRYPTO", label: "Send Crypto", icon: Bitcoin },
-  { id: "SOLANA_PAY", label: "Solana Pay", icon: Zap },
-  { id: "SUI_SLUSH", label: "SUI / Slush", icon: Wallet },
   { id: "CARD", label: "Card Payment", icon: CreditCard },
+  { id: "CRYPTO", label: "Send Crypto", icon: Bitcoin },
   { id: "BUY_CRYPTO", label: "Buy Crypto", icon: DollarSign },
-  { id: "CHEQUE", label: "Cheque", icon: FileText },
 ];
 
 const AMOUNT_PRESETS = [50, 100, 250, 500, 1000, 5000];
@@ -183,14 +179,12 @@ export default function DepositPage() {
 
   // On-ramp state
   // Form state (existing)
-  const [method, setMethod] = useState("CRYPTO");
+  const [method, setMethod] = useState("CARD");
   const [amount, setAmount] = useState("");
   const [selectedCoin, setSelectedCoin] = useState("BTC");
   const [selectedNetwork, setSelectedNetwork] = useState("Bitcoin");
   const [txHash, setTxHash] = useState("");
   const [cardRef, setCardRef] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [chequeNumber, setChequeNumber] = useState("");
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -326,8 +320,6 @@ export default function DepositPage() {
           txHash: txHash || undefined,
           proofUrl: proofUrl || undefined,
           cardRef: method === "BUY_CRYPTO" ? cardRef : undefined,
-          bankName: method === "CHEQUE" ? bankName : undefined,
-          chequeNumber: method === "CHEQUE" ? chequeNumber : undefined,
         }),
       });
       const data = await res.json();
@@ -357,8 +349,6 @@ export default function DepositPage() {
     setAmount("");
     setTxHash("");
     setCardRef("");
-    setBankName("");
-    setChequeNumber("");
     setProofUrl(null);
     setStep("form");
   };
@@ -553,85 +543,9 @@ export default function DepositPage() {
               {/* ═══════════════════════════════════════════════ */}
               {/* SOLANA PAY                                        */}
               {/* ═══════════════════════════════════════════════ */}
-              {method === "SOLANA_PAY" && (
-                <motion.div
-                  key="solana_pay"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <SolanaPayForm
-                    adminWallet={adminWallet}
-                    walletMap={walletMap}
-                    onSubmit={async (data) => {
-                      setSubmitting(true);
-                      setMsg(null);
-                      try {
-                        const res = await fetch("/api/deposits", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(data),
-                        });
-                        const result = await res.json();
-                        if (res.ok) {
-                          toast.success("Solana deposit submitted! Awaiting confirmation.");
-                          fetchDeposits();
-                        } else {
-                          toast.error(result.error || "Failed to submit");
-                        }
-                      } catch {
-                        toast.error("Network error");
-                      } finally {
-                        setSubmitting(false);
-                      }
-                    }}
-                    submitting={submitting}
-                  />
-                </motion.div>
-              )}
-
               {/* ═══════════════════════════════════════════════ */}
               {/* SUI / SLUSH WALLET                               */}
               {/* ═══════════════════════════════════════════════ */}
-              {method === "SUI_SLUSH" && (
-                <motion.div
-                  key="sui_slush"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <SuiSlushForm
-                    adminWallet={adminWallet}
-                    walletMap={walletMap}
-                    onSubmit={async (data) => {
-                      setSubmitting(true);
-                      setMsg(null);
-                      try {
-                        const res = await fetch("/api/deposits", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(data),
-                        });
-                        const result = await res.json();
-                        if (res.ok) {
-                          toast.success("SUI deposit submitted! Awaiting confirmation.");
-                          fetchDeposits();
-                        } else {
-                          toast.error(result.error || "Failed to submit");
-                        }
-                      } catch {
-                        toast.error("Network error");
-                      } finally {
-                        setSubmitting(false);
-                      }
-                    }}
-                    submitting={submitting}
-                  />
-                </motion.div>
-              )}
-
               {/* ═══════════════════════════════════════════════ */}
               {/* BUY CRYPTO — On-ramp providers                  */}
               {/* ═══════════════════════════════════════════════ */}
@@ -846,69 +760,10 @@ export default function DepositPage() {
               )}
 
               {/* ═══════════════════════════════════════════════ */}
-              {/* CHEQUE                                          */}
               {/* ═══════════════════════════════════════════════ */}
-              {method === "CHEQUE" && step === "form" && (
-                <motion.div key="cheque_form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-                  <form onSubmit={handleProceedToConfirm} className="space-y-5">
-                    <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5">Amount (USD)</label>
-                      <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="input-field text-lg font-semibold" placeholder="0.00" min="10" step="0.01" required />
-                      <div className="flex flex-wrap gap-2 mt-2.5">
-                        {AMOUNT_PRESETS.map((p) => (
-                          <button key={p} type="button" onClick={() => setAmount(String(p))} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${amount === String(p) ? "border-brand bg-brand/10 text-brand" : "border-border bg-surface-1 text-text-tertiary"}`}>${p.toLocaleString()}</button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="glass-panel p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-brand/10 shrink-0"><FileText className="w-5 h-5 text-brand" /></div>
-                        <div>
-                          <p className="text-sm font-medium text-text-primary mb-1">Cheque Deposit Instructions</p>
-                          <ol className="text-xs text-text-secondary space-y-1.5 list-decimal list-inside">
-                            <li>Fill in the cheque details below</li>
-                            <li>Upload a photo of the cheque as proof</li>
-                            <li>Submit and wait for verification (3–5 business days)</li>
-                          </ol>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-medium text-text-secondary mb-1.5">Bank Name</label>
-                        <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} className="input-field" placeholder="e.g. Chase" required />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-text-secondary mb-1.5">Cheque Number</label>
-                        <input type="text" value={chequeNumber} onChange={(e) => setChequeNumber(e.target.value)} className="input-field" placeholder="e.g. 001234" required />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5">Proof of Payment <span className="text-danger">*</span></label>
-                      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" onChange={handleFileUpload} className="hidden" />
-                      {proofUrl ? (
-                        <div className="flex items-center gap-3 bg-success/5 border border-success/20 rounded-lg px-4 py-3">
-                          <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                          <p className="text-sm text-text-primary font-medium flex-1">File uploaded</p>
-                          <button type="button" onClick={() => { setProofUrl(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} className="p-1 rounded hover:bg-surface-3 text-text-tertiary"><X className="w-4 h-4" /></button>
-                        </div>
-                      ) : (
-                        <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="w-full flex items-center justify-center gap-2 px-4 py-3.5 border-2 border-dashed border-border rounded-lg hover:border-brand/50 hover:bg-brand/5 transition-all text-sm text-text-tertiary">
-                          {uploading ? (<><Loader2 className="w-4 h-4 animate-spin" />Uploading...</>) : (<><Upload className="w-4 h-4" />Upload cheque photo</>)}
-                        </button>
-                      )}
-                    </div>
-                    <button type="submit" disabled={!amount || !bankName || !chequeNumber || !proofUrl} className="btn-primary w-full text-sm flex items-center justify-center gap-2">
-                      Review Deposit <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </form>
-                </motion.div>
-              )}
-
+              {/* CONFIRMATION STEP (crypto)                      */}
               {/* ═══════════════════════════════════════════════ */}
-              {/* CONFIRMATION STEP (crypto + cheque)             */}
-              {/* ═══════════════════════════════════════════════ */}
-              {(method === "CRYPTO" || method === "CHEQUE") && step === "confirm" && (
+              {method === "CRYPTO" && step === "confirm" && (
                 <motion.div key="confirm" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.3 }}>
                   <div className="flex items-center gap-2 mb-5">
                     <button onClick={() => setStep("form")} className="p-1.5 rounded-md hover:bg-surface-3 transition-colors text-text-tertiary hover:text-text-primary">
@@ -932,12 +787,6 @@ export default function DepositPage() {
                           <div className="flex justify-between"><span className="text-xs text-text-tertiary">Coin</span><span className="text-sm text-text-primary">{selectedCoin}</span></div>
                           <div className="flex justify-between"><span className="text-xs text-text-tertiary">Network</span><span className="text-sm text-text-primary">{selectedNetwork}</span></div>
                           {txHash && <div className="flex justify-between"><span className="text-xs text-text-tertiary">TX Hash</span><code className="text-2xs text-text-secondary font-mono">{txHash.slice(0, 16)}...</code></div>}
-                        </>
-                      )}
-                      {method === "CHEQUE" && (
-                        <>
-                          <div className="flex justify-between"><span className="text-xs text-text-tertiary">Bank</span><span className="text-sm text-text-primary">{bankName}</span></div>
-                          <div className="flex justify-between"><span className="text-xs text-text-tertiary">Cheque #</span><span className="text-sm text-text-primary">{chequeNumber}</span></div>
                         </>
                       )}
                       {proofUrl && (
