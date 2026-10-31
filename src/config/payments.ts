@@ -54,14 +54,6 @@ export const PAYMENT_METHODS: PaymentMethodOption[] = [
     icon: "bitcoin",
   },
   {
-    key: "coinbase",
-    label: "Coinbase Pay",
-    description: "Coinbase balance or card",
-    min: 2,
-    minCurrency: "USD",
-    icon: "bitcoin",
-  },
-  {
     key: "cashapp",
     label: "Cash App",
     description: "US only",
